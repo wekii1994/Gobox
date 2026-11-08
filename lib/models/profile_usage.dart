@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:bett_box/common/app_localizations.dart';
-import 'package:bett_box/enum/enum.dart';
+import 'package:gobox/common/app_localizations.dart';
+import 'package:gobox/enum/enum.dart';
 
 import 'common.dart';
 import 'profile.dart';

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:bett_box/state.dart';
+import 'package:gobox/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 

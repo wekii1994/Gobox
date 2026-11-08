@@ -1,5 +1,5 @@
-import 'package:bett_box/manager/message_manager.dart';
-import 'package:bett_box/widgets/scaffold.dart';
+import 'package:gobox/manager/message_manager.dart';
+import 'package:gobox/widgets/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension BuildContextExtension on BuildContext {

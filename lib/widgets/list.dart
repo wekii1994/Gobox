@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/models/models.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/open_container.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/models/models.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/open_container.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 

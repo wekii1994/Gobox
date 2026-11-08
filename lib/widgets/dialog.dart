@@ -1,12 +1,12 @@
 import 'dart:math';
 
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/providers/app.dart';
-import 'package:bett_box/widgets/pop_scope.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/providers/app.dart';
+import 'package:gobox/widgets/pop_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:bett_box/state.dart';
+import 'package:gobox/state.dart';
 import 'sheet.dart';
 import 'text.dart';
 

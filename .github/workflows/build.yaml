@@ -206,7 +206,7 @@ jobs:
           FILE="${MOD_CACHE}/github.com/metacubex/sing-tun@${SING_TUN_VERSION}/tun_windows.go"
           echo "Patching ${FILE}"
           chmod +w "${FILE}"
-      - name: Build Bettbox (Non-Windows)
+      - name: Build Gobox (Non-Windows)
         if: matrix.platform != 'windows'
         shell: bash
         env:
@@ -266,7 +266,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: unsigned-core-${{ matrix.arch }}-${{ matrix.compatible }}
-          path: libclash/windows/BettboxCore.exe
+          path: libclash/windows/GoboxCore.exe
           if-no-files-found: error
           retention-days: 1
 
@@ -285,7 +285,7 @@ jobs:
           api-token: '${{ env.SIGNPATH_API_TOKEN }}'
           github-token: '${{ secrets.GITHUB_TOKEN }}'
           organization-id: '0d3f8e8e-3f4d-4ac8-ab3f-d6c5c110ab0d'
-          project-slug: 'Bettbox'
+          project-slug: 'Gobox'
           signing-policy-slug: '${{ env.EXE_SIGNING_POLICY_SLUG }}'
           github-artifact-id: '${{ steps.upload-core.outputs.artifact-id }}'
           wait-for-completion: true
@@ -295,7 +295,7 @@ jobs:
         if: matrix.platform == 'windows'
         shell: pwsh
         run: |
-          $signedCoreHash = (Get-FileHash libclash/windows/BettboxCore.exe -Algorithm SHA256).Hash.ToLower()
+          $signedCoreHash = (Get-FileHash libclash/windows/GoboxCore.exe -Algorithm SHA256).Hash.ToLower()
           Write-Host "Signed Core SHA256 (TOKEN for Helper): $signedCoreHash"
           dart setup.dart windows --arch ${{ matrix.arch }} --out helper --core-hash $signedCoreHash ${{ matrix.compatible == true && '--compatible' || '' }}
 
@@ -305,7 +305,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: unsigned-helper-${{ matrix.arch }}-${{ matrix.compatible }}
-          path: libclash/windows/BettboxHelperService.exe
+          path: libclash/windows/GoboxHelperService.exe
           if-no-files-found: error
           retention-days: 1
 
@@ -324,19 +324,19 @@ jobs:
           api-token: '${{ env.SIGNPATH_API_TOKEN }}'
           github-token: '${{ secrets.GITHUB_TOKEN }}'
           organization-id: '0d3f8e8e-3f4d-4ac8-ab3f-d6c5c110ab0d'
-          project-slug: 'Bettbox'
+          project-slug: 'Gobox'
           signing-policy-slug: '${{ env.EXE_SIGNING_POLICY_SLUG }}'
           github-artifact-id: '${{ steps.upload-helper.outputs.artifact-id }}'
           wait-for-completion: true
           output-artifact-directory: 'libclash/windows'
 
-      - name: Build Bettbox (Windows)
+      - name: Build Gobox (Windows)
         if: matrix.platform == 'windows'
         shell: pwsh
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
-          $coreHash = (Get-FileHash libclash/windows/BettboxCore.exe -Algorithm SHA256).Hash.ToLower()
+          $coreHash = (Get-FileHash libclash/windows/GoboxCore.exe -Algorithm SHA256).Hash.ToLower()
           Write-Host "Core SHA256: $coreHash"
           
           $desc = if ('${{ matrix.compatible }}' -eq 'true') { "${{ matrix.arch }}-compatible" } else { "${{ matrix.arch }}" }
@@ -357,24 +357,24 @@ jobs:
           
           flutter @flutterArgs
 
-      - name: Upload Unsigned Bettbox
+      - name: Upload Unsigned Gobox
         if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        id: upload-bettbox
+        id: upload-gobox
         uses: actions/upload-artifact@v7
         with:
-          name: unsigned-bettbox-${{ matrix.arch }}-${{ matrix.compatible }}
-          path: build/windows/${{ matrix.arch == 'arm64' && 'arm64' || 'x64' }}/runner/Release/Bettbox.exe
+          name: unsigned-gobox-${{ matrix.arch }}-${{ matrix.compatible }}
+          path: build/windows/${{ matrix.arch == 'arm64' && 'arm64' || 'x64' }}/runner/Release/Gobox.exe
           if-no-files-found: error
           retention-days: 1
 
-      - name: Wait for Unsigned Bettbox
+      - name: Wait for Unsigned Gobox
         if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash .github/scripts/wait-artifact.sh '${{ steps.upload-bettbox.outputs.artifact-id }}'
+        run: bash .github/scripts/wait-artifact.sh '${{ steps.upload-gobox.outputs.artifact-id }}'
 
-      - name: Sign Bettbox (Windows)
+      - name: Sign Gobox (Windows)
         if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
         uses: signpath/github-action-submit-signing-request@v2
         timeout-minutes: 60
@@ -382,9 +382,9 @@ jobs:
           api-token: '${{ env.SIGNPATH_API_TOKEN }}'
           github-token: '${{ secrets.GITHUB_TOKEN }}'
           organization-id: '0d3f8e8e-3f4d-4ac8-ab3f-d6c5c110ab0d'
-          project-slug: 'Bettbox'
+          project-slug: 'Gobox'
           signing-policy-slug: '${{ env.EXE_SIGNING_POLICY_SLUG }}'
-          github-artifact-id: '${{ steps.upload-bettbox.outputs.artifact-id }}'
+          github-artifact-id: '${{ steps.upload-gobox.outputs.artifact-id }}'
           wait-for-completion: true
           output-artifact-directory: 'build/windows/${{ matrix.arch == ''arm64'' && ''arm64'' || ''x64'' }}/runner/Release'
 
@@ -399,7 +399,7 @@ jobs:
         shell: pwsh
         run: |
           $desc = if ('${{ matrix.compatible }}' -eq 'true') { "${{ matrix.arch }}-compatible" } else { "${{ matrix.arch }}" }
-          $installer = (Resolve-Path "dist/Bettbox-*-windows-$desc-setup.exe").Path
+          $installer = (Resolve-Path "dist/Gobox-*-windows-$desc-setup.exe").Path
           echo "INSTALLER_PATH=$installer" | Out-File -FilePath $env:GITHUB_ENV -Append
           echo "INSTALLER_FILENAME=$(Split-Path -Leaf $installer)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
@@ -428,7 +428,7 @@ jobs:
           api-token: '${{ env.SIGNPATH_API_TOKEN }}'
           github-token: '${{ secrets.GITHUB_TOKEN }}'
           organization-id: '0d3f8e8e-3f4d-4ac8-ab3f-d6c5c110ab0d'
-          project-slug: 'Bettbox'
+          project-slug: 'Gobox'
           signing-policy-slug: '${{ env.INSTALLER_SIGNING_POLICY_SLUG }}'
           github-artifact-id: '${{ steps.upload-installer.outputs.artifact-id }}'
           wait-for-completion: true
@@ -442,7 +442,7 @@ jobs:
           name: |
             unsigned-core-${{ matrix.arch }}-${{ matrix.compatible }}
             unsigned-helper-${{ matrix.arch }}-${{ matrix.compatible }}
-            unsigned-bettbox-${{ matrix.arch }}-${{ matrix.compatible }}
+            unsigned-gobox-${{ matrix.arch }}-${{ matrix.compatible }}
             unsigned-installer-${{ matrix.arch }}-${{ matrix.compatible }}
           failOnError: false
       
@@ -451,7 +451,7 @@ jobs:
         if: matrix.platform != 'linux' && matrix.platform != 'windows'
         uses: actions/upload-artifact@v7
         with:
-          name: Bettbox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}${{ matrix.lite == true && '-lite' || '' }}
+          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}${{ matrix.lite == true && '-lite' || '' }}
           path: ./dist/*
           archive: false
           overwrite: true
@@ -460,7 +460,7 @@ jobs:
         if: matrix.platform == 'windows'
         uses: actions/upload-artifact@v7
         with:
-          name: Bettbox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-installer
+          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-installer
           path: ./dist/*.exe
           archive: false
           overwrite: true
@@ -469,7 +469,7 @@ jobs:
         if: matrix.platform == 'windows' && matrix.compatible == true && matrix.arch == 'amd64'
         uses: actions/upload-artifact@v7
         with:
-          name: Bettbox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-portable
+          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-portable
           path: ./dist/*.zip
           archive: false
           overwrite: true
@@ -478,7 +478,7 @@ jobs:
         if: matrix.platform == 'linux'
         uses: actions/upload-artifact@v7
         with:
-          name: Bettbox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-deb
+          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-deb
           path: ./dist/*.deb
           archive: false
           overwrite: true
@@ -487,7 +487,7 @@ jobs:
         if: matrix.platform == 'linux' && matrix.arch == 'amd64'
         uses: actions/upload-artifact@v7
         with:
-          name: Bettbox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-AppImage
+          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-AppImage
           path: ./dist/*.AppImage
           archive: false
           overwrite: true
@@ -496,7 +496,7 @@ jobs:
         if: matrix.platform == 'linux' && matrix.arch == 'amd64'
         uses: actions/upload-artifact@v7
         with:
-          name: Bettbox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-rpm
+          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-rpm
           path: ./dist/*.rpm
           archive: false
           overwrite: true
@@ -515,7 +515,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: ./dist/
-          pattern: Bettbox-*
+          pattern: Gobox-*
           merge-multiple: true
           skip-decompress: true
 

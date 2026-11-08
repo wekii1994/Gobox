@@ -1,4 +1,4 @@
-import 'package:bett_box/common/string.dart';
+import 'package:gobox/common/string.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

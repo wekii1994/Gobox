@@ -5,16 +5,16 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
-import 'package:bett_box/clash/clash.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/helper/helper.dart';
+import 'package:gobox/clash/clash.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/helper/helper.dart';
 
-import 'package:bett_box/plugins/app.dart';
-import 'package:bett_box/plugins/service.dart' as vpn_service;
-import 'package:bett_box/providers/providers.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/dialog.dart';
-import 'package:bett_box/widgets/input.dart';
+import 'package:gobox/plugins/app.dart';
+import 'package:gobox/plugins/service.dart' as vpn_service;
+import 'package:gobox/providers/providers.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/dialog.dart';
+import 'package:gobox/widgets/input.dart';
 import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -459,7 +459,7 @@ class AppController {
     final currentProfileId = _ref.read(currentProfileIdProvider);
     final profiles = _ref.read(profilesProvider);
     final profile = profiles.where((e) => e.id == currentProfileId).firstOrNull;
-    final profileName = profile?.label ?? 'Bettbox';
+    final profileName = profile?.label ?? AppIdentity.displayName;
     final needsSync =
         vpn_service.service?.needsSpeedNotificationSync(profileName) ?? false;
     return needsSync ? profileName : null;
@@ -1515,7 +1515,7 @@ class AppController {
           finalSuffix = 'windows-amd64-compatible-portable.zip';
         }
         downloadUrl =
-            'https://github.com/$repository/releases/download/$tagName/Bettbox-$versionWithoutV-$finalSuffix';
+            'https://github.com/$repository/releases/download/$tagName/Gobox-$versionWithoutV-$finalSuffix';
       }
 
       globalState.openUrl(downloadUrl);
@@ -2237,7 +2237,7 @@ class AppController {
       final tempDir = Directory.systemTemp;
       final tempZipPath = join(
         tempDir.path,
-        'bettbox_backup_${DateTime.now().millisecondsSinceEpoch}.zip',
+        'gobox_backup_${DateTime.now().millisecondsSinceEpoch}.zip',
       );
       final encoder = ZipFileEncoder(
         password: password.isEmpty ? null : password,
@@ -2246,7 +2246,7 @@ class AppController {
 
       // Add marker file
       final markerData = json.encode({
-        'app': 'Bettbox',
+        'app': 'Gobox',
         'version': '1.0',
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
@@ -2254,11 +2254,11 @@ class AppController {
       final tempMarkerFile = File(
         join(
           tempDir.path,
-          'bettbox_marker_${DateTime.now().millisecondsSinceEpoch}.tmp',
+          'gobox_marker_${DateTime.now().millisecondsSinceEpoch}.tmp',
         ),
       );
       await tempMarkerFile.writeAsBytes(markerBytes);
-      await encoder.addFile(tempMarkerFile, '.bettbox_marker');
+      await encoder.addFile(tempMarkerFile, '.gobox_marker');
       await tempMarkerFile.delete();
 
       // Add config file
@@ -2266,7 +2266,7 @@ class AppController {
       final tempConfigFile = File(
         join(
           tempDir.path,
-          'bettbox_config_${DateTime.now().millisecondsSinceEpoch}.tmp',
+          'gobox_config_${DateTime.now().millisecondsSinceEpoch}.tmp',
         ),
       );
       await tempConfigFile.writeAsString(configStr);
@@ -2570,13 +2570,13 @@ class AppController {
     final homeDirPath = await appPath.homeDirPath;
 
     // Check for Bettbox marker
-    final hasBettboxMarker = archive.files.any(
-      (file) => file.name == '.bettbox_marker',
+    final hasGoboxMarker = archive.files.any(
+      (file) => file.name == '.gobox_marker' || file.name == '.bettbox_marker',
     );
 
-    if (hasBettboxMarker) {
-      // Bettbox backup
-      await _recoveryBettboxBackup(archive, recoveryOption, homeDirPath);
+    if (hasGoboxMarker) {
+      // Gobox backup
+      await _recoveryGoboxBackup(archive, recoveryOption, homeDirPath);
     } else {
       // Legacy backup
       await _recoveryLegacyBackup(archive, recoveryOption, homeDirPath);
@@ -2584,7 +2584,7 @@ class AppController {
   }
 
   /// Restore Bettbox
-  Future<void> _recoveryBettboxBackup(
+  Future<void> _recoveryGoboxBackup(
     Archive archive,
     RecoveryOption recoveryOption,
     String homeDirPath,
@@ -2593,11 +2593,11 @@ class AppController {
     final configs = archive.files
         .where(
           (item) =>
-              item.name.endsWith('.json') && item.name != '.bettbox_marker',
+              item.name.endsWith('.json') && (item.name != '.gobox_marker' && item.name != '.bettbox_marker'),
         )
         .toList();
     final profiles = archive.files.where(
-      (item) => !item.name.endsWith('.json') && item.name != '.bettbox_marker',
+      (item) => !item.name.endsWith('.json') && (item.name != '.gobox_marker' && item.name != '.bettbox_marker'),
     );
 
     // Find config.json

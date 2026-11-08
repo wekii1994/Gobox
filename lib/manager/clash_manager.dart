@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:bett_box/clash/clash.dart';
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/models/models.dart';
-import 'package:bett_box/providers/app.dart';
-import 'package:bett_box/providers/config.dart';
-import 'package:bett_box/providers/state.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/views/proxies/common.dart' show delayTestCoordinator;
+import 'package:gobox/clash/clash.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/models/models.dart';
+import 'package:gobox/providers/app.dart';
+import 'package:gobox/providers/config.dart';
+import 'package:gobox/providers/state.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/views/proxies/common.dart' show delayTestCoordinator;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

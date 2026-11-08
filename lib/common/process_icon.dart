@@ -5,7 +5,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:bett_box/common/system.dart';
+import 'package:gobox/common/system.dart';
 import 'package:ffi/ffi.dart';
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;

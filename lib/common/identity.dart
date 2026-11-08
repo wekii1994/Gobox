@@ -5,9 +5,9 @@ class AppIdentity {
   static const isDev = _useDevIdentity;
   static const isLite = _useLiteBuild;
 
-  static const productName = 'Bettbox';
+  static const productName = 'Gobox';
   static const devSuffix = 'Dev';
-  static const packageId = 'com.appshub.bettbox';
+  static const packageId = 'com.wekii.gobox';
 
   static const compactName = isDev ? '$productName$devSuffix' : productName;
   static const displayName = isDev ? '$productName Dev' : productName;

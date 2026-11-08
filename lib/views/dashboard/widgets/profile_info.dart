@@ -1,14 +1,14 @@
 import 'dart:math' as math;
 
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/models/models.dart';
-import 'package:bett_box/providers/providers.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/views/proxies/card.dart';
-import 'package:bett_box/views/proxies/common.dart';
-import 'package:bett_box/views/proxies/providers.dart';
-import 'package:bett_box/widgets/widgets.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/models/models.dart';
+import 'package:gobox/providers/providers.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/views/proxies/card.dart';
+import 'package:gobox/views/proxies/common.dart';
+import 'package:gobox/views/proxies/providers.dart';
+import 'package:gobox/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';

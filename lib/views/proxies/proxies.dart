@@ -1,13 +1,13 @@
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/models/common.dart';
-import 'package:bett_box/models/profile.dart';
-import 'package:bett_box/models/widget.dart';
-import 'package:bett_box/providers/providers.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/views/proxies/list.dart';
-import 'package:bett_box/views/proxies/providers.dart';
-import 'package:bett_box/widgets/widgets.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/models/common.dart';
+import 'package:gobox/models/profile.dart';
+import 'package:gobox/models/widget.dart';
+import 'package:gobox/providers/providers.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/views/proxies/list.dart';
+import 'package:gobox/views/proxies/providers.dart';
+import 'package:gobox/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

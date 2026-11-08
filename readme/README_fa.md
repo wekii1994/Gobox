@@ -2,25 +2,25 @@
   <a href="../README.md">简体中文</a> | <a href="README_en.md">English</a> | <a href="README_ru.md">Русский</a> | <strong>فارسی</strong> | <a href="README_ja.md">日本語</a> | <a href="README_ko.md">한국어</a>
 </h4>
 
-<h1 align="center">⚡ Bettbox</h1>
+<h1 align="center">⚡ Gobox</h1>
 <p align="center">
   <strong>Another Better Network Toolbox</strong>
 </p>
 
-**Bettbox یک ابزار چندسکویی برای تفکیک ترافیک شبکه و عیب‌یابی DNS است که بر پایه هسته Mihomo ساخته شده است. تمرکز آن بر تجربه کاربری عالی است؛ برای اجرای پایدار و طولانی‌مدت طراحی شده، سبک و کم‌مصرف است و هیچ داده‌ای جمع‌آوری نمی‌کند.**
+**Gobox یک ابزار چندسکویی برای تفکیک ترافیک شبکه و عیب‌یابی DNS است که بر پایه هسته Mihomo ساخته شده است. تمرکز آن بر تجربه کاربری عالی است؛ برای اجرای پایدار و طولانی‌مدت طراحی شده، سبک و کم‌مصرف است و هیچ داده‌ای جمع‌آوری نمی‌کند.**
 
-نام Bettbox مخفف Better Network Toolbox است. این پروژه بازبینی دستی امنیتی بنیاد SignPath را گذرانده و نسخه ویندوز با گواهی امضای کد OV امضا شده است.
+نام Gobox مخفف Better Network Toolbox است. این پروژه بازبینی دستی امنیتی بنیاد SignPath را گذرانده و نسخه ویندوز با گواهی امضای کد OV امضا شده است.
 
-[![Latest Release](https://img.shields.io/github/v/release/appshubcc/Bettbox?style=for-the-badge&logo=github&color=238636&label=Release)](https://github.com/appshubcc/Bettbox/releases/latest) [![Core](https://img.shields.io/github/v/release/MetaCubeX/mihomo?style=for-the-badge&logo=go&logoColor=white&color=8A2BE2&label=Mihomo)](https://github.com/MetaCubeX/mihomo/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/wekii1994/Gobox?style=for-the-badge&logo=github&color=238636&label=Release)](https://github.com/wekii1994/Gobox/releases/latest) [![Core](https://img.shields.io/github/v/release/MetaCubeX/mihomo?style=for-the-badge&logo=go&logoColor=white&color=8A2BE2&label=Mihomo)](https://github.com/MetaCubeX/mihomo/releases/latest)
 
 <p align="center">
-  <img src="../snapshots/home.jpg" alt="Bettbox" />
+  <img src="../snapshots/home.jpg" alt="Gobox" />
 </p>
 
 ---
 ### ✈️ جامعه تلگرام
 
-[![Telegram Group](https://img.shields.io/badge/Bettbox-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/bettbox_chat) [![Telegram Channel](https://img.shields.io/badge/Bettbox-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/appshub_channel)
+[![Telegram Group](https://img.shields.io/badge/Gobox-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/bettbox_chat) [![Telegram Channel](https://img.shields.io/badge/Gobox-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/appshub_channel)
 
 ---
 ## 🚀 ویژگی‌های اصلی
@@ -42,7 +42,7 @@
 ---
 ## 🛠️ نصب و دانلود
 
-لطفاً برای دانلود آخرین نسخه مناسب برای پلتفرم و سیستم‌عامل خود به صفحه **[[Releases]](https://github.com/appshubcc/Bettbox/releases)** مراجعه کنید:
+لطفاً برای دانلود آخرین نسخه مناسب برای پلتفرم و سیستم‌عامل خود به صفحه **[[Releases]](https://github.com/wekii1994/Gobox/releases)** مراجعه کنید:
 
 * **پشتیبانی دسکتاپ**: 
   * **Windows 8.1+:** (x64 / arm64)
@@ -63,7 +63,7 @@
 1. **محیط نصب و نسخه‌های سازگار**:
    - در دستگاه‌های اندروید، مطمئن شوید دسترسی کافی برای اجرای پس‌زمینه داده شده است؛ سیستم‌عامل باید حداقل Android 8.0+ باشد.
    - برای سخت‌افزارهای قدیمی دسکتاپ، لطفاً نسخه Compatible مناسب با مجموعه دستورات پردازنده (CPU) را انتخاب کنید.
-   - امنیت: فرآیند Bettbox کاملاً متن‌باز و شفاف است؛ کد برنامه ممیزی امنیتی معتبر SignPath را گذرانده و هیچ داده‌ای جمع‌آوری نمی‌شود.
+   - امنیت: فرآیند Gobox کاملاً متن‌باز و شفاف است؛ کد برنامه ممیزی امنیتی معتبر SignPath را گذرانده و هیچ داده‌ای جمع‌آوری نمی‌شود.
 
 2. **دسترسی‌های دسکتاپ و TUN**:
    - در ویندوز دسترسی ادمین از طریق فایل نصب مدیریت شده است؛ در استفاده روزمره نیازی به تایید دستی نیست.
@@ -71,10 +71,10 @@
    - در صورت بروز خطاهای دیگر، ابتدا مطمئن شوید پورت‌ها توسط نرم‌افزارهای پراکسی دیگر اشغال نشده باشند و هنگام گزارش مشکل لاگ Debug را ضمیمه کنید.
 
 3. **راهنمای اولین نصب در macOS**:
-   - فایل نصب `.dmg` مناسب معماری پردازنده خود (Intel / Apple Silicon) را دانلود کرده و باز کنید، سپس آیکون Bettbox را به پوشه Applications بکشید.
+   - فایل نصب `.dmg` مناسب معماری پردازنده خود (Intel / Apple Silicon) را دانلود کرده و باز کنید، سپس آیکون Gobox را به پوشه Applications بکشید.
    - **رد شدن از محدودیت امنیتی سیستم** ([به دلیل عدم خرید اشتراک توسعه‌دهنده تجاری اپل در حال حاضر](https://support.apple.com/en-us/102445)):
-     - **روش پیشنهادی**: در پوشه برنامه‌ها (Applications)، **روی آیکون Bettbox راست‌کلیک کرده و "Open" را انتخاب کنید**، سپس در پنجره سیستم روی "Open" کلیک کنید.
-     - **روش جایگزین**: اگر اجرا مسدود شد، به "تنظیمات سیستم -> امنیت و حریم خصوصی" رفته و در بخش Bettbox روی "Open Anyway" کلیک کنید.
+     - **روش پیشنهادی**: در پوشه برنامه‌ها (Applications)، **روی آیکون Gobox راست‌کلیک کرده و "Open" را انتخاب کنید**، سپس در پنجره سیستم روی "Open" کلیک کنید.
+     - **روش جایگزین**: اگر اجرا مسدود شد، به "تنظیمات سیستم -> امنیت و حریم خصوصی" رفته و در بخش Gobox روی "Open Anyway" کلیک کنید.
    - در اولین فعال‌سازی حالت TUN، درخواست رمز عبور سیستم نمایش داده می‌شود؛ رمز را برای ایجاد رابط شبکه مجازی وارد کنید.
 
 4. **وارد کردن اشتراک و عیب‌یابی**:
@@ -97,12 +97,12 @@
 
 انطباق اسکریپت‌های سفارشی با UI:
 
-* برنامه Bettbox از تطبیق گرافیکی اسکریپت‌های بازنویسی پشتیبانی می‌کند. به عنوان مثال، برای **[اسکریپت/پیکربندی AIsouler](https://github.com/AIsouler/MyClash)** کافیست خط زیر را در ابتدای اسکریپت قرار دهید تا به کلیدهای بصری متصل شود:
-* <code>const Compatible_With_Bettbox = { ruleOptionsEnable: true };</code>
+* برنامه Gobox از تطبیق گرافیکی اسکریپت‌های بازنویسی پشتیبانی می‌کند. به عنوان مثال، برای **[اسکریپت/پیکربندی AIsouler](https://github.com/AIsouler/MyClash)** کافیست خط زیر را در ابتدای اسکریپت قرار دهید تا به کلیدهای بصری متصل شود:
+* <code>const Compatible_With_Gobox = { ruleOptionsEnable: true };</code>
 * اگر کلیدهای اسکریپت شامل گروه‌های خط‌مشی و سایر موارد است، می‌توانید نام آن‌ها را با `policyGroupOptions` مشخص کنید؛ کلیدهای اعلام‌نشده در منوی ثانویه «⚙️ سایر تنظیمات» قرار می‌گیرند:
 
 ```js
-const Compatible_With_Bettbox = {
+const Compatible_With_Gobox = {
   ruleOptionsEnable: true,
   // تعیین نام کلیدهای متعلق به گروه‌های خط‌مشی؛ باید با کلیدهای ruleOptionsEnable مطابقت دقیق داشته باشد
   policyGroupOptions: ['🚀 节点选择', '🛑 广告拦截'],
@@ -146,7 +146,7 @@ const Compatible_With_Bettbox = {
 * **[FlClash GUI](https://github.com/chen08209/FlClash)** (این پروژه ریشه در پروژه متن‌باز عالی FlClash دارد؛ با احترام به تلاش‌ها و مشارکت‌های پیشگامانه نویسنده اصلی)
 * **[Mihomo Core](https://github.com/MetaCubeX/mihomo)** (هسته پردازشی قدرتمند و انعطاف‌پذیر)
 
-با تشکر از تمام [مشارکت‌کنندگان](https://github.com/appshubcc/Bettbox/graphs/contributors) که در این پروژه همکاری کرده‌اند، و همچنین پروژه‌های متن‌باز زیر به خاطر الهام‌بخشی و مراجع کاربردی:
+با تشکر از تمام [مشارکت‌کنندگان](https://github.com/wekii1994/Gobox/graphs/contributors) که در این پروژه همکاری کرده‌اند، و همچنین پروژه‌های متن‌باز زیر به خاطر الهام‌بخشی و مراجع کاربردی:
 
 [Zashboard](https://github.com/Zephyruso/zashboard), [CMFA](https://github.com/MetaCubeX/ClashMetaForAndroid), [Sparkle](https://github.com/xishang0128/sparkle), [SFA](https://github.com/SagerNet/sing-box-for-android), [HUSI](https://github.com/xchacha20-poly1305/husi), [V2rayN](https://github.com/2dust/v2rayN), [Bett-rules](https://github.com/appshubcc/bett-rules)
 

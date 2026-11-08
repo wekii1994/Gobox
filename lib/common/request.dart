@@ -7,11 +7,11 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:intl/intl.dart';
-import 'package:bett_box/clash/clash.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/models/models.dart';
-import 'package:bett_box/state.dart';
+import 'package:gobox/clash/clash.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/models/models.dart';
+import 'package:gobox/state.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 
 class _LimitedByteSink extends ByteConversionSinkBase {
@@ -57,7 +57,7 @@ class Request {
         client.autoUncompress = false;
         client.findProxy = (Uri uri) {
           client.userAgent = globalState.ua;
-          return BettboxHttpOverrides.handleFindProxy(uri);
+          return GoboxHttpOverrides.handleFindProxy(uri);
         };
         return client;
       },

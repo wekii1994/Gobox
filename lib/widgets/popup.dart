@@ -1,5 +1,5 @@
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/models/common.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/models/common.dart';
 import 'package:material_ui/material_ui.dart';
 
 class CommonPopupRoute<T> extends PopupRoute<T> {

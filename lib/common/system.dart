@@ -4,13 +4,13 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffi/ffi.dart';
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/common/helper_auth.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/helper/helper.dart';
-import 'package:bett_box/plugins/app.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/input.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/common/helper_auth.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/helper/helper.dart';
+import 'package:gobox/plugins/app.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/input.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
@@ -159,7 +159,7 @@ class System {
           appPath.corePath,
         ]);
         if (removeResult.exitCode == 0) {
-          commonPrint.log('Cleared quarantine attribute from BettboxCore');
+          commonPrint.log('Cleared quarantine attribute from GoboxCore');
         } else {
           quarantineCleared = false;
           commonPrint.warn(
@@ -177,7 +177,7 @@ class System {
       if (result.exitCode != 0) {
         globalState.showNotifier(
           !quarantineCleared
-              ? 'Failed to authorize BettboxCore. Try: xattr -dr com.apple.quarantine /Applications/Bettbox.app'
+              ? 'Failed to authorize GoboxCore. Try: xattr -dr com.apple.quarantine /Applications/Gobox.app'
               : appLocalizations.tunEnableRequireAdmin,
         );
         return AuthorizeCode.error;
@@ -248,7 +248,7 @@ class System {
 
   static const _setcapFailedExit = 12;
 
-  static const _polkitRuleFileName = '90-bettbox.rules';
+  static const _polkitRuleFileName = '90-gobox.rules';
 
   static const _legacyPolkitRuleFileName = '99-bettbox.rules';
 
@@ -285,9 +285,9 @@ class System {
   static const _polkitRuleEtcPath =
       '/etc/polkit-1/rules.d/$_polkitRuleFileName';
 
-  static const _polkitRuleEtcMarker = 'bettbox-polkit-rule:etc';
+  static const _polkitRuleEtcMarker = 'gobox-polkit-rule:etc';
 
-  static const _polkitRuleFailedMarker = 'bettbox-polkit-rule:failed';
+  static const _polkitRuleFailedMarker = 'gobox-polkit-rule:failed';
 
   static const _polkitRuleSettledKey = 'linux_polkit_rule_settled';
 

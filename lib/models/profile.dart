@@ -2,10 +2,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:bett_box/clash/core.dart';
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/state.dart';
+import 'package:gobox/clash/core.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/state.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';

@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:bett_box/clash/interface.dart';
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/helper/helper.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/utils/frame_codec.dart';
-import 'package:bett_box/utils/platform_check.dart';
+import 'package:gobox/clash/interface.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/helper/helper.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/utils/frame_codec.dart';
+import 'package:gobox/utils/platform_check.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
@@ -60,7 +60,7 @@ class ClashService extends ClashHandlerInterface {
 
   String _newSocketPath() {
     final token = Random.secure().nextInt(1 << 32).toRadixString(16);
-    return p.join(Directory.systemTemp.path, 'Bettbox_$token.sock');
+    return p.join(Directory.systemTemp.path, 'Gobox_$token.sock');
   }
 
   Future<void> _rebindTransport() async {

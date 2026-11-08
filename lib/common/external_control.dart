@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/utils/platform_check.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/utils/platform_check.dart';
 
 class ExternalControl {
   static ServerSocket? _server;
@@ -108,7 +108,7 @@ class ExternalControl {
       }
     }
 
-    throw StateError('Bettbox is not running');
+    throw StateError('Gobox is not running');
   }
 
   static Future<void> _sendUnixCommand(

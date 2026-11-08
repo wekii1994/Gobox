@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/models/models.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

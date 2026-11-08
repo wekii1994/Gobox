@@ -2,25 +2,25 @@
   <strong>简体中文</strong> | <a href="readme/README_en.md">English</a> | <a href="readme/README_ru.md">Русский</a> | <a href="readme/README_fa.md">فارسی</a> | <a href="readme/README_ja.md">日本語</a> | <a href="readme/README_ko.md">한국어</a>
 </h4>
 
-<h1 align="center">⚡ Bettbox</h1>
+<h1 align="center">⚡ Gobox</h1>
 <p align="center">
   <strong>Another Better Network Toolbox</strong>
 </p>
 
-**Bettbox 是基于 Mihomo 内核的多平台网络分流与 DNS 调试工具。更专注于极致的用户体验，为长期稳定运行而生，轻量省资源，且不收集任何数据。**
+**Gobox 是基于 Mihomo 内核的多平台网络分流与 DNS 调试工具。更专注于极致的用户体验，为长期稳定运行而生，轻量省资源，且不收集任何数据。**
 
-Bettbox 取自 Better Network Toolbox。项目已通过 SignPath 开源基金会的人工审核安全溯源，Windows 版使用 OV 代码签名证书。
+Gobox 取自 Better Network Toolbox。项目已通过 SignPath 开源基金会的人工审核安全溯源，Windows 版使用 OV 代码签名证书。
 
-[![Latest Release](https://img.shields.io/github/v/release/appshubcc/Bettbox?style=for-the-badge&logo=github&color=238636&label=Release)](https://github.com/appshubcc/Bettbox/releases/latest) [![Core](https://img.shields.io/github/v/release/MetaCubeX/mihomo?style=for-the-badge&logo=go&logoColor=white&color=8A2BE2&label=Mihomo)](https://github.com/MetaCubeX/mihomo/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/wekii1994/Gobox?style=for-the-badge&logo=github&color=238636&label=Release)](https://github.com/wekii1994/Gobox/releases/latest) [![Core](https://img.shields.io/github/v/release/MetaCubeX/mihomo?style=for-the-badge&logo=go&logoColor=white&color=8A2BE2&label=Mihomo)](https://github.com/MetaCubeX/mihomo/releases/latest)
 
 <p align="center">
-  <img src="snapshots/home.jpg" alt="Bettbox" />
+  <img src="snapshots/home.jpg" alt="Gobox" />
 </p>
 
 ---
 ### ✈️ Telegram 社区交流
 
-[![Telegram Group](https://img.shields.io/badge/Bettbox-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/bettbox_chat) [![Telegram Channel](https://img.shields.io/badge/Bettbox-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/appshub_channel)
+[![Telegram Group](https://img.shields.io/badge/Gobox-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/bettbox_chat) [![Telegram Channel](https://img.shields.io/badge/Gobox-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/appshub_channel)
 
 ---
 ## 🚀 核心特性
@@ -42,7 +42,7 @@ Bettbox 取自 Better Network Toolbox。项目已通过 SignPath 开源基金会
 ---
 ## 🛠️ 安装与下载
 
-请前往 **[[Releases]](https://github.com/appshubcc/Bettbox/releases)** 页面下载最新适合您平台和系统的安装包：
+请前往 **[[Releases]](https://github.com/wekii1994/Gobox/releases)** 页面下载最新适合您平台和系统的安装包：
 
 * **桌面端支持**: 
   * **Windows 8.1+:** (x64 / arm64)
@@ -63,7 +63,7 @@ Bettbox 取自 Better Network Toolbox。项目已通过 SignPath 开源基金会
 1. **安装环境与兼容版本**：
    - 安卓端设备请检查是否授予了充足的后台运行权限，系统需满足 Android 8.0+。
    - 桌面端老旧硬件请根据 CPU 指令集架构选择对应的 Compatible 兼容版本。
-   - 安全相关：Bettbox 全流程开源透明，代码已通过 SignPath 权威安全审计，零隐私收集。
+   - 安全相关：Gobox 全流程开源透明，代码已通过 SignPath 权威安全审计，零隐私收集。
 
 2. **桌面端权限与 TUN**：
    - Windows 端管理员权限安装包已内置处理，日常使用无需手动再次授权。
@@ -71,10 +71,10 @@ Bettbox 取自 Better Network Toolbox。项目已通过 SignPath 开源基金会
    - 如遇其他报错，请先确认后台没有其他代理工具冲突占用端口，并附带 Debug 日志提交反馈。
 
 3. **macOS 首次安装指南**：
-   - 根据平台 (Intel / Apple Silicon) 下载并打开 `.dmg` 安装包，将 Bettbox 图标拖入 Applications 文件夹。
+   - 根据平台 (Intel / Apple Silicon) 下载并打开 `.dmg` 安装包，将 Gobox 图标拖入 Applications 文件夹。
    - **避开系统安全拦截**（[当前暂未购买 Apple 商业开发者证书](https://support.apple.com/en-us/102445)）：
-     - **推荐**：在“访达 - 应用程序”中，**右键点击 Bettbox 图标选择“打开”**，在系统弹窗中确认点击“打开”即可。
-     - **备选**：若被阻止，可前往系统“设置 -> 隐私与安全性”，找到 Bettbox 点击“仍要打开”。
+     - **推荐**：在“访达 - 应用程序”中，**右键点击 Gobox 图标选择“打开”**，在系统弹窗中确认点击“打开”即可。
+     - **备选**：若被阻止，可前往系统“设置 -> 隐私与安全性”，找到 Gobox 点击“仍要打开”。
    - 首次开启 TUN 模式时，系统会提示密码授权，请输入密码允许创建虚拟网络接口。
 
 4. **订阅导入与排障**：
@@ -97,12 +97,12 @@ Bettbox 取自 Better Network Toolbox。项目已通过 SignPath 开源基金会
 
 自定义脚本 UI 适配：
 
-* Bettbox 支持外置覆写脚本适配图形化 UI。以 AIsouler 的 **[脚本/配置分享](https://github.com/AIsouler/MyClash)** 为例，只需在脚本首行添加以下声明，即可直接联动内置可视化开关：
-* <code>const Compatible_With_Bettbox = { ruleOptionsEnable: true };</code>
+* Gobox 支持外置覆写脚本适配图形化 UI。以 AIsouler 的 **[脚本/配置分享](https://github.com/AIsouler/MyClash)** 为例，只需在脚本首行添加以下声明，即可直接联动内置可视化开关：
+* <code>const Compatible_With_Gobox = { ruleOptionsEnable: true };</code>
 * 若脚本开关中包含策略组与其他功能开关，可通过 `policyGroupOptions` 声明策略组开关名称；未声明的开关会自动归纳至「⚙️ 其他设置」二级菜单：
 
 ```js
-const Compatible_With_Bettbox = {
+const Compatible_With_Gobox = {
   ruleOptionsEnable: true,
   // 声明属于策略组的开关名称，需与 ruleOptionsEnable 的键完全一致
   policyGroupOptions: ['🚀 节点选择', '🛑 广告拦截'],
@@ -134,7 +134,7 @@ const Compatible_With_Bettbox = {
 ---
 ### ☕ 赞助支持
 
-**如果您觉得这个项目对您有所帮助，也可通过以下方式赞助开发或使用 [推荐链接](https://github.com/appshubcc/Bettbox#%EF%B8%8F-%E6%8E%A8%E8%8D%90%E6%9C%8D%E5%8A%A1)：**
+**如果您觉得这个项目对您有所帮助，也可通过以下方式赞助开发或使用 [推荐链接](https://github.com/wekii1994/Gobox#%EF%B8%8F-%E6%8E%A8%E8%8D%90%E6%9C%8D%E5%8A%A1)：**
 
 * TRON (TRC-20)： <code>TCkTtZfF2WrciZLaJj3e1aqrh3zdTnCkDa</code>
 * Bitcoin： <code>bc1qu950cl6035qvllmzk6cfw3l30j2lg3cq9n6g6h</code>
@@ -156,7 +156,7 @@ const Compatible_With_Bettbox = {
 * **[FlClash GUI](https://github.com/chen08209/FlClash)**（本项目起源于优秀的开源项目 FlClash，向原作者的开创性探索与贡献致敬）
 * **[Mihomo Core](https://github.com/MetaCubeX/mihomo)**（强大灵活的核心驱动）
 
-感谢所有为本项目添砖加瓦的 [Contributors](https://github.com/appshubcc/Bettbox/graphs/contributors)，以及以下开源项目的启发与使用参考：
+感谢所有为本项目添砖加瓦的 [Contributors](https://github.com/wekii1994/Gobox/graphs/contributors)，以及以下开源项目的启发与使用参考：
 
 [Zashboard](https://github.com/Zephyruso/zashboard), [CMFA](https://github.com/MetaCubeX/ClashMetaForAndroid), [Sparkle](https://github.com/xishang0128/sparkle), [SFA](https://github.com/SagerNet/sing-box-for-android), [HUSI](https://github.com/xchacha20-poly1305/husi), [V2rayN](https://github.com/2dust/v2rayN), [Bett-rules](https://github.com/appshubcc/bett-rules)
 

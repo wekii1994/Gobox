@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/models/models.dart';
-import 'package:bett_box/providers/providers.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/widgets.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/models/models.dart';
+import 'package:gobox/providers/providers.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:bett_box/views/profiles/add_profile.dart';
-import 'package:bett_box/enum/enum.dart';
+import 'package:gobox/views/profiles/add_profile.dart';
+import 'package:gobox/enum/enum.dart';
 import 'package:intl/intl.dart';
 
 import 'tile.dart';

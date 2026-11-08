@@ -128,7 +128,7 @@ class AppPackageMakerPacman extends AppPackageMaker {
         packagingDirectory.path,
         'usr/share',
         makeConfig.appBinaryName,
-        'BettboxCore',
+        'GoboxCore',
       ),
     );
     if (coreFile.existsSync()) {

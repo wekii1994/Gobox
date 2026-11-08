@@ -131,7 +131,7 @@ class AppPackageMakerDeb extends AppPackageMaker {
     ]);
 
     final coreFile = File(
-      '${packagingDirectory.path}/usr/share/${makeConfig.appBinaryName}/BettboxCore',
+      '${packagingDirectory.path}/usr/share/${makeConfig.appBinaryName}/GoboxCore',
     );
     if (coreFile.existsSync()) {
       await $('chmod', ['0755', coreFile.path]);

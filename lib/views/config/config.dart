@@ -1,15 +1,15 @@
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/models/clash_config.dart';
-import 'package:bett_box/models/config.dart';
-import 'package:bett_box/providers/providers.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/views/config/general.dart';
-import 'package:bett_box/views/config/network.dart';
-import 'package:bett_box/views/config/ntp.dart';
-import 'package:bett_box/views/config/sniffer.dart';
-import 'package:bett_box/views/config/tunnel.dart';
-import 'package:bett_box/views/config/experimental.dart';
-import 'package:bett_box/widgets/widgets.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/models/clash_config.dart';
+import 'package:gobox/models/config.dart';
+import 'package:gobox/providers/providers.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/views/config/general.dart';
+import 'package:gobox/views/config/network.dart';
+import 'package:gobox/views/config/ntp.dart';
+import 'package:gobox/views/config/sniffer.dart';
+import 'package:gobox/views/config/tunnel.dart';
+import 'package:gobox/views/config/experimental.dart';
+import 'package:gobox/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

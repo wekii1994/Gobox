@@ -10,7 +10,7 @@
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_appshub_bettbox_core_Core_purgeMemory(JNIEnv *, jobject, jboolean all) {
+Java_com_wekii_gobox_core_Core_purgeMemory(JNIEnv *, jobject, jboolean all) {
     if (all && mallopt(M_PURGE_ALL, 0) == 1) {
         return;
     }
@@ -24,38 +24,38 @@ Java_com_appshub_bettbox_core_Core_purgeMemory(JNIEnv *, jobject, jboolean all) 
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_appshub_bettbox_core_Core_startTun(JNIEnv *env, jobject, const jint fd, jobject cb) {
+Java_com_wekii_gobox_core_Core_startTun(JNIEnv *env, jobject, const jint fd, jobject cb) {
     const auto interface = new_global(cb);
     return startTUN(fd, interface) ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_appshub_bettbox_core_Core_stopTun(JNIEnv *) {
+Java_com_wekii_gobox_core_Core_stopTun(JNIEnv *) {
     stopTun();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_appshub_bettbox_core_Core_suspend(JNIEnv *, jobject, jint suspended) {
+Java_com_wekii_gobox_core_Core_suspend(JNIEnv *, jobject, jint suspended) {
     suspend(suspended);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_appshub_bettbox_core_Core_setScreenState(JNIEnv *, jobject, jint on) {
+Java_com_wekii_gobox_core_Core_setScreenState(JNIEnv *, jobject, jint on) {
     setScreenState(on);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_appshub_bettbox_core_Core_networkChanged(JNIEnv *, jobject) {
+Java_com_wekii_gobox_core_Core_networkChanged(JNIEnv *, jobject) {
     networkChanged();
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_appshub_bettbox_core_Core_getTraffic(JNIEnv *env, jobject) {
+Java_com_wekii_gobox_core_Core_getTraffic(JNIEnv *env, jobject) {
     char *traffic = getTraffic();
     const auto result = new_string(traffic != nullptr ? traffic : "");
     freeCString(traffic);
@@ -115,7 +115,7 @@ JNI_OnLoad(JavaVM *vm, void *) {
 
     initialize_jni(vm, env);
 
-    const auto c_tun_interface = find_class("com/appshub/bettbox/core/TunInterface");
+    const auto c_tun_interface = find_class("com/wekii/gobox/core/TunInterface");
 
     m_tun_interface_protect = find_method(c_tun_interface, "protect", "(I)V");
     m_tun_interface_resolve_process = find_method(c_tun_interface, "resolverProcess",

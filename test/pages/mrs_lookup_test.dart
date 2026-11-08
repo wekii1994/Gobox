@@ -1,8 +1,8 @@
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/l10n/l10n.dart';
-import 'package:bett_box/models/models.dart';
-import 'package:bett_box/pages/toolbox/mrs_lookup.dart';
-import 'package:bett_box/state.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/l10n/l10n.dart';
+import 'package:gobox/models/models.dart';
+import 'package:gobox/pages/toolbox/mrs_lookup.dart';
+import 'package:gobox/state.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

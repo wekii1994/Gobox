@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.appshub.bettbox.core"
+    namespace = "com.wekii.gobox.core"
     compileSdk = 36
     ndkVersion = "28.2.13676358"
 

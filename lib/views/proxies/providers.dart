@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:bett_box/clash/clash.dart';
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/models/common.dart';
-import 'package:bett_box/models/config.dart';
-import 'package:bett_box/models/core.dart';
-import 'package:bett_box/models/profile.dart';
-import 'package:bett_box/pages/editor.dart';
-import 'package:bett_box/providers/app.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/widgets.dart';
+import 'package:gobox/clash/clash.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/models/common.dart';
+import 'package:gobox/models/config.dart';
+import 'package:gobox/models/core.dart';
+import 'package:gobox/models/profile.dart';
+import 'package:gobox/pages/editor.dart';
+import 'package:gobox/providers/app.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

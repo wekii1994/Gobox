@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'fa';
 
-  static String m0(log) => "تحلیل گزارش Bettbox (Mihomo): ${log}";
+  static String m0(log) => "تحلیل گزارش Gobox (Mihomo): ${log}";
 
   static String m1(error) => "پشتیبان‌گیری خودکار ناموفق بود: ${error}";
 
@@ -611,7 +611,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m12,
     "deleteTunnel": MessageLookupByLibrary.simpleMessage("حذف هدایت"),
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Bettbox به‌صورت عمیق بر پایه هسته قدرتمند و انعطاف‌پذیر Mihomo ساخته شده و بر ارائه تجربه کلاینت بهتر متمرکز است. چشم‌انداز ما: Connecting Open Source and AI, Accelerating Innovation",
+      "Gobox به‌صورت عمیق بر پایه هسته قدرتمند و انعطاف‌پذیر Mihomo ساخته شده و بر ارائه تجربه کلاینت بهتر متمرکز است. چشم‌انداز ما: Connecting Open Source and AI, Accelerating Innovation",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("آدرس مقصد"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(
@@ -1103,7 +1103,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "دسترسی به سرور ممکن نیست",
     ),
     "iperfFirewallTip": MessageLookupByLibrary.simpleMessage(
-      "اگر دستگاه‌های دیگر نمی‌توانند وصل شوند، اتصال‌های ورودی هستهٔ Bettbox را در دیوارهٔ آتش سیستم مجاز کنید.",
+      "اگر دستگاه‌های دیگر نمی‌توانند وصل شوند، اتصال‌های ورودی هستهٔ Gobox را در دیوارهٔ آتش سیستم مجاز کنید.",
     ),
     "iperfLostPackets": m28,
     "iperfNoAddress": MessageLookupByLibrary.simpleMessage(
@@ -1127,7 +1127,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "iperfRunning": MessageLookupByLibrary.simpleMessage("در حال آزمون"),
     "iperfScan": MessageLookupByLibrary.simpleMessage("اسکن برای اتصال"),
     "iperfScanHint": MessageLookupByLibrary.simpleMessage(
-      "با Bettbox در دستگاه دیگر اسکن کنید تا با یک لمس وصل شوید",
+      "با Gobox در دستگاه دیگر اسکن کنید تا با یک لمس وصل شوید",
     ),
     "iperfScanInvalid": MessageLookupByLibrary.simpleMessage(
       "این کد QR اتصال iPerf3 نیست",

@@ -1,5 +1,5 @@
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/models/models.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Log _core(String payload, {String level = 'info', int? time}) =>

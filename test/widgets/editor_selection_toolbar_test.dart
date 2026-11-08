@@ -1,5 +1,5 @@
-import 'package:bett_box/models/common.dart';
-import 'package:bett_box/widgets/code_editor.dart';
+import 'package:gobox/models/common.dart';
+import 'package:gobox/widgets/code_editor.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

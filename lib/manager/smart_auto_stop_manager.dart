@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/common/network_matcher.dart';
-import 'package:bett_box/plugins/service.dart';
-import 'package:bett_box/providers/providers.dart';
-import 'package:bett_box/state.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/common/network_matcher.dart';
+import 'package:gobox/plugins/service.dart';
+import 'package:gobox/providers/providers.dart';
+import 'package:gobox/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:synchronized/synchronized.dart';

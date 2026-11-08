@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/models/common.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/dialog.dart';
-import 'package:bett_box/widgets/null_status.dart';
-import 'package:bett_box/widgets/text.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/models/common.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/dialog.dart';
+import 'package:gobox/widgets/null_status.dart';
+import 'package:gobox/widgets/text.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';

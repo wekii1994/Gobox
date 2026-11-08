@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/keep_scope.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/keep_scope.dart';
 import 'package:material_ui/material_ui.dart';
 
 bool dismissTvInputFocus() {

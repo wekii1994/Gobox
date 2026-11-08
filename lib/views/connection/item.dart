@@ -1,18 +1,18 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/models/models.dart';
-import 'package:bett_box/pages/pages.dart';
-import 'package:bett_box/plugins/app.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/widgets.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/models/models.dart';
+import 'package:gobox/pages/pages.dart';
+import 'package:gobox/plugins/app.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/widgets.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bett_box/providers/providers.dart';
+import 'package:gobox/providers/providers.dart';
 
 final _iconCache = <String, Uint8List?>{};
 final _iconPending = <String, Future<Uint8List?>>{};

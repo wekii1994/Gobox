@@ -2,25 +2,25 @@
   <a href="../README.md">简体中文</a> | <a href="README_en.md">English</a> | <strong>Русский</strong> | <a href="README_fa.md">فارسی</a> | <a href="README_ja.md">日本語</a> | <a href="README_ko.md">한국어</a>
 </h4>
 
-<h1 align="center">⚡ Bettbox</h1>
+<h1 align="center">⚡ Gobox</h1>
 <p align="center">
   <strong>Another Better Network Toolbox</strong>
 </p>
 
-**Bettbox — это кроссплатформенный инструмент для маршрутизации сетевого трафика и отладки DNS на базе ядра Mihomo. Главный акцент — на превосходном пользовательском опыте: приложение создано для долгой стабильной работы, лёгкое, экономное к ресурсам и не собирает никаких данных.**
+**Gobox — это кроссплатформенный инструмент для маршрутизации сетевого трафика и отладки DNS на базе ядра Mihomo. Главный акцент — на превосходном пользовательском опыте: приложение создано для долгой стабильной работы, лёгкое, экономное к ресурсам и не собирает никаких данных.**
 
-Bettbox означает Better Network Toolbox. Проект прошёл ручной аудит безопасности SignPath Foundation, а сборка для Windows подписана сертификатом подписи кода OV.
+Gobox означает Better Network Toolbox. Проект прошёл ручной аудит безопасности SignPath Foundation, а сборка для Windows подписана сертификатом подписи кода OV.
 
-[![Latest Release](https://img.shields.io/github/v/release/appshubcc/Bettbox?style=for-the-badge&logo=github&color=238636&label=Release)](https://github.com/appshubcc/Bettbox/releases/latest) [![Core](https://img.shields.io/github/v/release/MetaCubeX/mihomo?style=for-the-badge&logo=go&logoColor=white&color=8A2BE2&label=Mihomo)](https://github.com/MetaCubeX/mihomo/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/wekii1994/Gobox?style=for-the-badge&logo=github&color=238636&label=Release)](https://github.com/wekii1994/Gobox/releases/latest) [![Core](https://img.shields.io/github/v/release/MetaCubeX/mihomo?style=for-the-badge&logo=go&logoColor=white&color=8A2BE2&label=Mihomo)](https://github.com/MetaCubeX/mihomo/releases/latest)
 
 <p align="center">
-  <img src="../snapshots/home.jpg" alt="Bettbox" />
+  <img src="../snapshots/home.jpg" alt="Gobox" />
 </p>
 
 ---
 ### ✈️ Сообщество в Telegram
 
-[![Telegram Group](https://img.shields.io/badge/Bettbox-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/bettbox_chat) [![Telegram Channel](https://img.shields.io/badge/Bettbox-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/appshub_channel)
+[![Telegram Group](https://img.shields.io/badge/Gobox-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/bettbox_chat) [![Telegram Channel](https://img.shields.io/badge/Gobox-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/appshub_channel)
 
 ---
 ## 🚀 Основные особенности
@@ -42,7 +42,7 @@ Bettbox означает Better Network Toolbox. Проект прошёл ру�
 ---
 ## 🛠️ Установка и загрузка
 
-Перейдите на страницу **[[Releases]](https://github.com/appshubcc/Bettbox/releases)**, чтобы скачать актуальный установочный пакет для вашей платформы и системы:
+Перейдите на страницу **[[Releases]](https://github.com/wekii1994/Gobox/releases)**, чтобы скачать актуальный установочный пакет для вашей платформы и системы:
 
 * **Поддержка настольных ПК**: 
   * **Windows 8.1+:** (x64 / arm64)
@@ -63,7 +63,7 @@ Bettbox означает Better Network Toolbox. Проект прошёл ру�
 1. **Системные требования и совместимость**:
    - На устройствах Android убедитесь, что приложению предоставлены достаточные разрешения для работы в фоновом режиме; система должна быть не ниже Android 8.0+.
    - Для старых ПК выбирайте соответствующую версию Compatible в зависимости от набора инструкций процессора.
-   - Безопасность: Bettbox полностью прозрачен и открыт, код прошёл авторитетный аудит безопасности SignPath, сбор персональных данных отсутствует.
+   - Безопасность: Gobox полностью прозрачен и открыт, код прошёл авторитетный аудит безопасности SignPath, сбор персональных данных отсутствует.
 
 2. **Права администратора на ПК и режим TUN**:
    - В установщике Windows права администратора преднастроены заранее — в повседневном использовании повторная авторизация вручную не требуется.
@@ -71,10 +71,10 @@ Bettbox означает Better Network Toolbox. Проект прошёл ру�
    - При возникновении других ошибок убедитесь, что порты не заняты другими прокси-программами, и приложите логи Debug при отправке отзыва.
 
 3. **Руководство по первой установке на macOS**:
-   - Скачайте пакет `.dmg` в соответствии с вашей платформой (Intel / Apple Silicon), откройте его и перетащите значок Bettbox в папку Программы (Applications).
+   - Скачайте пакет `.dmg` в соответствии с вашей платформой (Intel / Apple Silicon), откройте его и перетащите значок Gobox в папку Программы (Applications).
    - **Обход системной защиты Gatekeeper** ([сертификат Apple Developer в настоящее время не приобретён](https://support.apple.com/en-us/102445)):
-     - **Рекомендуется**: В папке «Программы» **нажмите правой кнопкой мыши на значок Bettbox и выберите «Открыть»**, затем подтвердите нажатием «Открыть» в системном диалоговом окне.
-     - **Альтернатива**: Если запуск заблокирован, откройте «Системные настройки -> Конфиденциальность и безопасность», найдите Bettbox и нажмите «Подтвердить вход».
+     - **Рекомендуется**: В папке «Программы» **нажмите правой кнопкой мыши на значок Gobox и выберите «Открыть»**, затем подтвердите нажатием «Открыть» в системном диалоговом окне.
+     - **Альтернатива**: Если запуск заблокирован, откройте «Системные настройки -> Конфиденциальность и безопасность», найдите Gobox и нажмите «Подтвердить вход».
    - При первом включении режима TUN система запросит пароль; введите его, чтобы разрешить создание виртуального сетевого интерфейса.
 
 4. **Импорт подписок и устранение неполадок**:
@@ -97,12 +97,12 @@ Bettbox означает Better Network Toolbox. Проект прошёл ру�
 
 Адаптация пользовательских скриптов под графический интерфейс:
 
-* Bettbox поддерживает визуальную адаптацию UI для внешних скриптов переопределения (override). Например, для **[скрипта/конфигурации](https://github.com/AIsouler/MyClash)** от AIsouler достаточно добавить в первую строку скрипта следующее объявление для прямой связи со встроенными переключателями:
-* <code>const Compatible_With_Bettbox = { ruleOptionsEnable: true };</code>
+* Gobox поддерживает визуальную адаптацию UI для внешних скриптов переопределения (override). Например, для **[скрипта/конфигурации](https://github.com/AIsouler/MyClash)** от AIsouler достаточно добавить в первую строку скрипта следующее объявление для прямой связи со встроенными переключателями:
+* <code>const Compatible_With_Gobox = { ruleOptionsEnable: true };</code>
 * Если переключатели скрипта содержат группы политик и другие функции, имена переключателей групп политик можно объявить через `policyGroupOptions`; необъявленные переключатели будут автоматически помещены в подменю «⚙️ Другие настройки»:
 
 ```js
-const Compatible_With_Bettbox = {
+const Compatible_With_Gobox = {
   ruleOptionsEnable: true,
   // Объявление имен переключателей групп политик; должны точно совпадать с ключами в ruleOptionsEnable
   policyGroupOptions: ['🚀 节点选择', '🛑 广告拦截'],
@@ -146,7 +146,7 @@ const Compatible_With_Bettbox = {
 * **[FlClash GUI](https://github.com/chen08209/FlClash)** (Проект берет свое начало от превосходного открытого проекта FlClash; отдаем дань уважения новаторским исследованиям и вкладу автора)
 * **[Mihomo Core](https://github.com/MetaCubeX/mihomo)** (Мощное и гибкое ядро)
 
-Благодарим всех [Участников](https://github.com/appshubcc/Bettbox/graphs/contributors), внесших вклад в проект, а также следующие открытые проекты за вдохновение и практические решения:
+Благодарим всех [Участников](https://github.com/wekii1994/Gobox/graphs/contributors), внесших вклад в проект, а также следующие открытые проекты за вдохновение и практические решения:
 
 [Zashboard](https://github.com/Zephyruso/zashboard), [CMFA](https://github.com/MetaCubeX/ClashMetaForAndroid), [Sparkle](https://github.com/xishang0128/sparkle), [SFA](https://github.com/SagerNet/sing-box-for-android), [HUSI](https://github.com/xchacha20-poly1305/husi), [V2rayN](https://github.com/2dust/v2rayN), [Bett-rules](https://github.com/appshubcc/bett-rules)
 

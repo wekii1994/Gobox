@@ -95,8 +95,10 @@ var
 begin
   PowerShellScript := 
     '$ErrorActionPreference = ''SilentlyContinue'';' + #13#10 +
-    'Write-Host "Cleaning old Wintun/Bettbox/LiClash network adapters...";' + #13#10 +
+    'Write-Host "Cleaning old Wintun/Gobox/Bettbox/LiClash network adapters...";' + #13#10 +
     '$adapters = Get-NetAdapter | Where-Object {' + #13#10 +
+    '$_.InterfaceDescription -like "*Gobox*" -or' + #13#10 +
+    '  $_.Name -like "*Gobox*" -or' + #13#10 +
     '$_.InterfaceDescription -like "*Bettbox*" -or' + #13#10 +
     '  $_.Name -like "*Bettbox*"' + #13#10 +
     '};' + #13#10 +
@@ -156,9 +158,9 @@ begin
   if (PipeName = '') or (Pos('{' + '{', PipeName) > 0) then
   begin
     if Pos('Dev', ServiceName) > 0 then
-      PipeName := '\\.\pipe\BettboxDev.Helper'
+      PipeName := '\\.\pipe\GoboxDev.Helper'
     else
-      PipeName := '\\.\pipe\Bettbox.Helper';
+      PipeName := '\\.\pipe\Gobox.Helper';
   end;
   HelperPath := ExpandConstant('{app}\{{HELPER_EXECUTABLE_NAME}}');
   
@@ -223,9 +225,11 @@ var
   RegistryKeys: TArrayOfString;
   i: Integer;
 begin
-  SetArrayLength(RegistryKeys, 2);
-  RegistryKeys[0] := 'Software\com.appshub.bettbox';
-  RegistryKeys[1] := 'Software\com.appshub\Bettbox';
+  SetArrayLength(RegistryKeys, 4);
+  RegistryKeys[0] := 'Software\com.wekii.gobox';
+  RegistryKeys[1] := 'Software\com.wekii\Gobox';
+  RegistryKeys[2] := 'Software\com.appshub.bettbox';
+  RegistryKeys[3] := 'Software\com.appshub\Bettbox';
   
   for i := 0 to GetArrayLength(RegistryKeys)-1 do
   begin
@@ -241,9 +245,11 @@ var
 begin
   AppDataPath := ExpandConstant('{userappdata}');
   
-  SetArrayLength(UserDataPaths, 2);
-  UserDataPaths[0] := AppDataPath + '\com.appshub.bettbox';
-  UserDataPaths[1] := AppDataPath + '\com.appshub\Bettbox';
+  SetArrayLength(UserDataPaths, 4);
+  UserDataPaths[0] := AppDataPath + '\com.wekii.gobox';
+  UserDataPaths[1] := AppDataPath + '\com.wekii\Gobox';
+  UserDataPaths[2] := AppDataPath + '\com.appshub.bettbox';
+  UserDataPaths[3] := AppDataPath + '\com.appshub\Bettbox';
   
   for i := 0 to GetArrayLength(UserDataPaths)-1 do
   begin
@@ -255,6 +261,7 @@ begin
   
   if DirExists(AppDataPath + '\com.appshub') then
   begin
+    RemoveDir(AppDataPath + '\com.wekii');
     RemoveDir(AppDataPath + '\com.appshub');
   end;
 end;

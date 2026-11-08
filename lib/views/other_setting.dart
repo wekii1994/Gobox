@@ -1,11 +1,11 @@
-import 'package:bett_box/common/common.dart';
-import 'package:bett_box/common/network_matcher.dart';
-import 'package:bett_box/enum/enum.dart';
-import 'package:bett_box/plugins/app.dart';
-import 'package:bett_box/plugins/service.dart';
-import 'package:bett_box/providers/providers.dart';
-import 'package:bett_box/state.dart';
-import 'package:bett_box/widgets/widgets.dart';
+import 'package:gobox/common/common.dart';
+import 'package:gobox/common/network_matcher.dart';
+import 'package:gobox/enum/enum.dart';
+import 'package:gobox/plugins/app.dart';
+import 'package:gobox/plugins/service.dart';
+import 'package:gobox/providers/providers.dart';
+import 'package:gobox/state.dart';
+import 'package:gobox/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

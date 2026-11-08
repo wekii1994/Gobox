@@ -370,7 +370,7 @@ pub mod process {
     }
 
     pub fn set_process_priority(process_name: &str, enable: bool) -> String {
-        if !["BettboxCore.exe", "BettboxDevCore.exe"]
+        if !["GoboxCore.exe", "GoboxDevCore.exe", "BettboxCore.exe", "BettboxDevCore.exe"]
             .iter()
             .any(|name| name.eq_ignore_ascii_case(process_name))
         {

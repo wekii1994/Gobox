@@ -2,25 +2,25 @@
   <a href="../README.md">简体中文</a> | <strong>English</strong> | <a href="README_ru.md">Русский</a> | <a href="README_fa.md">فارسی</a> | <a href="README_ja.md">日本語</a> | <a href="README_ko.md">한국어</a>
 </h4>
 
-<h1 align="center">⚡ Bettbox</h1>
+<h1 align="center">⚡ Gobox</h1>
 <p align="center">
   <strong>Another Better Network Toolbox</strong>
 </p>
 
-**Bettbox is a cross-platform network traffic routing and DNS debugging tool built on the Mihomo core. It focuses on an outstanding user experience, is built for long-term stable operation, stays lightweight on resources, and collects no data at all.**
+**Gobox is a cross-platform network traffic routing and DNS debugging tool built on the Mihomo core. It focuses on an outstanding user experience, is built for long-term stable operation, stays lightweight on resources, and collects no data at all.**
 
-Bettbox stands for Better Network Toolbox. The project has passed the manual security review of the SignPath Foundation, and the Windows build is signed with an OV code-signing certificate.
+Gobox stands for Better Network Toolbox. The project has passed the manual security review of the SignPath Foundation, and the Windows build is signed with an OV code-signing certificate.
 
-[![Latest Release](https://img.shields.io/github/v/release/appshubcc/Bettbox?style=for-the-badge&logo=github&color=238636&label=Release)](https://github.com/appshubcc/Bettbox/releases/latest) [![Core](https://img.shields.io/github/v/release/MetaCubeX/mihomo?style=for-the-badge&logo=go&logoColor=white&color=8A2BE2&label=Mihomo)](https://github.com/MetaCubeX/mihomo/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/wekii1994/Gobox?style=for-the-badge&logo=github&color=238636&label=Release)](https://github.com/wekii1994/Gobox/releases/latest) [![Core](https://img.shields.io/github/v/release/MetaCubeX/mihomo?style=for-the-badge&logo=go&logoColor=white&color=8A2BE2&label=Mihomo)](https://github.com/MetaCubeX/mihomo/releases/latest)
 
 <p align="center">
-  <img src="../snapshots/home.jpg" alt="Bettbox" />
+  <img src="../snapshots/home.jpg" alt="Gobox" />
 </p>
 
 ---
 ### ✈️ Telegram Community
 
-[![Telegram Group](https://img.shields.io/badge/Bettbox-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/bettbox_chat) [![Telegram Channel](https://img.shields.io/badge/Bettbox-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/appshub_channel)
+[![Telegram Group](https://img.shields.io/badge/Gobox-Chat-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/bettbox_chat) [![Telegram Channel](https://img.shields.io/badge/Gobox-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/appshub_channel)
 
 ---
 ## 🚀 Core Features
@@ -42,7 +42,7 @@ Bettbox stands for Better Network Toolbox. The project has passed the manual sec
 ---
 ## 🛠️ Installation & Downloads
 
-Please visit the **[[Releases]](https://github.com/appshubcc/Bettbox/releases)** page to download the latest installer suitable for your platform and operating system:
+Please visit the **[[Releases]](https://github.com/wekii1994/Gobox/releases)** page to download the latest installer suitable for your platform and operating system:
 
 * **Desktop Support**: 
   * **Windows 8.1+:** (x64 / arm64)
@@ -63,7 +63,7 @@ Please visit the **[[Releases]](https://github.com/appshubcc/Bettbox/releases)**
 1. **System Requirements & Compatibility**:
    - For Android devices, ensure sufficient background execution permissions are granted; system must meet Android 8.0+.
    - For legacy desktop hardware, please choose the corresponding Compatible build based on CPU instruction set architecture.
-   - Security: Bettbox is fully open-source and transparent; the code has passed the authoritative SignPath security audit with zero privacy collection.
+   - Security: Gobox is fully open-source and transparent; the code has passed the authoritative SignPath security audit with zero privacy collection.
 
 2. **Desktop Permissions & TUN**:
    - Windows administrator permissions are pre-handled by the installer; daily usage requires no manual re-authorization.
@@ -71,10 +71,10 @@ Please visit the **[[Releases]](https://github.com/appshubcc/Bettbox/releases)**
    - For other errors, verify that no conflicting proxy tools are occupying ports in the background, and include debug logs when submitting feedback.
 
 3. **macOS First-Time Installation Guide**:
-   - Download and open the `.dmg` installer according to your platform (Intel / Apple Silicon), and drag the Bettbox icon into the Applications folder.
+   - Download and open the `.dmg` installer according to your platform (Intel / Apple Silicon), and drag the Gobox icon into the Applications folder.
    - **Bypassing System Security Gatekeeper** ([Apple Commercial Developer Certificate is not currently purchased](https://support.apple.com/en-us/102445)):
-     - **Recommended**: In "Finder - Applications", **right-click the Bettbox icon and select "Open"**, then click "Open" in the system confirmation prompt.
-     - **Alternative**: If blocked, navigate to System "Settings -> Privacy & Security", locate Bettbox, and click "Open Anyway".
+     - **Recommended**: In "Finder - Applications", **right-click the Gobox icon and select "Open"**, then click "Open" in the system confirmation prompt.
+     - **Alternative**: If blocked, navigate to System "Settings -> Privacy & Security", locate Gobox, and click "Open Anyway".
    - When enabling TUN mode for the first time, a system password prompt will appear; enter your password to allow the creation of the virtual network interface.
 
 4. **Subscription Import & Troubleshooting**:
@@ -97,12 +97,12 @@ Taking Windows build as an example:
 
 Custom Script UI Adaptation:
 
-* Bettbox supports graphical UI adaptation for external override scripts. Taking AIsouler's **[Script/Config Repository](https://github.com/AIsouler/MyClash)** as an example, simply add the following declaration at the first line of the script to directly link with built-in visual toggles:
-* <code>const Compatible_With_Bettbox = { ruleOptionsEnable: true };</code>
+* Gobox supports graphical UI adaptation for external override scripts. Taking AIsouler's **[Script/Config Repository](https://github.com/AIsouler/MyClash)** as an example, simply add the following declaration at the first line of the script to directly link with built-in visual toggles:
+* <code>const Compatible_With_Gobox = { ruleOptionsEnable: true };</code>
 * If the script switches include policy groups and other function switches, you can declare policy group switch names via `policyGroupOptions`; undeclared switches will be automatically grouped under the "⚙️ Other Settings" secondary menu:
 
 ```js
-const Compatible_With_Bettbox = {
+const Compatible_With_Gobox = {
   ruleOptionsEnable: true,
   // Declare switch names belonging to policy groups; must match keys in ruleOptionsEnable exactly
   policyGroupOptions: ['🚀 节点选择', '🛑 广告拦截'],
@@ -146,7 +146,7 @@ const Compatible_With_Bettbox = {
 * **[FlClash GUI](https://github.com/chen08209/FlClash)** (This project originated from the excellent open-source project FlClash; tribute to the original author's pioneering exploration and contributions)
 * **[Mihomo Core](https://github.com/MetaCubeX/mihomo)** (Powerful and flexible core driver)
 
-Thanks to all [Contributors](https://github.com/appshubcc/Bettbox/graphs/contributors) who have contributed to this project, as well as the following open-source projects for their inspiration and reference:
+Thanks to all [Contributors](https://github.com/wekii1994/Gobox/graphs/contributors) who have contributed to this project, as well as the following open-source projects for their inspiration and reference:
 
 [Zashboard](https://github.com/Zephyruso/zashboard), [CMFA](https://github.com/MetaCubeX/ClashMetaForAndroid), [Sparkle](https://github.com/xishang0128/sparkle), [SFA](https://github.com/SagerNet/sing-box-for-android), [HUSI](https://github.com/xchacha20-poly1305/husi), [V2rayN](https://github.com/2dust/v2rayN), [Bett-rules](https://github.com/appshubcc/bett-rules)
 

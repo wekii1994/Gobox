@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:bett_box/common/color.dart';
+import 'package:gobox/common/color.dart';
 import 'package:material_ui/material_ui.dart';
 
 class Point {

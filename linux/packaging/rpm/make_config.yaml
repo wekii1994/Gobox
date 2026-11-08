@@ -1,4 +1,4 @@
-display_name: Bettbox
+display_name: Gobox
 
 packager: appshub
 packagerEmail: appshubcc@gmail.com
@@ -14,20 +14,20 @@ requires:
   - '(/usr/sbin/setcap or /usr/bin/setcap)'
 
 keywords:
-  - Bettbox
+  - Gobox
   - Clash
   - ClashMeta
   - Proxy
 
-generic_name: Bettbox
+generic_name: Gobox
 
 group: Applications/Internet
 
 startup_notify: true
-startup_wm_class: com.appshub.bettbox
+startup_wm_class: com.wekii.gobox
 
 extra_files:
-  linux/packaging/polkit/90-bettbox.rules: usr/share/polkit-1/rules.d/90-bettbox.rules
+  linux/packaging/polkit/90-gobox.rules: usr/share/polkit-1/rules.d/90-gobox.rules
 
 install: |
   mkdir -p %{buildroot}%{_bindir}
@@ -38,18 +38,18 @@ install: |
   ln -s ../share/%{name}/%{name} %{buildroot}%{_bindir}/%{name}
   cp -r %{name}.desktop %{buildroot}%{_datadir}/applications
   cp -r %{name}.png %{buildroot}%{_datadir}/pixmaps
-  chmod 0755 %{buildroot}%{_datadir}/%{name}/BettboxCore
+  chmod 0755 %{buildroot}%{_datadir}/%{name}/GoboxCore
   update-mime-database %{_datadir}/mime &> /dev/null || :
 
 posttrans: |
-  CORE_PATH="%{_datadir}/%{name}/BettboxCore"
+  CORE_PATH="%{_datadir}/%{name}/GoboxCore"
   if [ -f "$CORE_PATH" ]; then
     setcap 'cap_net_admin,cap_net_bind_service,cap_net_raw=+ep' "$CORE_PATH" && sync
   fi
-  rm -f /etc/polkit-1/rules.d/90-bettbox.rules /etc/polkit-1/rules.d/99-bettbox.rules /usr/share/polkit-1/rules.d/99-bettbox.rules
+  rm -f /etc/polkit-1/rules.d/90-gobox.rules /etc/polkit-1/rules.d/99-bettbox.rules /usr/share/polkit-1/rules.d/99-bettbox.rules
 
 postun: |
   update-mime-database %{_datadir}/mime &> /dev/null || :
 
 attr: |
-  %attr(0755, root, root) %{_datadir}/%{name}/BettboxCore
+  %attr(0755, root, root) %{_datadir}/%{name}/GoboxCore

@@ -5,11 +5,11 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:bett_box/plugins/app.dart';
-import 'package:bett_box/plugins/clipboard_ext.dart';
-import 'package:bett_box/plugins/tile.dart';
-import 'package:bett_box/plugins/vpn.dart';
-import 'package:bett_box/state.dart';
+import 'package:gobox/plugins/app.dart';
+import 'package:gobox/plugins/clipboard_ext.dart';
+import 'package:gobox/plugins/tile.dart';
+import 'package:gobox/plugins/vpn.dart';
+import 'package:gobox/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -98,7 +98,7 @@ Future<void> _runApp() async {
   if (system.isWindows) {
     clipboardExt.init();
   }
-  HttpOverrides.global = BettboxHttpOverrides();
+  HttpOverrides.global = GoboxHttpOverrides();
   runApp(ProviderScope(retry: (_, _) => null, child: const Application()));
 }
 
@@ -222,7 +222,7 @@ Future<void> _service(List<String> flags) async {
             final profile = globalState.config.profiles
                 .where((e) => e.id == profileId)
                 .firstOrNull;
-            final profileName = profile?.label ?? 'Bettbox';
+            final profileName = profile?.label ?? 'Gobox';
             await vpn?.updateNotificationSpeed(profileName, '↑0B/s ↓0B/s');
           }
 
