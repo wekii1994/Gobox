@@ -10,10 +10,10 @@ val localProperties = Properties().apply {
 }
 
 val mStoreFile = file("keystore.jks")
-val mStorePassword: String? = localProperties.getProperty("storePassword")
-val mKeyAlias: String? = localProperties.getProperty("keyAlias")
-val mKeyPassword: String? = localProperties.getProperty("keyPassword")
-val isRelease = mStoreFile.exists() && mStorePassword != null && mKeyAlias != null && mKeyPassword != null
+val mStorePassword: String? = localProperties.getProperty("storePassword") ?: "android"
+val mKeyAlias: String? = localProperties.getProperty("keyAlias") ?: "gobox"
+val mKeyPassword: String? = localProperties.getProperty("keyPassword") ?: "android"
+val isRelease = mStoreFile.exists()
 
 android {
     namespace = "com.wekii.gobox"

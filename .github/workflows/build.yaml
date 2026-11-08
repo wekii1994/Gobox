@@ -1,138 +1,96 @@
-name: build
+name: Build Android arm64-v8a
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
 
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
   IS_PRERELEASE: ${{ contains(github.ref_name, 'pre') }}
-  SHOULD_RELEASE: ${{ !contains(github.ref, '-') || contains(github.ref_name, 'pre') }}
+  SHOULD_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
   GRADLE_OPTS: -Dorg.gradle.vfs.watch=false
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   SENTRY_BACKEND: none
-  # Temporarily disabled SignPath due to account risk control:
-  # SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
-  SIGNPATH_API_TOKEN: ''
   IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN || vars.IPINFO_TOKEN }}
-  
+
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
-      actions: write
+    name: Build Android APK (arm64-v8a)
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: android
-            os: ubuntu-24.04
-            arch: arm64
-          - platform: android
-            os: ubuntu-24.04
-            arch: amd64
-          - platform: android
-            os: ubuntu-24.04
-            arch: arm
-          - platform: android
-            os: ubuntu-24.04
-            arch: universal
-          - platform: android
-            os: ubuntu-24.04
-            arch: arm64
-            lite: true
-          - platform: android
-            os: ubuntu-24.04
-            arch: amd64
-            lite: true
-          - platform: android
-            os: ubuntu-24.04
-            arch: arm
-            lite: true
-          - platform: android
-            os: ubuntu-24.04
-            arch: universal
-            lite: true
-          - platform: windows
-            os: windows-2022
-            arch: amd64
-          - platform: windows
-            os: windows-11-arm
-            arch: arm64
-          - platform: windows
-            os: windows-2022
-            arch: amd64
-            compatible: true
-          - platform: macos
-            os: macos-26
-            arch: arm64
-          - platform: macos
-            os: macos-26
-            arch: amd64
-          - platform: linux
-            os: ubuntu-22.04
-            arch: amd64
-          - platform: linux
-            os: ubuntu-24.04-arm
-            arch: arm64
-          - platform: linux
-            os: ubuntu-22.04
-            arch: amd64
-            compatible: true
+        platform: [android]
+        arch: [arm64]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 1
 
-      - name: Setup Rust (Windows)
-        if: matrix.platform == 'windows'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.arch == 'arm64' && 'aarch64-pc-windows-msvc' || 'x86_64-pc-windows-msvc' }}
-
       - name: Setup Rust (Android)
-        if: matrix.platform == 'android'
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
-
-      - name: Setup Rust (Linux)
-        if: matrix.platform == 'linux'
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Setup Rust (macOS)
-        if: matrix.platform == 'macos'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.arch == 'amd64' && 'x86_64-apple-darwin' || 'aarch64-apple-darwin' }}
-
-      - name: Enable Git long paths (Windows)
-        if: matrix.platform == 'windows'
-        run: git config --global core.longpaths true
+          targets: aarch64-linux-android
 
       - name: Setup Keystore (Android)
-        if: matrix.platform == 'android'
+        shell: bash
         run: |
-          echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/local.properties
-          echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/local.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/local.properties
-          
+          if [ -n "${{ secrets.KEYSTORE }}" ]; then
+            echo "Using custom secrets.KEYSTORE..."
+            echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
+            echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/local.properties
+            echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/local.properties
+            echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/local.properties
+          elif [ -f ".github/signing/release.keystore" ]; then
+            echo "Using repository default solidified release keystore..."
+            cp .github/signing/release.keystore android/app/keystore.jks
+            echo "keyAlias=gobox" >> android/local.properties
+            echo "storePassword=android" >> android/local.properties
+            echo "keyPassword=android" >> android/local.properties
+          elif [ -f "android/app/keystore.jks" ]; then
+            echo "Using existing android/app/keystore.jks..."
+            echo "keyAlias=gobox" >> android/local.properties
+            echo "storePassword=android" >> android/local.properties
+            echo "keyPassword=android" >> android/local.properties
+          else
+            echo "Generating persistent release keystore..."
+            keytool -genkeypair -v \
+              -keystore android/app/keystore.jks \
+              -alias gobox \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Gobox, OU=Gobox, O=Gobox, L=Unknown, ST=Unknown, C=US"
+            echo "keyAlias=gobox" >> android/local.properties
+            echo "storePassword=android" >> android/local.properties
+            echo "keyPassword=android" >> android/local.properties
+          fi
+
       - name: Setup Java (Android)
-        if: matrix.platform == 'android'
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
           cache: 'gradle'
 
       - name: Setup Android NDK
-        if: matrix.platform == 'android'
         shell: bash
         run: |
           NDK_VERSION="28.2.13676358"
@@ -140,390 +98,86 @@ jobs:
           echo "ANDROID_NDK=${ANDROID_SDK_ROOT}/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
 
       - name: Configure Cargo for Android
-        if: matrix.platform == 'android'
         shell: bash
         run: |
           mkdir -p ~/.cargo
           cat > ~/.cargo/config.toml <<EOF
           [target.aarch64-linux-android]
           linker = "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang"
-          [target.armv7-linux-androideabi]
-          linker = "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang"
-          [target.x86_64-linux-android]
-          linker = "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang"
-          [target.i686-linux-android]
-          linker = "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android26-clang"
           EOF
 
-      - name: Install Dependencies (Linux)
-        if: matrix.platform == 'linux'
-        run: |
-          sudo apt-get update -o Acquire::Retries=3 -o Acquire::ForceIPv4=true
-          sudo apt-get install -y -o Acquire::Retries=3 -o Acquire::ForceIPv4=true --fix-missing libcurl4-openssl-dev ninja-build libgtk-3-dev rpm
-
       - name: Setup Golang
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.compatible == true && '1.24.x' || '1.25.x' }}
+          go-version: '1.25.x'
           cache-dependency-path: core/go.sum
-
-      - name: Select Xcode (macOS)
-        if: matrix.platform == 'macos'
-        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: ${{ contains(matrix.os, 'arm') && 'master' || 'stable' }}
+          channel: 'stable'
           cache: true
-          cache-key: flutter-${{ matrix.platform }}-${{ matrix.arch }}-${{ hashFiles('**/pubspec.lock') }}
-          flutter-version: ${{ contains(matrix.os, 'arm') && '' || '3.47.7' }}
+          cache-key: flutter-android-arm64-${{ hashFiles('**/pubspec.lock') }}
+          flutter-version: '3.47.7'
 
       - name: Clear Pub Cache Credentials
         shell: bash
         run: rm -f ~/.pub-cache/credentials.json 2>/dev/null || true
 
-
       - name: Clean Gradle (Android)
-        if: matrix.platform == 'android'
         run: |
           cd android
           flutter clean
 
-      - name: Disable Swift Package Manager (macOS)
-        if: matrix.platform == 'macos'
-        run: flutter config --no-enable-swift-package-manager
-
-      - name: Patch for Windows
-        if: matrix.platform == 'windows'
-        shell: bash
-        run: |
-          cd core
-          SING_TUN_VERSION=$(grep -E 'github\.com/metacubex/sing-tun\s+v[^[:space:]]+' go.mod | awk '{print $2}')
-          echo "Detected sing-tun version: ${SING_TUN_VERSION}"
-          go mod download github.com/metacubex/sing-tun@${SING_TUN_VERSION}
-          MOD_CACHE=$(go env GOMODCACHE | tr '\\' '/')
-          FILE="${MOD_CACHE}/github.com/metacubex/sing-tun@${SING_TUN_VERSION}/tun_windows.go"
-          echo "Patching ${FILE}"
-          chmod +w "${FILE}"
-      - name: Build Gobox (Non-Windows)
-        if: matrix.platform != 'windows'
+      - name: Build Gobox (Android arm64-v8a)
         shell: bash
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           flutter pub get
           dart run build_runner build
-          dart setup.dart ${{ matrix.platform }} --arch ${{ matrix.arch }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} ${{ matrix.compatible == true && '--compatible' || '' }} ${{ matrix.lite == true && '--lite' || '' }}
+          dart setup.dart android --arch arm64 ${{ env.IS_STABLE == 'true' && '--env stable' || '' }}
 
-      - name: Install SignPath (Windows)
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        shell: pwsh
-        env:
-          SIGNPATH_API_TOKEN: ${{ env.SIGNPATH_API_TOKEN }}
-        run: |
-          if (-not $env:SIGNPATH_API_TOKEN) {
-            Write-Host "SIGNPATH_API_TOKEN is not configured. Skipping module installation."
-            exit 0
-          }
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
-          Install-Module -Name SignPath -Force -Scope CurrentUser -Repository PSGallery
-
-      - name: Set Signing Policy Slug (Windows)
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        shell: pwsh
-        run: |
-          $isStable = '${{ env.IS_STABLE }}' -eq 'true'
-          $isPre = '${{ env.IS_PRERELEASE }}' -eq 'true'
-
-          if ($isStable) {
-            $exePolicy = "release-signing"
-            $installerPolicy = "release-signing"
-          } elseif ($isPre) {
-            $exePolicy = "test-signing"
-            $installerPolicy = "release-signing"
-          } else {
-            $exePolicy = "test-signing"
-            $installerPolicy = "test-signing"
-          }
-          Write-Host "Setting EXE_SIGNING_POLICY_SLUG to $exePolicy"
-          Write-Host "Setting INSTALLER_SIGNING_POLICY_SLUG to $installerPolicy"
-          "EXE_SIGNING_POLICY_SLUG=$exePolicy" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "INSTALLER_SIGNING_POLICY_SLUG=$installerPolicy" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Build Core (Windows)
-        if: matrix.platform == 'windows'
+      - name: Generate Checksums
         shell: bash
         run: |
-          flutter pub get
-          dart run build_runner build
-          dart setup.dart windows --arch ${{ matrix.arch }} --out core-only ${{ matrix.compatible == true && '--compatible' || '' }}
+          cd dist
+          find . -name "*.apk" -type f -exec sha256sum {} + > sha256sum.txt
+          cat sha256sum.txt
 
-      - name: Upload Unsigned Core
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        id: upload-core
-        uses: actions/upload-artifact@v7
+      - name: Upload Artifacts (Android arm64-v8a)
+        uses: actions/upload-artifact@v4
         with:
-          name: unsigned-core-${{ matrix.arch }}-${{ matrix.compatible }}
-          path: libclash/windows/GoboxCore.exe
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Wait for Unsigned Core
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash .github/scripts/wait-artifact.sh '${{ steps.upload-core.outputs.artifact-id }}'
-
-      - name: Sign Core (Windows)
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        uses: signpath/github-action-submit-signing-request@v2
-        timeout-minutes: 60
-        with:
-          api-token: '${{ env.SIGNPATH_API_TOKEN }}'
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
-          organization-id: '0d3f8e8e-3f4d-4ac8-ab3f-d6c5c110ab0d'
-          project-slug: 'Gobox'
-          signing-policy-slug: '${{ env.EXE_SIGNING_POLICY_SLUG }}'
-          github-artifact-id: '${{ steps.upload-core.outputs.artifact-id }}'
-          wait-for-completion: true
-          output-artifact-directory: 'libclash/windows'
-
-      - name: Build HelperService (Windows)
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        run: |
-          $signedCoreHash = (Get-FileHash libclash/windows/GoboxCore.exe -Algorithm SHA256).Hash.ToLower()
-          Write-Host "Signed Core SHA256 (TOKEN for Helper): $signedCoreHash"
-          dart setup.dart windows --arch ${{ matrix.arch }} --out helper --core-hash $signedCoreHash ${{ matrix.compatible == true && '--compatible' || '' }}
-
-      - name: Upload Unsigned HelperService
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        id: upload-helper
-        uses: actions/upload-artifact@v7
-        with:
-          name: unsigned-helper-${{ matrix.arch }}-${{ matrix.compatible }}
-          path: libclash/windows/GoboxHelperService.exe
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Wait for Unsigned HelperService
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash .github/scripts/wait-artifact.sh '${{ steps.upload-helper.outputs.artifact-id }}'
-
-      - name: Sign HelperService (Windows)
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        uses: signpath/github-action-submit-signing-request@v2
-        timeout-minutes: 60
-        with:
-          api-token: '${{ env.SIGNPATH_API_TOKEN }}'
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
-          organization-id: '0d3f8e8e-3f4d-4ac8-ab3f-d6c5c110ab0d'
-          project-slug: 'Gobox'
-          signing-policy-slug: '${{ env.EXE_SIGNING_POLICY_SLUG }}'
-          github-artifact-id: '${{ steps.upload-helper.outputs.artifact-id }}'
-          wait-for-completion: true
-          output-artifact-directory: 'libclash/windows'
-
-      - name: Build Gobox (Windows)
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: |
-          $coreHash = (Get-FileHash libclash/windows/GoboxCore.exe -Algorithm SHA256).Hash.ToLower()
-          Write-Host "Core SHA256: $coreHash"
-          
-          $desc = if ('${{ matrix.compatible }}' -eq 'true') { "${{ matrix.arch }}-compatible" } else { "${{ matrix.arch }}" }
-          $appEnv = if ('${{ env.IS_STABLE }}' -eq 'true') { "stable" } else { "pre" }
-          
-          $flutterArgs = @(
-            "build", "windows", "--release", "--verbose",
-            "--dart-define=CORE_SHA256=$coreHash",
-            "--dart-define=APP_ENV=$appEnv",
-            "--dart-define=APP_ASSET_SUFFIX=windows-$desc-setup.exe"
-          )
-          if ($env:SENTRY_DSN) {
-            $flutterArgs += "--dart-define=SENTRY_DSN=$env:SENTRY_DSN"
-          }
-          if ($env:IPINFO_TOKEN) {
-            $flutterArgs += "--dart-define=IPINFO_TOKEN=$env:IPINFO_TOKEN"
-          }
-          
-          flutter @flutterArgs
-
-      - name: Upload Unsigned Gobox
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        id: upload-gobox
-        uses: actions/upload-artifact@v7
-        with:
-          name: unsigned-gobox-${{ matrix.arch }}-${{ matrix.compatible }}
-          path: build/windows/${{ matrix.arch == 'arm64' && 'arm64' || 'x64' }}/runner/Release/Gobox.exe
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Wait for Unsigned Gobox
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash .github/scripts/wait-artifact.sh '${{ steps.upload-gobox.outputs.artifact-id }}'
-
-      - name: Sign Gobox (Windows)
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        uses: signpath/github-action-submit-signing-request@v2
-        timeout-minutes: 60
-        with:
-          api-token: '${{ env.SIGNPATH_API_TOKEN }}'
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
-          organization-id: '0d3f8e8e-3f4d-4ac8-ab3f-d6c5c110ab0d'
-          project-slug: 'Gobox'
-          signing-policy-slug: '${{ env.EXE_SIGNING_POLICY_SLUG }}'
-          github-artifact-id: '${{ steps.upload-gobox.outputs.artifact-id }}'
-          wait-for-completion: true
-          output-artifact-directory: 'build/windows/${{ matrix.arch == ''arm64'' && ''arm64'' || ''x64'' }}/runner/Release'
-
-      - name: Package Windows Application
-        if: matrix.platform == 'windows'
-        shell: bash
-        run: |
-          dart windows/packaging/exe/package_windows.dart --arch ${{ matrix.arch }} ${{ matrix.compatible == true && '--compatible' || '' }} --env ${{ env.IS_STABLE == 'true' && 'stable' || 'pre' }}
-
-      - name: Find Installer Path
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        shell: pwsh
-        run: |
-          $desc = if ('${{ matrix.compatible }}' -eq 'true') { "${{ matrix.arch }}-compatible" } else { "${{ matrix.arch }}" }
-          $installer = (Resolve-Path "dist/Gobox-*-windows-$desc-setup.exe").Path
-          echo "INSTALLER_PATH=$installer" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "INSTALLER_FILENAME=$(Split-Path -Leaf $installer)" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Upload Unsigned Installer
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        id: upload-installer
-        uses: actions/upload-artifact@v7
-        with:
-          name: unsigned-installer-${{ matrix.arch }}-${{ matrix.compatible }}
-          path: ${{ env.INSTALLER_PATH }}
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Wait for Unsigned Installer
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash .github/scripts/wait-artifact.sh '${{ steps.upload-installer.outputs.artifact-id }}'
-
-      - name: Sign Installer (Windows)
-        if: matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        uses: signpath/github-action-submit-signing-request@v2
-        timeout-minutes: 60
-        with:
-          api-token: '${{ env.SIGNPATH_API_TOKEN }}'
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
-          organization-id: '0d3f8e8e-3f4d-4ac8-ab3f-d6c5c110ab0d'
-          project-slug: 'Gobox'
-          signing-policy-slug: '${{ env.INSTALLER_SIGNING_POLICY_SLUG }}'
-          github-artifact-id: '${{ steps.upload-installer.outputs.artifact-id }}'
-          wait-for-completion: true
-          output-artifact-directory: 'dist'
-      
-      - name: Clean up intermediate unsigned artifacts
-        if: always() && matrix.platform == 'windows' && env.SIGNPATH_API_TOKEN != ''
-        continue-on-error: true
-        uses: geekyeggo/delete-artifact@v6
-        with:
-          name: |
-            unsigned-core-${{ matrix.arch }}-${{ matrix.compatible }}
-            unsigned-helper-${{ matrix.arch }}-${{ matrix.compatible }}
-            unsigned-gobox-${{ matrix.arch }}-${{ matrix.compatible }}
-            unsigned-installer-${{ matrix.arch }}-${{ matrix.compatible }}
-          failOnError: false
-      
-
-      - name: Upload Artifacts (macOS & Android)
-        if: matrix.platform != 'linux' && matrix.platform != 'windows'
-        uses: actions/upload-artifact@v7
-        with:
-          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}${{ matrix.lite == true && '-lite' || '' }}
+          name: Gobox-android-arm64-v8a
           path: ./dist/*
-          archive: false
           overwrite: true
 
-      - name: Upload Windows Installer Artifact
-        if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v7
-        with:
-          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-installer
-          path: ./dist/*.exe
-          archive: false
-          overwrite: true
-
-      - name: Upload Windows Portable Artifact
-        if: matrix.platform == 'windows' && matrix.compatible == true && matrix.arch == 'amd64'
-        uses: actions/upload-artifact@v7
-        with:
-          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-portable
-          path: ./dist/*.zip
-          archive: false
-          overwrite: true
-
-      - name: Upload DEB Artifact
-        if: matrix.platform == 'linux'
-        uses: actions/upload-artifact@v7
-        with:
-          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-deb
-          path: ./dist/*.deb
-          archive: false
-          overwrite: true
-
-      - name: Upload AppImage Artifact
-        if: matrix.platform == 'linux' && matrix.arch == 'amd64'
-        uses: actions/upload-artifact@v7
-        with:
-          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-AppImage
-          path: ./dist/*.AppImage
-          archive: false
-          overwrite: true
-
-      - name: Upload RPM Artifact
-        if: matrix.platform == 'linux' && matrix.arch == 'amd64'
-        uses: actions/upload-artifact@v7
-        with:
-          name: Gobox-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.compatible == true && '-compatible' || '' }}-rpm
-          path: ./dist/*.rpm
-          archive: false
-          overwrite: true
-
-  upload:
-    permissions: write-all
-    needs: [ build ]
+  release:
+    name: Publish Release
+    if: ${{ env.SHOULD_RELEASE == 'true' }}
+    needs: [build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Download
-        uses: actions/download-artifact@v8
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
         with:
+          name: Gobox-android-arm64-v8a
           path: ./dist/
-          pattern: Gobox-*
-          merge-multiple: true
-          skip-decompress: true
 
       - name: Generate release.md
+        shell: bash
         run: |
           printf '%s\n' "- Fixes and improvements" "- Recommended version update" > release.md
 
       - name: Patch release.md
+        shell: bash
         run: |
           version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
           base_version=$(echo "$version" | sed 's/-pre[0-9]*//')
@@ -533,9 +187,8 @@ jobs:
             sed -e "s|BASE_VERSION|$base_version|g" -e "s|VERSION|$version|g" ./.github/release_template.md >> release.md
           fi
 
-      - name: Release
-        if: ${{ env.SHOULD_RELEASE == 'true' }}
-        uses: softprops/action-gh-release@v3.0.0
+      - name: Publish Release to GitHub
+        uses: softprops/action-gh-release@v2
         with:
           files: ./dist/*
           body_path: './release.md'
