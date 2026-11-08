@@ -7,15 +7,10 @@ on:
       - main
     tags:
       - 'v*'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.vscode/**'
 
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
   IS_PRERELEASE: ${{ contains(github.ref_name, 'pre') }}
-  SHOULD_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
   GRADLE_OPTS: -Dorg.gradle.vfs.watch=false
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   SENTRY_BACKEND: none
@@ -156,7 +151,7 @@ jobs:
 
   release:
     name: Publish Release
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
@@ -173,26 +168,34 @@ jobs:
           name: Gobox-android-arm64-v8a
           path: ./dist/
 
-      - name: Generate release.md
+      - name: Prepare Release Metadata
         shell: bash
         run: |
-          printf '%s\n' "- Fixes and improvements" "- Recommended version update" > release.md
-
-      - name: Patch release.md
-        shell: bash
-        run: |
-          version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          base_version=$(echo "$version" | sed 's/-pre[0-9]*//')
-          if [ "${{ env.IS_PRERELEASE }}" == "true" ]; then
-            sed -e "s|BASE_VERSION|$base_version|g" -e "s|VERSION|$version|g" ./.github/release_template_pre.md >> release.md
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAG_NAME="${{ github.ref_name }}"
           else
-            sed -e "s|BASE_VERSION|$base_version|g" -e "s|VERSION|$version|g" ./.github/release_template.md >> release.md
+            VER=$(grep '^version:' pubspec.yaml | head -n 1 | awk '{print $2}' | cut -d'+' -f1)
+            TAG_NAME="v${VER}"
+          fi
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+          
+          VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
+          base_version=$(echo "$VERSION" | sed 's/-pre[0-9]*//')
+          
+          printf '%s\n' "- Fixes and improvements" "- Recommended version update" > release.md
+          if [[ "$TAG_NAME" == *"-pre"* || "$TAG_NAME" == *"-test"* ]]; then
+            echo "IS_PRE=true" >> "$GITHUB_ENV"
+            sed -e "s|BASE_VERSION|$base_version|g" -e "s|VERSION|$VERSION|g" ./.github/release_template_pre.md >> release.md
+          else
+            echo "IS_PRE=false" >> "$GITHUB_ENV"
+            sed -e "s|BASE_VERSION|$base_version|g" -e "s|VERSION|$VERSION|g" ./.github/release_template.md >> release.md
           fi
 
       - name: Publish Release to GitHub
         uses: softprops/action-gh-release@v2
         with:
-          name: Gobox ${{ github.ref_name }}
+          tag_name: ${{ env.TAG_NAME }}
+          name: Gobox ${{ env.TAG_NAME }}
           files: ./dist/*
           body_path: './release.md'
-          prerelease: ${{ env.IS_PRERELEASE == 'true' }}
+          prerelease: ${{ env.IS_PRE == 'true' }}
