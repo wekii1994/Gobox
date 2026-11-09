@@ -530,6 +530,8 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 		maxAllowedTolerance        = 80
 		optimalHealthCheckInterval = 300
 		defaultExpectedStatus      = "200-204"
+		defaultMaxFailedTimes      = 3
+		maxAllowedMaxFailedTimes   = 5
 	)
 
 	for _, group := range raw.ProxyGroup {
@@ -580,6 +582,55 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 
 			if status, ok := group["expected-status"].(string); !ok || strings.TrimSpace(status) == "" {
 				group["expected-status"] = defaultExpectedStatus
+			}
+
+			maxFailedVal := 0
+			switch maxFailed := group["max-failed-times"].(type) {
+			case int:
+				maxFailedVal = maxFailed
+			case float64:
+				maxFailedVal = int(maxFailed)
+			case string:
+				if value, err := strconv.Atoi(strings.TrimSpace(maxFailed)); err == nil {
+					maxFailedVal = value
+				}
+			}
+			if maxFailedVal <= 0 || maxFailedVal > maxAllowedMaxFailedTimes {
+				group["max-failed-times"] = defaultMaxFailedTimes
+			}
+		}
+	}
+
+	for _, provider := range raw.ProxyProvider {
+		if provider == nil {
+			continue
+		}
+		if hc, ok := provider["health-check"].(map[string]any); ok && hc != nil {
+			if status, ok := hc["expected-status"].(string); !ok || strings.TrimSpace(status) == "" {
+				hc["expected-status"] = defaultExpectedStatus
+			}
+			switch interval := hc["interval"].(type) {
+			case int:
+				if interval <= 0 || interval > optimalHealthCheckInterval {
+					hc["interval"] = optimalHealthCheckInterval
+				}
+			case float64:
+				if int(interval) <= 0 || int(interval) > optimalHealthCheckInterval {
+					hc["interval"] = optimalHealthCheckInterval
+				}
+			case string:
+				if v, err := strconv.Atoi(strings.TrimSpace(interval)); err == nil {
+					if v <= 0 || v > optimalHealthCheckInterval {
+						hc["interval"] = optimalHealthCheckInterval
+					}
+				}
+			case nil:
+				hc["interval"] = optimalHealthCheckInterval
+			}
+			if params.HealthCheckTimeout != defaultHealthCheckTimeout {
+				if timeout, exist := hc["timeout"]; !exist || timeout == nil {
+					hc["timeout"] = params.HealthCheckTimeout
+				}
 			}
 		}
 	}

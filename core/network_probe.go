@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -12,6 +13,7 @@ import (
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/constant"
+	P "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -280,6 +282,65 @@ func cancelResetNetwork() {
 	resetNetworkMu.Unlock()
 }
 
+func snapshotGroupSelections(groups []*adapter.Proxy) map[string]string {
+	res := make(map[string]string, len(groups))
+	for _, g := range groups {
+		if pg, ok := g.ProxyAdapter.(outboundgroup.ProxyGroup); ok {
+			res[g.Name()] = pg.Now()
+		}
+	}
+	return res
+}
+
+func probeProvidersFallback(ctx context.Context, providerMap map[string]P.ProxyProvider) {
+	type providerProbeItem struct {
+		proxy   constant.Proxy
+		url     string
+		timeout time.Duration
+	}
+	var items []providerProbeItem
+	seen := make(map[string]bool)
+	defaultTestURL := "http://www.gstatic.com/generate_204"
+
+	for _, p := range providerMap {
+		if p == nil {
+			continue
+		}
+		p.Touch()
+		url := p.HealthCheckURL()
+		if url == "" {
+			url = defaultTestURL
+		}
+		timeout := 5 * time.Second
+
+		for _, proxy := range p.Proxies() {
+			if proxy == nil {
+				continue
+			}
+			dedupKey := fmt.Sprintf("%p|%s", proxy, url)
+			if !seen[dedupKey] {
+				seen[dedupKey] = true
+				items = append(items, providerProbeItem{
+					proxy:   proxy,
+					url:     url,
+					timeout: timeout,
+				})
+			}
+		}
+	}
+
+	_ = runBoundedProbes(ctx, len(items), primaryProbeConcurrency, func(probeCtx context.Context, idx int) bool {
+		if probeCtx.Err() != nil {
+			return false
+		}
+		item := items[idx]
+		nodeCtx, nodeCancel := context.WithTimeout(probeCtx, item.timeout)
+		defer nodeCancel()
+		_, _ = item.proxy.URLTest(nodeCtx, item.url, nil)
+		return true
+	})
+}
+
 func handleResetNetwork() {
 	closeConnections()
 	closeIdleOutbounds(tunnel.Proxies(), tunnel.Providers())
@@ -307,6 +368,8 @@ func handleResetNetwork() {
 		}
 
 		primaryGroups, _ := classifyAutoGroups()
+		beforeSelections := snapshotGroupSelections(primaryGroups)
+
 		if len(primaryGroups) > 0 {
 			ok := probeGroupsConcurrently(resetCtx, primaryGroups)
 			if !ok && waitOrCancel(resetCtx, networkRetryBackoff) {
@@ -315,6 +378,24 @@ func handleResetNetwork() {
 				retryCtx := outboundgroup.WithProbeRound(resetCtx, retryRound)
 				defer outboundgroup.CleanupProbeRound(retryRound)
 				_ = probeGroupsConcurrently(retryCtx, primaryGroups)
+			}
+		} else {
+			probeProvidersFallback(resetCtx, tunnel.Providers())
+		}
+
+		if resetCtx.Err() != nil {
+			return
+		}
+
+		for _, g := range primaryGroups {
+			if pg, ok := g.ProxyAdapter.(outboundgroup.ProxyGroup); ok {
+				before := beforeSelections[g.Name()]
+				after := pg.Now()
+				if before != "" && after != "" && before != after {
+					if !isGroupProxyAlive(g.ProxyAdapter, before) {
+						handleCloseGroupStaleConnections(g.Name(), before, time.Now())
+					}
+				}
 			}
 		}
 	}(resetCtx)
