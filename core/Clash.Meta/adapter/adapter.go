@@ -3,6 +3,7 @@ package adapter
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -166,6 +167,10 @@ func (p *Proxy) URLTest(ctx context.Context, url string, expectedStatus utils.In
 	var satisfied bool
 
 	defer func() {
+		if errors.Is(ctx.Err(), context.Canceled) || errors.Is(err, context.Canceled) {
+			return
+		}
+
 		if UrlTestHook != nil {
 			UrlTestHook(url, p.Name(), t)
 		}
@@ -277,6 +282,9 @@ func (p *Proxy) URLTest(ctx context.Context, url string, expectedStatus utils.In
 	}
 
 	satisfied = resp != nil && (expectedStatus == nil || expectedStatus.Check(uint16(resp.StatusCode)))
+	if !satisfied {
+		return 0, fmt.Errorf("delay test response does not match expected status")
+	}
 	t = uint16(time.Since(start) / time.Millisecond)
 	if t == 0 {
 		// a zero delay means a failed test to callers, so report a test

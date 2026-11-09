@@ -195,6 +195,8 @@ const (
 	startToolProxyMethod                 Method = "startToolProxy"
 	stopToolProxyMethod                  Method = "stopToolProxy"
 	ageCryptMethod                       Method = "ageCrypt"
+	getFailoverStatsMethod               Method = "getFailoverStats"
+	resetFailoverStatsMethod             Method = "resetFailoverStats"
 )
 
 type Method string

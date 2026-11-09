@@ -59,8 +59,11 @@ func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Co
 	c, err = proxy.DialContext(ctx, metadata)
 	if err == nil {
 		c.AppendToChains(u)
+		if !N.NeedHandshake(c) {
+			u.onDialSuccess()
+		}
 	} else {
-		u.onDialFailed(proxy.Type(), err, u.healthCheck)
+		u.onDialFailed(proxy.Type(), metadata, err, u.healthCheck)
 	}
 
 	if N.NeedHandshake(c) {
@@ -68,7 +71,7 @@ func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Co
 			if err == nil {
 				u.onDialSuccess()
 			} else {
-				u.onDialFailed(proxy.Type(), err, u.healthCheck)
+				u.onDialFailed(proxy.Type(), metadata, err, u.healthCheck)
 			}
 		})
 	}
@@ -83,7 +86,7 @@ func (u *URLTest) ListenPacketContext(ctx context.Context, metadata *C.Metadata)
 	if err == nil {
 		pc.AppendToChains(u)
 	} else {
-		u.onDialFailed(proxy.Type(), err, u.healthCheck)
+		u.onDialFailed(proxy.Type(), metadata, err, u.healthCheck)
 	}
 
 	return pc, err
@@ -95,9 +98,11 @@ func (u *URLTest) Unwrap(metadata *C.Metadata, touch bool) C.Proxy {
 }
 
 func (u *URLTest) healthCheck() {
-	u.fastSingle.Reset()
-	u.GroupBase.healthCheck()
-	u.fastSingle.Reset()
+	timeout := time.Duration(u.GroupBase.testTimeout) * time.Millisecond
+	roundTimeout := roundBudget(len(u.GetProxies(false)), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), roundTimeout)
+	defer cancel()
+	_, _ = u.HealthCheckContext(ctx)
 }
 
 func (u *URLTest) fast(touch bool) C.Proxy {
@@ -219,4 +224,62 @@ func NewURLTest(option GroupCommonOption, urlTestOption URLTestOption, emptyFall
 	}
 
 	return urlTest, nil
+}
+
+// HealthCheckContext refreshes member health using this group's configured URL
+// and expected-status policy, and invalidates its cached selection afterwards.
+func (u *URLTest) HealthCheckContext(ctx context.Context) (map[string]uint16, error) {
+	if !u.probing.CompareAndSwap(false, true) {
+		return nil, nil
+	}
+	defer u.probing.Store(false)
+
+	before := u.Now()
+	expected, err := utils.NewUnsignedRanges[uint16](u.expectedStatus)
+	if err != nil {
+		return nil, err
+	}
+	u.fastSingle.Reset()
+	result, err := u.GroupBase.URLTest(ctx, u.testUrl, expected)
+	u.fastSingle.Reset()
+
+	// If the entire probe task was actively canceled (e.g. route epoch changed or reset network),
+	// never apply stale switch results or update failure state.
+	if errors.Is(ctx.Err(), context.Canceled) {
+		return result, ctx.Err()
+	}
+
+	// If parent deadline expired before all candidates finished:
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		// If at least one candidate succeeded before deadline, we have verified alive proxy(ies).
+		if len(result) > 0 {
+			u.GroupBase.UpdateConsecutiveFailures(false)
+			after := u.Now()
+			if _, verifiedAlive := result[after]; verifiedAlive {
+				if before != "" && after != "" && before != after && OnGroupNowChanged != nil {
+					OnGroupNowChanged(u, u.Name(), before, after)
+				}
+			}
+		}
+		// In both partial success and zero success, the probe was truncated by parent deadline.
+		// Return result along with ctx.Err() (context.DeadlineExceeded) so callers can distinguish
+		// truncated/incomplete checks from complete ones while still accessing verified alive results.
+		return result, ctx.Err()
+	}
+
+	// Normal complete check (ctx.Err() == nil):
+	allFailed := (err != nil || len(result) == 0)
+	u.GroupBase.UpdateConsecutiveFailures(allFailed)
+
+	// If at least one candidate succeeded, evaluate valid switch
+	if len(result) > 0 {
+		after := u.Now()
+		if _, verifiedAlive := result[after]; verifiedAlive {
+			if before != "" && after != "" && before != after && OnGroupNowChanged != nil {
+				OnGroupNowChanged(u, u.Name(), before, after)
+			}
+		}
+	}
+
+	return result, err
 }

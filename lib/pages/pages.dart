@@ -13,3 +13,4 @@ export 'toolbox/iperf.dart';
 export 'toolbox/local_ping.dart';
 export 'toolbox/traffic_stats.dart';
 export 'speed_test.dart';
+export 'toolbox/failover_stats.dart';

@@ -265,6 +265,24 @@ func handleAction(action *Action, result ActionResult) {
 	case ageCryptMethod:
 		result.success(toolbox.HandleAgeCrypt(action.Data.(string)))
 		return
+	case getFailoverStatsMethod:
+		stats, err := handleGetFailoverStats()
+		if err != nil {
+			result.error(err)
+		} else {
+			data, _ := json.Marshal(stats)
+			result.success(string(data))
+		}
+		return
+	case resetFailoverStatsMethod:
+		stats, err := handleResetFailoverStats()
+		if err != nil {
+			result.error(err)
+		} else {
+			data, _ := json.Marshal(stats)
+			result.success(string(data))
+		}
+		return
 	case getConnectionsMethod:
 		result.success(handleGetConnections())
 		return

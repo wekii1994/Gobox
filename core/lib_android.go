@@ -315,8 +315,6 @@ func handleNetworkChanged() {
 	if !isInit || !state.CurrentState.VpnProps.QuickResponse {
 		return
 	}
-	log.Infoln("[APP] Network changed, resetting connections")
-	closeConnections()
-	closeIdleOutbounds(tunnel.Proxies(), tunnel.Providers())
-	resolver.ResetConnection()
+	log.Infoln("[APP] Network changed, resetting connections and probing auto groups")
+	handleResetNetwork()
 }

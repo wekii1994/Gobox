@@ -2275,6 +2275,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Fetch icons from the sites first, use Google\'s icon service when a site has no sharp icon, and cache them locally",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("Trend"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("Failover Statistics"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("Tracks automatic failovers from passive failure detection"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic Usage"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage(
       "Tray Click Behavior",

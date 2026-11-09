@@ -185,6 +185,14 @@ List<_ToolItem> _buildTools() {
       description: appLocalizations.trafficStatsDesc,
       open: (context) => push(context, const TrafficStatsPage()),
     ),
+    _ToolItem(
+      id: 'failoverStats',
+      icon: Icons.swap_horizontal_circle_rounded,
+      color: const Color(0xFF00897B),
+      title: appLocalizations.failoverStats,
+      description: appLocalizations.toolFailoverStatsDesc,
+      open: (context) => push(context, const FailoverStatsPage()),
+    ),
   ];
 }
 

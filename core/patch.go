@@ -525,13 +525,61 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 		}
 	}
 
+	const (
+		optimalTolerance           = 50
+		maxAllowedTolerance        = 80
+		optimalHealthCheckInterval = 120
+		defaultExpectedStatus      = "200-204"
+	)
+
 	for _, group := range raw.ProxyGroup {
+		groupType := ""
+		if t, ok := group["type"].(string); ok {
+			groupType = strings.ToLower(strings.TrimSpace(t))
+		}
+
+		tolVal := 0
 		switch tolerance := group["tolerance"].(type) {
+		case int:
+			tolVal = tolerance
 		case float64:
-			group["tolerance"] = int(tolerance)
+			tolVal = int(tolerance)
 		case string:
 			if value, err := strconv.Atoi(strings.TrimSpace(tolerance)); err == nil {
-				group["tolerance"] = value
+				tolVal = value
+			}
+		}
+		if groupType == "url-test" {
+			if tolVal <= 0 || tolVal > maxAllowedTolerance {
+				tolVal = optimalTolerance
+			}
+		}
+		if tolVal > 0 {
+			group["tolerance"] = tolVal
+		}
+
+		if groupType == "url-test" || groupType == "fallback" || groupType == "load-balance" {
+			switch interval := group["interval"].(type) {
+			case int:
+				if interval <= 0 || interval > optimalHealthCheckInterval {
+					group["interval"] = optimalHealthCheckInterval
+				}
+			case float64:
+				if int(interval) <= 0 || int(interval) > optimalHealthCheckInterval {
+					group["interval"] = optimalHealthCheckInterval
+				}
+			case string:
+				if value, err := strconv.Atoi(strings.TrimSpace(interval)); err == nil {
+					if value <= 0 || value > optimalHealthCheckInterval {
+						group["interval"] = optimalHealthCheckInterval
+					}
+				}
+			case nil:
+				group["interval"] = optimalHealthCheckInterval
+			}
+
+			if status, ok := group["expected-status"].(string); !ok || strings.TrimSpace(status) == "" {
+				group["expected-status"] = defaultExpectedStatus
 			}
 		}
 	}

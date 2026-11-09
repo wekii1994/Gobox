@@ -1708,6 +1708,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "優先從對應網站取得圖示，網站沒有清晰圖示時改用 Google 圖示服務，並快取到本機",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("趨勢"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("故障轉移統計"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("記錄策略組被動故障感知與秒級無感故障轉移數據"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量統計"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage("托盤點擊行為"),
     "trayEnhancement": MessageLookupByLibrary.simpleMessage("托盤增強"),

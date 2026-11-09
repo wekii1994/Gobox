@@ -2384,6 +2384,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сначала загружать значки с сайтов, а если чёткого значка нет — через сервис значков Google, и хранить локально",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("Динамика"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("Статистика переключений"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("Отслеживание автоматических переключений узлов"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Трафик"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage(
       "Действие при нажатии на значок",

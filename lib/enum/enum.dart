@@ -311,6 +311,8 @@ enum ActionMethod {
   cancelIperfClient,
   startLocalPing,
   cancelLocalPing,
+  getFailoverStats,
+  resetFailoverStats,
 
   ///Android,
   setState,

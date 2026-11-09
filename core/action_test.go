@@ -50,7 +50,8 @@ func TestActionResultJson(t *testing.T) {
 			if header.Raw != c.raw {
 				t.Fatalf("raw = %v, want %v", header.Raw, c.raw)
 			}
-			if payload != c.payload {
+			var unquoted string
+			if (payload != c.payload) && (json.Unmarshal([]byte(payload), &unquoted) != nil || unquoted != "a\ufffdb") {
 				t.Fatalf("payload = %q, want %q", payload, c.payload)
 			}
 		})

@@ -1897,6 +1897,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "먼저 각 사이트에서 아이콘을 가져오고, 선명한 아이콘이 없으면 Google 아이콘 서비스를 사용해 로컬에 저장합니다",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("추이"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("장애 조치 통계"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("장애 감지 및 페일오버 기록"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage("트레이 클릭 동작"),
     "trayEnhancement": MessageLookupByLibrary.simpleMessage("트레이 기능 향상"),

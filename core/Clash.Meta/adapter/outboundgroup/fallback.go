@@ -34,8 +34,11 @@ func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata) (C.Con
 	c, err := proxy.DialContext(ctx, metadata)
 	if err == nil {
 		c.AppendToChains(f)
+		if !N.NeedHandshake(c) {
+			f.onDialSuccess()
+		}
 	} else {
-		f.onDialFailed(proxy.Type(), err, f.healthCheck)
+		f.onDialFailed(proxy.Type(), metadata, err, f.healthCheck)
 	}
 
 	if N.NeedHandshake(c) {
@@ -43,7 +46,7 @@ func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata) (C.Con
 			if err == nil {
 				f.onDialSuccess()
 			} else {
-				f.onDialFailed(proxy.Type(), err, f.healthCheck)
+				f.onDialFailed(proxy.Type(), metadata, err, f.healthCheck)
 			}
 		})
 	}
@@ -178,4 +181,67 @@ func NewFallback(option GroupCommonOption, fallbackOption FallbackOption, emptyF
 		testUrl:        option.URL,
 		expectedStatus: option.ExpectedStatus,
 	}, nil
+}
+
+func (f *Fallback) healthCheck() {
+	timeout := time.Duration(f.GroupBase.testTimeout) * time.Millisecond
+	roundTimeout := roundBudget(len(f.GetProxies(false)), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), roundTimeout)
+	defer cancel()
+	_, _ = f.HealthCheckContext(ctx)
+}
+
+// HealthCheckContext refreshes all candidates, including currently unselected ones.
+func (f *Fallback) HealthCheckContext(ctx context.Context) (map[string]uint16, error) {
+	if !f.probing.CompareAndSwap(false, true) {
+		return nil, nil
+	}
+	defer f.probing.Store(false)
+
+	before := f.Now()
+	expected, err := utils.NewUnsignedRanges[uint16](f.expectedStatus)
+	if err != nil {
+		return nil, err
+	}
+	result, err := f.GroupBase.URLTest(ctx, f.testUrl, expected)
+
+	// If the entire probe task was actively canceled (e.g. route epoch changed or reset network),
+	// never apply stale switch results or update failure state.
+	if errors.Is(ctx.Err(), context.Canceled) {
+		return result, ctx.Err()
+	}
+
+	// If parent deadline expired before all candidates finished:
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		// If at least one candidate succeeded before deadline, we have verified alive proxy(ies).
+		if len(result) > 0 {
+			f.GroupBase.UpdateConsecutiveFailures(false)
+			after := f.Now()
+			if _, verifiedAlive := result[after]; verifiedAlive {
+				if before != "" && after != "" && before != after && OnGroupNowChanged != nil {
+					OnGroupNowChanged(f, f.Name(), before, after)
+				}
+			}
+		}
+		// In both partial success and zero success, the probe was truncated by parent deadline.
+		// Return result along with ctx.Err() (context.DeadlineExceeded) so callers can distinguish
+		// truncated/incomplete checks from complete ones while still accessing verified alive results.
+		return result, ctx.Err()
+	}
+
+	// Normal complete check (ctx.Err() == nil):
+	allFailed := (err != nil || len(result) == 0)
+	f.GroupBase.UpdateConsecutiveFailures(allFailed)
+
+	// If at least one candidate succeeded, evaluate valid switch
+	if len(result) > 0 {
+		after := f.Now()
+		if _, verifiedAlive := result[after]; verifiedAlive {
+			if before != "" && after != "" && before != after && OnGroupNowChanged != nil {
+				OnGroupNowChanged(f, f.Name(), before, after)
+			}
+		}
+	}
+
+	return result, err
 }

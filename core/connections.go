@@ -6,7 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
@@ -139,4 +141,113 @@ func handleGetConnectionsSummary() string {
 		return ""
 	}
 	return string(data)
+}
+
+func handleCloseGroupStaleConnections(groupName, oldProxyName string, switchTime time.Time) {
+	if groupName == "" || oldProxyName == "" {
+		return
+	}
+	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
+		info := c.Info()
+		if info == nil {
+			return true
+		}
+		if !switchTime.IsZero() && info.Start.After(switchTime) {
+			return true
+		}
+		hasGroup := false
+		hasOldProxy := false
+		for _, node := range info.Chain {
+			if node == groupName {
+				hasGroup = true
+			}
+			if node == oldProxyName {
+				hasOldProxy = true
+			}
+		}
+		if hasGroup && hasOldProxy {
+			_ = c.Close()
+		}
+		return true
+	})
+}
+
+
+var (
+	networkProbingGroups   = make(map[string]int)
+	networkProbingGroupsMu sync.Mutex
+)
+
+func markNetworkProbing(name string) func() {
+	networkProbingGroupsMu.Lock()
+	networkProbingGroups[name]++
+	networkProbingGroupsMu.Unlock()
+	return func() {
+		networkProbingGroupsMu.Lock()
+		networkProbingGroups[name]--
+		if networkProbingGroups[name] <= 0 {
+			delete(networkProbingGroups, name)
+		}
+		networkProbingGroupsMu.Unlock()
+	}
+}
+
+func isNetworkProbing(name string) bool {
+	networkProbingGroupsMu.Lock()
+	defer networkProbingGroupsMu.Unlock()
+	return networkProbingGroups[name] > 0
+}
+
+func getGroupTestURL(group constant.ProxyAdapter) (testURL string) {
+	if group == nil {
+		return ""
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			testURL = ""
+		}
+	}()
+	if m, ok := group.(interface{ MarshalJSON() ([]byte, error) }); ok {
+		data, err := m.MarshalJSON()
+		if err == nil {
+			var parsed struct {
+				TestURL string `json:"testUrl"`
+			}
+			if json.Unmarshal(data, &parsed) == nil && parsed.TestURL != "" {
+				return parsed.TestURL
+			}
+		}
+	}
+	return ""
+}
+
+func isGroupProxyAlive(group constant.ProxyAdapter, proxyName string) bool {
+	if group == nil || proxyName == "" {
+		return false
+	}
+	testURL := getGroupTestURL(group)
+	if g, ok := group.(interface{ GetProxies(bool) []constant.Proxy }); ok {
+		for _, p := range g.GetProxies(false) {
+			if p.Name() == proxyName {
+				if testURL != "" {
+					return p.AliveForTestUrl(testURL)
+				}
+				return p.AliveForTestUrl("")
+			}
+		}
+	}
+	return false
+}
+
+func init() {
+	outboundgroup.OnGroupNowChanged = func(group constant.ProxyAdapter, groupName, before, after string) {
+		isHealthyReselect := isNetworkProbing(groupName) && isGroupProxyAlive(group, before)
+		if isHealthyReselect {
+			log.Debugln("[Failover] Suppressed failover count for healthy node latency reselection on group %s: [%s] -> [%s]", groupName, before, after)
+		} else {
+			log.Infoln("[Failover] Proxy group %s auto switched from [%s] to [%s] via passive failure detection", groupName, before, after)
+			recordFailover(groupName, before, after)
+			handleCloseGroupStaleConnections(groupName, before, time.Now())
+		}
+	}
 }

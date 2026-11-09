@@ -2314,6 +2314,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "ابتدا آیکون از خود سایت‌ها دریافت می‌شود و اگر آیکون واضحی نباشد از سرویس آیکون Google استفاده و به‌صورت محلی ذخیره می‌شود",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("روند"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("آمار تغییر مسیر"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("پیگیری تغییر مسیر خودکار سرورها"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("مصرف ترافیک"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage(
       "رفتار کلیک روی سینی",

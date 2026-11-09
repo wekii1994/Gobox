@@ -1904,6 +1904,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "まず各サイトからアイコンを取得し、鮮明なアイコンがない場合は Google のアイコンサービスを使用してローカルに保存します",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("推移"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("フェイルオーバー統計"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("パッシブ障害検知とフェイルオーバーの統計"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("通信量統計"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage("トレイクリック動作"),
     "trayEnhancement": MessageLookupByLibrary.simpleMessage("トレイ拡張"),

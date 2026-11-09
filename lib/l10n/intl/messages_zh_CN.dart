@@ -1698,6 +1698,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "优先从对应网站获取图标，网站没有清晰图标时改用 Google 图标服务，并缓存到本地",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("趋势"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("故障转移统计"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("记录策略组被动故障感知与秒级无感故障转移数据"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage("托盘点击行为"),
     "trayEnhancement": MessageLookupByLibrary.simpleMessage("托盘增强"),

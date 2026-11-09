@@ -15,3 +15,4 @@ export 'local_ping.dart';
 export 'toolbox.dart';
 export 'traffic_stats.dart';
 export 'home_widget.dart';
+export 'failover_stats.dart';

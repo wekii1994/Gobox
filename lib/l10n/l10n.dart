@@ -171,6 +171,26 @@ class AppLocalizations {
   }
 
   /// `Traffic Usage`
+  /// `Failover Statistics`
+  String get failoverStats {
+    return Intl.message(
+      'Failover Statistics',
+      name: 'failoverStats',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tracks automatic failovers from passive failure detection`
+  String get toolFailoverStatsDesc {
+    return Intl.message(
+      'Tracks automatic failovers from passive failure detection',
+      name: 'toolFailoverStatsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   String get trafficUsage {
     return Intl.message(
       'Traffic Usage',

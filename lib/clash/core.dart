@@ -736,6 +736,16 @@ class ClashCore {
     await clashInterface.toolboxInvoke(ActionMethod.clearTrafficStats);
   }
 
+  Future<FailoverStats> getFailoverStats() async =>
+      FailoverStats.fromJson(
+        await _toolboxJson(ActionMethod.getFailoverStats),
+      );
+
+  Future<FailoverStats> resetFailoverStats() async =>
+      FailoverStats.fromJson(
+        await _toolboxJson(ActionMethod.resetFailoverStats),
+      );
+
   Future<String> storeGet(StoreSpace space, String key) =>
       clashInterface.toolboxInvoke(
         ActionMethod.storeGet,
