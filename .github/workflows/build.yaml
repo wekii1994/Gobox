@@ -142,6 +142,7 @@ jobs:
         shell: bash
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           flutter pub get
           dart run build_runner build

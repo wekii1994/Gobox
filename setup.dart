@@ -371,21 +371,37 @@ class Build {
       url:
           'https://github.com/appshubcc/bett-rules/releases/download/latest/geosite.dat',
       fileName: 'GeoSite.dat',
+      fallbackUrls: [
+        'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geosite.dat',
+        'https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat',
+      ],
     ),
     AssetDownloadItem(
       url:
           'https://github.com/appshubcc/bett-rules/releases/download/latest/geoip.metadb',
       fileName: 'geoip.metadb',
+      fallbackUrls: [
+        'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/geoip.metadb',
+        'https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb',
+      ],
     ),
     AssetDownloadItem(
       url:
           'https://github.com/appshubcc/bett-rules/releases/download/latest/GeoLite2-ASN-lite.mmdb',
       fileName: 'ASN.mmdb',
+      fallbackUrls: [
+        'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/release/GeoLite2-ASN.mmdb',
+        'https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb',
+      ],
     ),
     AssetDownloadItem(
       url:
           'https://github.com/Zephyruso/zashboard/releases/download/v3.29.1/dist-no-fonts.zip',
       fileName: 'zash.zip',
+      fallbackUrls: [
+        'https://api.github.com/repos/Zephyruso/zashboard/releases/assets/583318487',
+        'https://github.com/Zephyruso/zashboard/releases/download/v3.30.0/dist-no-fonts.zip',
+      ],
     ),
   ];
 
@@ -416,7 +432,7 @@ class Build {
 
       if (shouldDownload) {
         print('Downloading ${item.fileName} from ${item.url} ...');
-        await _downloadAsset(item.url, targetFile.path);
+        await _downloadAsset(item.url, targetFile.path, fallbackUrls: item.fallbackUrls);
         print('Downloaded ${item.fileName} successfully.');
       } else {
         final ageHours = now.difference(targetFile.lastModifiedSync()).inHours;
@@ -426,65 +442,87 @@ class Build {
   }
 
   static Future<void> _downloadAsset(
-    String url,
+    String primaryUrl,
     String destinationPath, {
     int maxRetries = 3,
+    List<String> fallbackUrls = const [],
   }) async {
-    final tempPath = '$destinationPath.tmp';
-    final tempFile = File(tempPath);
-    if (tempFile.existsSync()) {
-      tempFile.deleteSync();
-    }
+    final candidateUrls = [primaryUrl, ...fallbackUrls];
+    final token = Platform.environment['GITHUB_TOKEN'];
 
-    for (var attempt = 1; attempt <= maxRetries; attempt++) {
-      final client = HttpClient();
-      client.connectionTimeout = const Duration(seconds: 30);
-      try {
-        final request = await client.getUrl(Uri.parse(url));
-        request.followRedirects = true;
-        request.maxRedirects = 10;
-        final response = await request.close();
-        if (response.statusCode != HttpStatus.ok) {
-          throw HttpException(
-            'Failed with status ${response.statusCode}',
-            uri: Uri.parse(url),
-          );
-        }
-        final sink = tempFile.openWrite();
-        await response.pipe(sink);
-        await sink.flush();
-        await sink.close();
-
-        final destinationFile = File(destinationPath);
-        if (destinationFile.existsSync()) {
-          destinationFile.deleteSync();
-        }
-        tempFile.renameSync(destinationPath);
-        File(destinationPath).setLastModifiedSync(DateTime.now());
-        return;
-      } catch (e) {
+    for (final url in candidateUrls) {
+      for (var attempt = 1; attempt <= maxRetries; attempt++) {
+        final client = HttpClient();
+        client.connectionTimeout = const Duration(seconds: 30);
+        final tempPath = '$destinationPath.tmp';
+        final tempFile = File(tempPath);
         if (tempFile.existsSync()) {
           try {
             tempFile.deleteSync();
           } catch (_) {}
         }
-        if (attempt == maxRetries) {
-          rethrow;
+        try {
+          final request = await client.getUrl(Uri.parse(url));
+          request.followRedirects = true;
+          request.maxRedirects = 10;
+          request.headers.set(
+            HttpHeaders.userAgentHeader,
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          );
+          if (url.contains('api.github.com')) {
+            request.headers.set(HttpHeaders.acceptHeader, 'application/octet-stream');
+            if (token != null && token.isNotEmpty) {
+              request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
+            }
+          }
+          final response = await request.close();
+          if (response.statusCode != HttpStatus.ok) {
+            throw HttpException(
+              'Failed with status ${response.statusCode}',
+              uri: Uri.parse(url),
+            );
+          }
+          final sink = tempFile.openWrite();
+          await response.pipe(sink);
+          await sink.flush();
+          await sink.close();
+
+          final destinationFile = File(destinationPath);
+          if (destinationFile.existsSync()) {
+            destinationFile.deleteSync();
+          }
+          tempFile.renameSync(destinationPath);
+          File(destinationPath).setLastModifiedSync(DateTime.now());
+          return;
+        } catch (e) {
+          if (tempFile.existsSync()) {
+            try {
+              tempFile.deleteSync();
+            } catch (_) {}
+          }
+          print('Download failed from $url ($e), attempt $attempt/$maxRetries');
+          if (attempt < maxRetries) {
+            await Future.delayed(Duration(seconds: attempt * 2));
+          }
+        } finally {
+          client.close();
         }
-        print('Download failed ($e), retrying ($attempt/$maxRetries)...');
-        await Future.delayed(Duration(seconds: attempt * 2));
-      } finally {
-        client.close();
       }
     }
+    throw Exception('Failed to download $destinationPath from all available mirrors ($candidateUrls)');
   }
 }
 
 class AssetDownloadItem {
   final String url;
   final String fileName;
+  final List<String> fallbackUrls;
 
-  const AssetDownloadItem({required this.url, required this.fileName});
+  const AssetDownloadItem({
+    required this.url,
+    required this.fileName,
+    this.fallbackUrls = const [],
+  });
 }
 
 final _managedVersionPattern = RegExp(
