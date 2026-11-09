@@ -195,9 +195,16 @@ jobs:
           echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
           
           VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
-          base_version=$(echo "$VERSION" | sed 's/-pre[0-9]*//')
+          base_version=$(echo "$VERSION" | sed 's/-pre[0-9]*.*//')
           
-          printf '%s\n' "- Fixes and improvements" "- Recommended version update" > release.md
+          if [ -f "RELEASE_NOTES.md" ]; then
+            cat RELEASE_NOTES.md > release.md
+            echo "" >> release.md
+            echo "---" >> release.md
+            echo "" >> release.md
+          else
+            printf '%s\n' "- Fixes and improvements" "- Recommended version update" > release.md
+          fi
           if [[ "$TAG_NAME" == *"-pre"* || "$TAG_NAME" == *"-test"* ]]; then
             echo "IS_PRE=true" >> "$GITHUB_ENV"
             sed -e "s|BASE_VERSION|$base_version|g" -e "s|VERSION|$VERSION|g" ./.github/release_template_pre.md >> release.md
