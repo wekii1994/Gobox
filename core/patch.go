@@ -528,7 +528,7 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 	const (
 		optimalTolerance           = 50
 		maxAllowedTolerance        = 80
-		optimalHealthCheckInterval = 120
+		optimalHealthCheckInterval = 300
 		defaultExpectedStatus      = "200-204"
 	)
 

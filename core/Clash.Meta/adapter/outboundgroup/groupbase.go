@@ -430,61 +430,96 @@ func (p *cancellableProbePool) Do(
 }
 
 func (gb *GroupBase) URLTest(ctx context.Context, url string, expectedStatus utils.IntRanges[uint16]) (map[string]uint16, error) {
-	var wg sync.WaitGroup
-	var lock sync.Mutex
-	mp := map[string]uint16{}
 	proxies := gb.GetProxies(false)
+	results := make(map[string]uint16, len(proxies))
+	if len(proxies) == 0 {
+		return results, fmt.Errorf("get delay: all proxies timeout")
+	}
+	if err := ctx.Err(); err != nil {
+		return results, err
+	}
+
+	workers := len(proxies)
+	if workers > maxConcurrentProxyProbes {
+		workers = maxConcurrentProxyProbes
+	}
+	timeout := time.Duration(gb.testTimeout) * time.Millisecond
+	if timeout <= 0 {
+		timeout = 5 * time.Second
+	}
+	expectedStr := ""
+	if expectedStatus != nil {
+		expectedStr = expectedStatus.String()
+	}
 	roundVal := ProbeRoundFromContext(ctx)
 
-	for _, proxy := range proxies {
-		proxy := proxy
+	jobs := make(chan C.Proxy)
+	var wg sync.WaitGroup
+	var resultsMu sync.Mutex
+
+	probe := func(proxy C.Proxy) {
+		if proxy == nil || ctx.Err() != nil {
+			return
+		}
+		sfKey := fmt.Sprintf("%p|%v|%s|%s|%s|%v", proxy, roundVal, proxy.Name(), url, expectedStr, timeout)
+		val, err := globalProbePool.Do(ctx, sfKey, timeout, func(workCtx context.Context) (uint16, error) {
+			select {
+			case globalProbeSem <- struct{}{}:
+				defer func() { <-globalProbeSem }()
+				if err := workCtx.Err(); err != nil {
+					return 0, err
+				}
+			case <-workCtx.Done():
+				return 0, workCtx.Err()
+			}
+			dialCtx, dialCancel := context.WithTimeout(workCtx, timeout)
+			defer dialCancel()
+			return proxy.URLTest(dialCtx, url, expectedStatus)
+		})
+
+		if err == nil {
+			resultsMu.Lock()
+			results[proxy.Name()] = val
+			resultsMu.Unlock()
+		}
+	}
+
+	for i := 0; i < workers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-
-			if ctx.Err() != nil {
-				return
-			}
-
-			expectedStr := ""
-			if expectedStatus != nil {
-				expectedStr = expectedStatus.String()
-			}
-			timeout := time.Duration(gb.testTimeout) * time.Millisecond
-			if timeout <= 0 {
-				timeout = 5 * time.Second
-			}
-			sfKey := fmt.Sprintf("%p|%v|%s|%s|%s|%v", proxy, roundVal, proxy.Name(), url, expectedStr, timeout)
-
-			val, err := globalProbePool.Do(ctx, sfKey, timeout, func(workCtx context.Context) (uint16, error) {
+			for {
 				select {
-				case globalProbeSem <- struct{}{}:
-					defer func() { <-globalProbeSem }()
-					if err := workCtx.Err(); err != nil {
-						return 0, err
+				case <-ctx.Done():
+					return
+				case proxy, ok := <-jobs:
+					if !ok {
+						return
 					}
-				case <-workCtx.Done():
-					return 0, workCtx.Err()
+					probe(proxy)
 				}
-				dialCtx, dialCancel := context.WithTimeout(workCtx, timeout)
-				defer dialCancel()
-				return proxy.URLTest(dialCtx, url, expectedStatus)
-			})
-
-			if err == nil {
-				lock.Lock()
-				mp[proxy.Name()] = val
-				lock.Unlock()
 			}
 		}()
 	}
+
+submit:
+	for _, proxy := range proxies {
+		select {
+		case jobs <- proxy:
+		case <-ctx.Done():
+			break submit
+		}
+	}
+	close(jobs)
 	wg.Wait()
 
-	if len(mp) == 0 {
-		return mp, fmt.Errorf("get delay: all proxies timeout")
-	} else {
-		return mp, nil
+	if len(results) == 0 {
+		if err := ctx.Err(); err != nil {
+			return results, err
+		}
+		return results, fmt.Errorf("get delay: all proxies timeout")
 	}
+	return results, nil
 }
 
 func isProxyServerHardFailure(err error) bool {
