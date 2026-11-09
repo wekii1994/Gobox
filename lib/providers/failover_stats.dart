@@ -7,7 +7,7 @@ final failoverStatsProvider =
   FailoverStatsNotifier.new,
 );
 
-class FailoverStatsNotifier extends AutoDisposeAsyncNotifier<FailoverStats> {
+class FailoverStatsNotifier extends AsyncNotifier<FailoverStats> {
   @override
   Future<FailoverStats> build() async {
     return _fetch();
