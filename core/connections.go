@@ -198,25 +198,12 @@ func isNetworkProbing(name string) bool {
 	return networkProbingGroups[name] > 0
 }
 
-func getGroupTestURL(group constant.ProxyAdapter) (testURL string) {
+func getGroupTestURL(group constant.ProxyAdapter) string {
 	if group == nil {
 		return ""
 	}
-	defer func() {
-		if r := recover(); r != nil {
-			testURL = ""
-		}
-	}()
-	if m, ok := group.(interface{ MarshalJSON() ([]byte, error) }); ok {
-		data, err := m.MarshalJSON()
-		if err == nil {
-			var parsed struct {
-				TestURL string `json:"testUrl"`
-			}
-			if json.Unmarshal(data, &parsed) == nil && parsed.TestURL != "" {
-				return parsed.TestURL
-			}
-		}
+	if t, ok := group.(interface{ TestURL() string }); ok {
+		return t.TestURL()
 	}
 	return ""
 }

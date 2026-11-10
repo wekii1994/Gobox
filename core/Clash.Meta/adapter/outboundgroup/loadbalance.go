@@ -288,6 +288,10 @@ func (lb *LoadBalance) Now() string {
 	return ""
 }
 
+func (lb *LoadBalance) TestURL() string {
+	return lb.testUrl
+}
+
 func NewLoadBalance(option GroupCommonOption, loadBalanceOption LoadBalanceOption, emptyFallback C.Proxy, providers []P.ProxyProvider) (lb *LoadBalance, err error) {
 	var strategyFn strategyFn
 	withKey, err := hashKey(loadBalanceOption.HashKey)

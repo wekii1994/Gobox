@@ -80,6 +80,10 @@ func (s *Selector) Now() string {
 	return s.selectedProxy(false).Name()
 }
 
+func (s *Selector) TestURL() string {
+	return s.testUrl
+}
+
 func (s *Selector) Set(name string) error {
 	for _, proxy := range s.GetProxies(false) {
 		if proxy.Name() == name {

@@ -33,6 +33,10 @@ func (u *URLTest) Now() string {
 	return u.fast(false).Name()
 }
 
+func (u *URLTest) TestURL() string {
+	return u.testUrl
+}
+
 func (u *URLTest) Set(name string) error {
 	var p C.Proxy
 	for _, proxy := range u.GetProxies(false) {
@@ -107,6 +111,11 @@ func (u *URLTest) healthCheck() {
 
 func (u *URLTest) fast(touch bool) C.Proxy {
 	u.forgetUnmeasuredPick()
+	var (
+		notifyChanged bool
+		oldNodeName   string
+		newNodeName   string
+	)
 	elm, _, shared := u.fastSingle.Do(func() (C.Proxy, error) {
 		proxies := u.GetProxies(touch)
 		if u.selected != "" {
@@ -147,14 +156,18 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 			u.fastNode = fast
 		}
 		if !u.probing.Load() && oldFast != nil && u.fastNode != nil && oldFast.Name() != u.fastNode.Name() {
-			if OnGroupNowChanged != nil {
-				OnGroupNowChanged(u, u.Name(), oldFast.Name(), u.fastNode.Name())
-			}
+			notifyChanged = true
+			oldNodeName = oldFast.Name()
+			newNodeName = u.fastNode.Name()
 		}
 		return u.fastNode, nil
 	})
 	if shared && touch { // a shared fastSingle.Do() may cause providers untouched, so we touch them again
 		u.Touch()
+	}
+
+	if notifyChanged && OnGroupNowChanged != nil {
+		go OnGroupNowChanged(u, u.Name(), oldNodeName, newNodeName)
 	}
 
 	return elm

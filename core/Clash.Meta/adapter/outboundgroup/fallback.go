@@ -28,6 +28,10 @@ func (f *Fallback) Now() string {
 	return proxy.Name()
 }
 
+func (f *Fallback) TestURL() string {
+	return f.testUrl
+}
+
 // DialContext implements C.ProxyAdapter
 func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
 	proxy := f.findAliveProxy(true)
