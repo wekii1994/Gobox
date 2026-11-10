@@ -2201,6 +2201,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("Test URL"),
     "testing": MessageLookupByLibrary.simpleMessage("Testing"),
     "textScale": MessageLookupByLibrary.simpleMessage("Text Scaling"),
+    "pageScale": MessageLookupByLibrary.simpleMessage("Page scaling"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage("Scale overall interface elements (60% - 120%)"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Theme Color"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

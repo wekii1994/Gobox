@@ -1646,6 +1646,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("测试链接"),
     "testing": MessageLookupByLibrary.simpleMessage("检测中"),
     "textScale": MessageLookupByLibrary.simpleMessage("文本缩放"),
+    "pageScale": MessageLookupByLibrary.simpleMessage("页面缩放"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage("整体界面元素缩放（60% - 120%）"),
     "theme": MessageLookupByLibrary.simpleMessage("主题"),
     "themeColor": MessageLookupByLibrary.simpleMessage("主题色彩"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("设置主题色彩相关"),

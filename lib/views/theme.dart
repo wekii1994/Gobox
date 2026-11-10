@@ -51,6 +51,7 @@ class ThemeView extends ConsumerWidget {
       if (system.isAndroid) const _DarkIconItem(),
       if (system.isWindows) const _TrayIconInvertItem(),
       const _TextScaleFactorItem(),
+      const _PageScaleItem(),
     ];
 
     final items = <Widget>[
@@ -809,3 +810,100 @@ class _SliderDefaultsM3 extends SliderThemeData {
   @override
   double? get trackGap => 6.0;
 }
+
+class _PageScaleItem extends ConsumerStatefulWidget {
+  const _PageScaleItem();
+
+  @override
+  ConsumerState<_PageScaleItem> createState() => _PageScaleItemState();
+}
+
+class _PageScaleItemState extends ConsumerState<_PageScaleItem> {
+  double? _draft;
+
+  void _update(double scale) {
+    setState(() => _draft = null);
+    ref
+        .read(themeSettingProvider.notifier)
+        .updateState((state) => state.copyWith(pageScale: scale));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pageScale = ref.watch(
+      themeSettingProvider.select((state) => state.pageScale),
+    );
+    final rawScale = _draft ?? pageScale;
+    final scale = rawScale.isFinite
+        ? rawScale.clamp(minPageScale, maxPageScale).toDouble()
+        : defaultPageScale;
+    final String process = '${(scale * 100).round()}%';
+    final textTheme = Theme.of(context).textTheme;
+    final onSurfaceVariant = context.colorScheme.onSurfaceVariant;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: ListItem(
+            leading: const Icon(Icons.aspect_ratio_outlined),
+            horizontalTitleGap: 12,
+            title: Text(
+              appLocalizations.pageScale,
+              style: textTheme.titleSmall?.copyWith(color: onSurfaceVariant),
+            ),
+            subtitle: Text(
+              appLocalizations.pageScaleDesc,
+              style: textTheme.bodySmall?.copyWith(
+                color: onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+            ),
+            trailing: pageScale != defaultPageScale
+                ? IconButton(
+                    icon: const Icon(Icons.refresh, size: 20),
+                    tooltip: appLocalizations.reset,
+                    onPressed: () => _update(defaultPageScale),
+                  )
+                : null,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.max,
+            spacing: 32,
+            children: [
+              Expanded(
+                child: SliderTheme(
+                  data: _SliderDefaultsM3(context),
+                  child: Slider(
+                    padding: EdgeInsets.zero,
+                    min: minPageScale,
+                    max: maxPageScale,
+                    divisions: 12,
+                    value: scale,
+                    onChanged: (value) {
+                      setState(() {
+                        _draft = (value * 20).round() / 20;
+                      });
+                    },
+                    onChangeEnd: (value) => _update((value * 20).round() / 20),
+                  ),
+                ),
+              ),
+              Text(
+                process,
+                style: textTheme.titleMedium?.copyWith(
+                  color: onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+

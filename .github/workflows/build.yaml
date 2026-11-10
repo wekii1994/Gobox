@@ -145,7 +145,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           flutter pub get
-          dart run build_runner build
+          dart run build_runner build --delete-conflicting-outputs
           dart setup.dart android --arch arm64 ${{ env.IS_STABLE == 'true' && '--env stable' || '' }}
 
       - name: Generate Checksums

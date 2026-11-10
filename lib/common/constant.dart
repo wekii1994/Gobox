@@ -18,6 +18,9 @@ const packageName = AppIdentity.packageId;
 final unixSocketPath = '/tmp/GoboxSocket_${Random().nextInt(10000)}.sock';
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
+const maxPageScale = 1.2;
+const minPageScale = 0.6;
+const defaultPageScale = 1.0;
 final baseInfoEdgeInsets = EdgeInsets.symmetric(
   vertical: 16.ap,
   horizontal: 16.ap,

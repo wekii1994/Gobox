@@ -609,6 +609,8 @@
   "clearDataTipTitle": "Dangerous Operation",
   "clearDataTipDesc": "This operation will reset the application. Please make backups. Are you sure you want to continue?",
   "textScale": "Text Scaling",
+  "pageScale": "Page scaling",
+  "pageScaleDesc": "Scale overall interface elements (60% - 120%)",
   "trayIconInvert": "Invert Tray Icon",
   "trayIconInvertDesc": "Invert the current tray icon color",
   "darkIcon": "Dark Icon",

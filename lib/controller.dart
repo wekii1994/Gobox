@@ -450,29 +450,56 @@ class AppController {
     return dashboardRefreshManager.isActive();
   }
 
-  String? _speedNotificationProfileToSync() {
-    if (!system.isAndroid ||
-        !globalState.isScreenOn ||
-        !_ref.read(vpnSettingProvider).networkSpeedNotification) {
-      return null;
+  String? _lastNotificationTitle;
+
+  String getPhysicalOutboundTitle({String? fallbackLabel}) {
+    final mode = _ref.read(clashConfigProvider.select((state) => state.mode));
+    if (mode == Mode.direct) {
+      return appLocalizations.direct;
+    }
+    final mainGroupName = _ref.read(currentMainGroupNameProvider);
+    if (mainGroupName != null && mainGroupName.isNotEmpty) {
+      final leafState = getProxyCardState(mainGroupName);
+      final groups = _ref.read(groupsProvider);
+      if (leafState.proxyName.isNotEmpty &&
+          groups.getGroup(leafState.proxyName) == null) {
+        return leafState.proxyName;
+      }
+    }
+    if (fallbackLabel != null && fallbackLabel.isNotEmpty) {
+      return fallbackLabel;
     }
     final currentProfileId = _ref.read(currentProfileIdProvider);
     final profiles = _ref.read(profilesProvider);
     final profile = profiles.where((e) => e.id == currentProfileId).firstOrNull;
-    final profileName = profile?.label ?? AppIdentity.displayName;
-    final needsSync =
-        vpn_service.service?.needsSpeedNotificationSync(profileName) ?? false;
-    return needsSync ? profileName : null;
+    return profile?.label ?? AppIdentity.displayName;
+  }
+
+  String? _notificationTitleToSync() {
+    if (!system.isAndroid || !globalState.isScreenOn) {
+      return null;
+    }
+    final title = getPhysicalOutboundTitle();
+    final enableSpeed = _ref.read(vpnSettingProvider).networkSpeedNotification;
+    if (enableSpeed) {
+      _lastNotificationTitle = title;
+      return title;
+    }
+    if (_lastNotificationTitle != title) {
+      _lastNotificationTitle = title;
+      return title;
+    }
+    return null;
   }
 
   Future<void> updateTraffic() async {
     final shouldUpdateDashboard = await _shouldUpdateDashboardTick();
-    final speedNotificationProfile = _speedNotificationProfileToSync();
+    final notificationTitle = _notificationTitleToSync();
     final enableTraySpeed =
         system.isMacOS && _ref.read(vpnSettingProvider).enableTraySpeed;
 
     if (!shouldUpdateDashboard &&
-        speedNotificationProfile == null &&
+        notificationTitle == null &&
         !enableTraySpeed) {
       return;
     }
@@ -490,10 +517,12 @@ class AppController {
       await tray.updateSpeed(traffic);
     }
 
-    if (speedNotificationProfile != null) {
+    if (notificationTitle != null) {
+      final enableSpeed =
+          _ref.read(vpnSettingProvider).networkSpeedNotification;
       await vpn_service.service?.updateNotificationSpeed(
-        speedNotificationProfile,
-        traffic.toString(),
+        notificationTitle,
+        enableSpeed ? traffic.toString() : appLocalizations.serviceRunning,
       );
     }
   }
@@ -1899,12 +1928,10 @@ class AppController {
   }
 
   Future<void> _handlerDisclaimer() async {
-    if (_ref.read(appSettingProvider).disclaimerAccepted) {
-      return;
-    }
-    final isDisclaimerAccepted = await showDisclaimer();
-    if (!isDisclaimerAccepted) {
-      await handleExit();
+    if (!_ref.read(appSettingProvider).disclaimerAccepted) {
+      _ref.read(appSettingProvider.notifier).update(
+            (state) => state.copyWith(disclaimerAccepted: true),
+          );
     }
     return;
   }

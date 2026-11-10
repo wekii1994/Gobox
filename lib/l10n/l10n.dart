@@ -5050,6 +5050,21 @@ class AppLocalizations {
     return Intl.message('Text Scaling', name: 'textScale', desc: '', args: []);
   }
 
+  /// `Page scaling`
+  String get pageScale {
+    return Intl.message('Page scaling', name: 'pageScale', desc: '', args: []);
+  }
+
+  /// `Scale overall interface elements (60% - 120%)`
+  String get pageScaleDesc {
+    return Intl.message(
+      'Scale overall interface elements (60% - 120%)',
+      name: 'pageScaleDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Invert Tray Icon`
   String get trayIconInvert {
     return Intl.message(

@@ -218,13 +218,20 @@ Future<void> _service(List<String> flags) async {
           await vpn?.start(clashLibHandler.getAndroidVpnOptions());
           Future.delayed(const Duration(seconds: 2), checkSmartAutoStop);
 
-          if (globalState.config.vpnProps.networkSpeedNotification) {
-            final profile = globalState.config.profiles
-                .where((e) => e.id == profileId)
-                .firstOrNull;
-            final profileName = profile?.label ?? 'Gobox';
-            await vpn?.updateNotificationSpeed(profileName, '↑0B/s ↓0B/s');
-          }
+          final profile = globalState.config.profiles
+              .where((e) => e.id == profileId)
+              .firstOrNull;
+          final fallbackName = profile?.label ?? 'Gobox';
+          final profileName =
+              globalState.appController.getPhysicalOutboundTitle(
+            fallbackLabel: fallbackName,
+          );
+          await vpn?.updateNotificationSpeed(
+            profileName,
+            globalState.config.vpnProps.networkSpeedNotification
+                ? '↑0B/s ↓0B/s'
+                : appLocalizations.serviceRunning,
+          );
 
           clashLibHandler.startListener();
         } catch (e) {

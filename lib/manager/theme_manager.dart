@@ -88,6 +88,13 @@ class _ThemeManagerState extends ConsumerState<ThemeManager> {
     final textScale = ref.read(
       themeSettingProvider.select((state) => state.textScale),
     );
+    final pageScale = ref.watch(
+      themeSettingProvider.select((state) => state.pageScale),
+    );
+    final effectivePageScale = pageScale.isFinite
+        ? pageScale.clamp(minPageScale, maxPageScale).toDouble()
+        : defaultPageScale;
+
     final double textScaleFactor = max(
       min(
         textScale.enable ? textScale.scale : defaultTextScaleFactor,
@@ -100,20 +107,53 @@ class _ThemeManagerState extends ConsumerState<ThemeManager> {
     final mediaQuery = MediaQuery.of(context);
     final padding = mediaQuery.padding;
     final height = mediaQuery.size.height;
-    return MediaQuery(
-      data: mediaQuery.copyWith(
-        textScaler: TextScaler.linear(textScaleFactor),
-        padding: padding.copyWith(
-          top: padding.top > height * 0.3 ? 20.0 : padding.top,
-        ),
+    final baseData = mediaQuery.copyWith(
+      textScaler: TextScaler.linear(textScaleFactor),
+      padding: padding.copyWith(
+        top: padding.top > height * 0.3 ? 20.0 : padding.top,
       ),
-      child: LayoutBuilder(
-        builder: (_, container) {
-          globalState.appController.updateViewSize(
-            Size(container.maxWidth, container.maxHeight),
-          );
-          return _buildSystemUi(widget.child);
-        },
+    );
+
+    final inner = LayoutBuilder(
+      builder: (_, container) {
+        globalState.appController.updateViewSize(
+          Size(container.maxWidth, container.maxHeight),
+        );
+        return _buildSystemUi(widget.child);
+      },
+    );
+
+    if (effectivePageScale == 1.0) {
+      return MediaQuery(
+        data: baseData,
+        child: inner,
+      );
+    }
+
+    final originalSize = baseData.size;
+    final scaledSize = originalSize / effectivePageScale;
+    return MediaQuery(
+      data: baseData.copyWith(
+        size: scaledSize,
+        padding: baseData.padding / effectivePageScale,
+        viewPadding: baseData.viewPadding / effectivePageScale,
+        viewInsets: baseData.viewInsets / effectivePageScale,
+      ),
+      child: SizedBox(
+        width: originalSize.width,
+        height: originalSize.height,
+        child: OverflowBox(
+          minWidth: scaledSize.width,
+          maxWidth: scaledSize.width,
+          minHeight: scaledSize.height,
+          maxHeight: scaledSize.height,
+          alignment: Alignment.topLeft,
+          child: Transform.scale(
+            scale: effectivePageScale,
+            alignment: Alignment.topLeft,
+            child: inner,
+          ),
+        ),
       ),
     );
   }
