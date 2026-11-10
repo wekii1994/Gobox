@@ -453,7 +453,8 @@ class AppController {
   String? _lastNotificationTitle;
 
   String getPhysicalOutboundTitle({String? fallbackLabel}) {
-    final mode = _ref.read(clashConfigProvider.select((state) => state.mode));
+    final mode =
+        _ref.read(patchClashConfigProvider.select((state) => state.mode));
     if (mode == Mode.direct) {
       return appLocalizations.direct;
     }
@@ -1929,7 +1930,7 @@ class AppController {
 
   Future<void> _handlerDisclaimer() async {
     if (!_ref.read(appSettingProvider).disclaimerAccepted) {
-      _ref.read(appSettingProvider.notifier).update(
+      _ref.read(appSettingProvider.notifier).updateState(
             (state) => state.copyWith(disclaimerAccepted: true),
           );
     }
