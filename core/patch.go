@@ -561,7 +561,6 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 		}
 
 		if groupType == "url-test" || groupType == "fallback" || groupType == "load-balance" {
-			group["lazy"] = false
 			switch interval := group["interval"].(type) {
 			case int:
 				if interval <= 0 || interval > optimalHealthCheckInterval {
@@ -607,7 +606,6 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 			continue
 		}
 		if hc, ok := provider["health-check"].(map[string]any); ok && hc != nil {
-			hc["lazy"] = false
 			if status, ok := hc["expected-status"].(string); !ok || strings.TrimSpace(status) == "" {
 				hc["expected-status"] = defaultExpectedStatus
 			}

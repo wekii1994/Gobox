@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	failSlidingWindow   = 20 * time.Second
+	failSlidingWindow   = 5 * time.Second
 	failoverCooldown    = 10 * time.Second
 	maxFailedTargetsCap = 16
 )
