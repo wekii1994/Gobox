@@ -222,6 +222,13 @@ func checkGroupsChanged() bool {
 	return changed
 }
 
+func notifyGroupsChanged() {
+	groupNowsLock.Lock()
+	groupsChangedSent = true
+	groupNowsLock.Unlock()
+	sendMessage(Message{Type: GroupsChangedMessage})
+}
+
 func testDelays(ctx context.Context, params testDelaysParams) []Delay {
 	concurrency := params.Concurrency
 	if concurrency < 1 {

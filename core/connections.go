@@ -249,5 +249,6 @@ func init() {
 			recordFailover(groupName, before, after)
 			handleCloseGroupStaleConnections(groupName, before, time.Now())
 		}
+		notifyGroupsChanged()
 	}
 }

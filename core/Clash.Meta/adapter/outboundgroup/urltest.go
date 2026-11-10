@@ -141,9 +141,15 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 			}
 
 		}
+		oldFast := u.fastNode
 		// tolerance
 		if u.fastNode == nil || fastNotExist || !u.fastNode.AliveForTestUrl(u.testUrl) || u.fastNode.LastDelayForTestUrl(u.testUrl) > fast.LastDelayForTestUrl(u.testUrl)+u.tolerance {
 			u.fastNode = fast
+		}
+		if !u.probing.Load() && oldFast != nil && u.fastNode != nil && oldFast.Name() != u.fastNode.Name() {
+			if OnGroupNowChanged != nil {
+				OnGroupNowChanged(u, u.Name(), oldFast.Name(), u.fastNode.Name())
+			}
 		}
 		return u.fastNode, nil
 	})

@@ -387,16 +387,21 @@ func handleResetNetwork() {
 			return
 		}
 
+		hasChanged := false
 		for _, g := range primaryGroups {
 			if pg, ok := g.ProxyAdapter.(outboundgroup.ProxyGroup); ok {
 				before := beforeSelections[g.Name()]
 				after := pg.Now()
 				if before != "" && after != "" && before != after {
+					hasChanged = true
 					if !isGroupProxyAlive(g.ProxyAdapter, before) {
 						handleCloseGroupStaleConnections(g.Name(), before, time.Now())
 					}
 				}
 			}
+		}
+		if hasChanged {
+			notifyGroupsChanged()
 		}
 	}(resetCtx)
 }

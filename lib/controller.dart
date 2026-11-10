@@ -476,6 +476,24 @@ class AppController {
     return profile?.label ?? AppIdentity.displayName;
   }
 
+  Future<void> syncNotificationTitleNow() async {
+    if (!system.isAndroid) return;
+    try {
+      final title = getPhysicalOutboundTitle();
+      _lastNotificationTitle = title;
+      final enableSpeed =
+          _ref.read(vpnSettingProvider).networkSpeedNotification;
+      await vpn_service.service?.updateNotificationSpeed(
+        title,
+        enableSpeed
+            ? globalState.appState.totalTraffic.toString()
+            : appLocalizations.serviceRunning,
+      );
+    } catch (e) {
+      commonPrint.warn('Failed to sync notification title: $e');
+    }
+  }
+
   String? _notificationTitleToSync() {
     if (!system.isAndroid || !globalState.isScreenOn) {
       return null;
@@ -1313,6 +1331,9 @@ class AppController {
 
       if (!listEquals(currentGroups, newGroups)) {
         _ref.read(groupsProvider.notifier).value = newGroups;
+        if (system.isAndroid) {
+          unawaited(syncNotificationTitleNow());
+        }
       }
       _updateGroupsRetryCount = 0;
       _updateGroupsRetryTimer?.cancel();
