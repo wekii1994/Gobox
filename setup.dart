@@ -116,8 +116,27 @@ class Build {
   static String _getCc(BuildItem buildItem) {
     final environment = Platform.environment;
     if (buildItem.target == Target.android) {
-      final ndk = environment['ANDROID_NDK'];
-      assert(ndk != null);
+      var ndk = environment['ANDROID_NDK'];
+      if (ndk == null ||
+          !Directory(join(ndk, 'toolchains', 'llvm', 'prebuilt')).existsSync()) {
+        final sdkRoot =
+            environment['ANDROID_SDK_ROOT'] ?? environment['ANDROID_HOME'];
+        if (sdkRoot != null) {
+          final ndkParent = Directory(join(sdkRoot, 'ndk'));
+          if (ndkParent.existsSync()) {
+            final candidates =
+                ndkParent.listSync().whereType<Directory>().toList();
+            for (final candidate in candidates) {
+              if (Directory(join(candidate.path, 'toolchains', 'llvm', 'prebuilt'))
+                  .existsSync()) {
+                ndk = candidate.path;
+                break;
+              }
+            }
+          }
+        }
+      }
+      assert(ndk != null, 'Android NDK toolchain not found');
       final prebuiltDir = Directory(
         join(ndk!, 'toolchains', 'llvm', 'prebuilt'),
       );

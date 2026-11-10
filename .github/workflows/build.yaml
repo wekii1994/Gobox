@@ -103,8 +103,46 @@ jobs:
         shell: bash
         run: |
           NDK_VERSION="28.2.13676358"
-          yes | "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" --install "ndk;${NDK_VERSION}" >/dev/null 2>&1 || true
-          echo "ANDROID_NDK=${ANDROID_SDK_ROOT}/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
+          TARGET_NDK="${ANDROID_SDK_ROOT}/ndk/${NDK_VERSION}"
+
+          # Accept SDK licenses first
+          yes | "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+
+          if [ ! -d "$TARGET_NDK/toolchains/llvm/prebuilt" ]; then
+            echo "Target NDK not found at $TARGET_NDK, installing ndk;${NDK_VERSION}..."
+            for attempt in 1 2 3; do
+              echo "Installation attempt $attempt..."
+              if "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" --install "ndk;${NDK_VERSION}"; then
+                break
+              fi
+              sleep 5
+            done
+          fi
+
+          if [ -d "$TARGET_NDK/toolchains/llvm/prebuilt" ]; then
+            echo "ANDROID_NDK=${TARGET_NDK}" >> "$GITHUB_ENV"
+            echo "Successfully configured ANDROID_NDK=${TARGET_NDK}"
+          else
+            echo "Warning: ${TARGET_NDK} not available, scanning for installed fallback NDK..."
+            FALLBACK_NDK=""
+            for dir in $(ls -d "${ANDROID_SDK_ROOT}/ndk"/* 2>/dev/null | sort -V -r); do
+              if [ -d "$dir/toolchains/llvm/prebuilt" ]; then
+                FALLBACK_NDK="$dir"
+                break
+              fi
+            done
+            if [ -n "$FALLBACK_NDK" ]; then
+              echo "Using fallback ANDROID_NDK=${FALLBACK_NDK}"
+              echo "ANDROID_NDK=${FALLBACK_NDK}" >> "$GITHUB_ENV"
+              FALLBACK_VER=$(basename "$FALLBACK_NDK")
+              echo "Aligning build.gradle.kts ndkVersion to $FALLBACK_VER..."
+              sed -i "s/ndkVersion = .*/ndkVersion = \"$FALLBACK_VER\"/g" android/app/build.gradle.kts android/core/build.gradle.kts 2>/dev/null || true
+            else
+              echo "Error: No valid Android NDK found in ${ANDROID_SDK_ROOT}/ndk"
+              ls -la "${ANDROID_SDK_ROOT}/ndk" 2>/dev/null || true
+              exit 1
+            fi
+          fi
 
       - name: Configure Cargo for Android
         shell: bash
