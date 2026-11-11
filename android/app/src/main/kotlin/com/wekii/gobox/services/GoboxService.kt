@@ -214,9 +214,9 @@ class GoboxService : Service(), BaseServiceInterface {
             .build()
 
         if (!hasStartedForeground) {
-            hasStartedForeground = true
             runCatching {
                 this.startForeground(notification, useSpecialType = !GlobalState.isSmartStopped)
+                hasStartedForeground = true
             }.onFailure { android.util.Log.e("GoboxService", "postNotificationContent startForeground error: ${it.message}") }
         } else {
             runCatching {

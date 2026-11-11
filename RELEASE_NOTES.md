@@ -1,4 +1,20 @@
-## 🚀 Gobox v1.19.8-pre1-9 更新说明
+## 🚀 Gobox v1.19.8-pre1-10 更新说明
+
+本版本继续深化代码审查，集中修复 3 项深层隐患并优化构建工具链：
+
+### 🛠️ 核心修复与优化
+1. **解包底层 ProxyAdapter 恢复网络切换并发测速能力**
+   - 在 `core/connections.go` 导出 `UnwrapProxyAdapter`，并在 `core/network_probe.go` 针对 `contextHealthCheckedGroup`、`failureResetter`、`ProxyGroup`、`candidateCountGroup`、`timeoutAwareGroup` 全面引入解包机制。防止 Mihomo 统计或鉴权包装层导致接口类型断言失败而静默跳过并发快速探测。
+2. **异步清理故障转移残留长短连接**
+   - 在 `outboundgroup.OnGroupNowChanged` 回调中将 `handleCloseGroupStaleConnections` 转为独立 goroutine 异步执行，彻底消除大量连接场景下遍历全局连接表导致的同步阻塞，保障前端 UI 与通知栏毫秒级响应。
+3. **Android NDK 候选目录版本降序排序**
+   - 在 `setup.dart` 中对 NDK 路径列表执行降序排序，确保在系统同时存在多个 NDK 版本时始终优先选择最新版 NDK，避免命中老旧不兼容版本。
+4. **Android 14+ 前台服务启动标志位全链路加固**
+   - 完善 `GoboxVpnService.kt` 与 `GoboxService.kt` 启动逻辑，仅在 `startForeground()` 成功后置位 `hasStartedForeground = true`，杜绝偶发系统异常导致的状态失步。
+
+---
+
+## 📦 历史版本（v1.19.8-pre1-9）
 
 本版本集中修复由全链路 Code Review 排查出的 5 项并发与边界关键 Bug：
 

@@ -198,7 +198,7 @@ func isNetworkProbing(name string) bool {
 	return networkProbingGroups[name] > 0
 }
 
-func unwrapProxyAdapter(group constant.ProxyAdapter) constant.ProxyAdapter {
+func UnwrapProxyAdapter(group constant.ProxyAdapter) constant.ProxyAdapter {
 	for group != nil {
 		unwrapped, ok := group.(interface{ Adapter() constant.ProxyAdapter })
 		if !ok {
@@ -211,6 +211,10 @@ func unwrapProxyAdapter(group constant.ProxyAdapter) constant.ProxyAdapter {
 		group = inner
 	}
 	return group
+}
+
+func unwrapProxyAdapter(group constant.ProxyAdapter) constant.ProxyAdapter {
+	return UnwrapProxyAdapter(group)
 }
 
 func getGroupTestURL(group constant.ProxyAdapter) (testURL string) {
@@ -288,7 +292,7 @@ func init() {
 		} else {
 			log.Infoln("[Failover] Proxy group %s auto switched from [%s] to [%s] via passive failure detection", groupName, before, after)
 			recordFailover(groupName, before, after)
-			handleCloseGroupStaleConnections(groupName, before, now)
+			go handleCloseGroupStaleConnections(groupName, before, now)
 		}
 		notifyGroupsChanged()
 	}

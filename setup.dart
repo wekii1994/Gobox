@@ -126,6 +126,7 @@ class Build {
           if (ndkParent.existsSync()) {
             final candidates =
                 ndkParent.listSync().whereType<Directory>().toList();
+            candidates.sort((a, b) => b.path.compareTo(a.path));
             for (final candidate in candidates) {
               if (Directory(join(candidate.path, 'toolchains', 'llvm', 'prebuilt'))
                   .existsSync()) {

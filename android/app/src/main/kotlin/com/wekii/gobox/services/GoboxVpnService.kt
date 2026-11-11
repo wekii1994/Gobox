@@ -252,10 +252,6 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             .setStyle(null)
             .build()
 
-        if (!hasStartedForeground) {
-            hasStartedForeground = true
-        }
-
         val pendingProfile = pendingSpeedProfile
         val pendingSpeed = pendingSpeedInfo
         if (!isSuspended && GlobalState.isSpeedNotificationEnabled && pendingProfile != null && pendingSpeed != null) {
@@ -263,7 +259,12 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             return
         }
 
-        this.startForeground(notification, useSpecialType = !isSuspended)
+        runCatching {
+            this.startForeground(notification, useSpecialType = !isSuspended)
+            hasStartedForeground = true
+        }.onFailure {
+            Log.e(TAG, "startForeground error: ${it.message}")
+        }
     }
 
     @SuppressLint("ForegroundServiceType")

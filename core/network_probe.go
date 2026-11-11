@@ -113,7 +113,7 @@ func classifyAutoGroups() (primary []*adapter.Proxy, secondary []*adapter.Proxy)
 		}
 		curr := p
 		for curr != nil {
-			pg, ok := curr.ProxyAdapter.(outboundgroup.ProxyGroup)
+			pg, ok := UnwrapProxyAdapter(curr.ProxyAdapter).(outboundgroup.ProxyGroup)
 			if !ok {
 				break
 			}
@@ -179,7 +179,7 @@ type failureResetter interface {
 func resetAllGroupsConsecutiveFailures() {
 	for _, raw := range tunnel.Proxies() {
 		if p, ok := raw.(*adapter.Proxy); ok {
-			if r, ok := p.ProxyAdapter.(failureResetter); ok {
+			if r, ok := UnwrapProxyAdapter(p.ProxyAdapter).(failureResetter); ok {
 				r.ResetConsecutiveFailures()
 			}
 		}
@@ -195,17 +195,25 @@ type timeoutAwareGroup interface {
 }
 
 func getGroupCandidateCount(proxy *adapter.Proxy) int {
-	if cg, ok := proxy.ProxyAdapter.(candidateCountGroup); ok {
+	if proxy == nil {
+		return 1
+	}
+	unwrapped := UnwrapProxyAdapter(proxy.ProxyAdapter)
+	if cg, ok := unwrapped.(candidateCountGroup); ok {
 		return len(cg.GetProxies(false))
 	}
-	if pg, ok := proxy.ProxyAdapter.(outboundgroup.ProxyGroup); ok {
+	if pg, ok := unwrapped.(outboundgroup.ProxyGroup); ok {
 		return len(pg.Proxies())
 	}
 	return 1
 }
 
 func getGroupTestTimeout(proxy *adapter.Proxy) time.Duration {
-	if tg, ok := proxy.ProxyAdapter.(timeoutAwareGroup); ok {
+	if proxy == nil {
+		return 5 * time.Second
+	}
+	unwrapped := UnwrapProxyAdapter(proxy.ProxyAdapter)
+	if tg, ok := unwrapped.(timeoutAwareGroup); ok {
 		if d := tg.TestTimeout(); d > 0 {
 			return d
 		}
@@ -241,7 +249,7 @@ func probeGroupsConcurrently(ctx context.Context, groups []*adapter.Proxy) bool 
 	_ = runBoundedProbes(ctx, len(groups), primaryProbeConcurrency,
 		func(probeCtx context.Context, index int) bool {
 			g := groups[index]
-			checker, ok := g.ProxyAdapter.(contextHealthCheckedGroup)
+			checker, ok := UnwrapProxyAdapter(g.ProxyAdapter).(contextHealthCheckedGroup)
 			if !ok {
 				return false
 			}
@@ -296,7 +304,7 @@ func cancelResetNetwork() {
 func snapshotGroupSelections(groups []*adapter.Proxy) map[string]string {
 	res := make(map[string]string, len(groups))
 	for _, g := range groups {
-		if pg, ok := g.ProxyAdapter.(outboundgroup.ProxyGroup); ok {
+		if pg, ok := UnwrapProxyAdapter(g.ProxyAdapter).(outboundgroup.ProxyGroup); ok {
 			res[g.Name()] = pg.Now()
 		}
 	}
@@ -400,13 +408,13 @@ func handleResetNetwork() {
 
 		hasChanged := false
 		for _, g := range primaryGroups {
-			if pg, ok := g.ProxyAdapter.(outboundgroup.ProxyGroup); ok {
+			if pg, ok := UnwrapProxyAdapter(g.ProxyAdapter).(outboundgroup.ProxyGroup); ok {
 				before := beforeSelections[g.Name()]
 				after := pg.Now()
 				if before != "" && after != "" && before != after {
 					hasChanged = true
 					if !isGroupProxyAlive(g.ProxyAdapter, before) {
-						handleCloseGroupStaleConnections(g.Name(), before, time.Now())
+						go handleCloseGroupStaleConnections(g.Name(), before, time.Now())
 					}
 				}
 			}
