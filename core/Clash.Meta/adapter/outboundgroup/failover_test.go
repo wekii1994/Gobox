@@ -1280,3 +1280,68 @@ func TestURLTestFastDistinguishesHealthySwitchFromFailure(t *testing.T) {
 		t.Fatal("timed out waiting for OnGroupNowChanged")
 	}
 }
+
+type trafficTestAdapter struct {
+	*outbound.Base
+	err error
+}
+
+func (a *trafficTestAdapter) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
+	if a.err != nil {
+		return nil, a.err
+	}
+	return nil, errors.New("mock dial completed")
+}
+
+func (a *trafficTestAdapter) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
+	return nil, errors.New("mock udp blocked")
+}
+
+func TestTrafficActivityAndSelectorReset(t *testing.T) {
+	leafA := adapter.NewProxy(&trafficTestAdapter{
+		Base: outbound.NewBase(outbound.BaseOption{Name: "leaf-a", Type: C.Vmess}),
+	})
+	leafB := adapter.NewProxy(&trafficTestAdapter{
+		Base: outbound.NewBase(outbound.BaseOption{Name: "leaf-b", Type: C.Vmess}),
+	})
+	jpAuto, err := NewURLTest(
+		GroupCommonOption{Name: "JP-Auto", URL: "http://example.test", TestTimeout: 300},
+		URLTestOption{Tolerance: 50},
+		leafA,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{leafA, leafB}}},
+	)
+	require.NoError(t, err)
+	require.True(t, jpAuto.LastTrafficAt().IsZero())
+
+	// 1. Latency probe context must NOT mark group traffic-active
+	_, _ = jpAuto.DialContext(C.WithLatencyTestContext(context.Background()), &C.Metadata{Host: "example.test"})
+	require.True(t, jpAuto.LastTrafficAt().IsZero(), "synthetic latency test must not mark LastTrafficAt")
+
+	// 2. Real traffic dial MUST mark group traffic-active
+	_, _ = jpAuto.DialContext(context.Background(), &C.Metadata{Host: "example.com"})
+	require.False(t, jpAuto.LastTrafficAt().IsZero(), "real DialContext must mark LastTrafficAt")
+
+	// 3. Switching a parent Selector away from JP-Auto must immediately clear its traffic activity
+	jpProxy := adapter.NewProxy(jpAuto)
+	manualLeaf := adapter.NewProxy(&trafficTestAdapter{
+		Base: outbound.NewBase(outbound.BaseOption{Name: "manual-leaf", Type: C.Shadowsocks}),
+	})
+	regionSel, err := NewSelector(
+		GroupCommonOption{Name: "Japan"},
+		SelectorOption{DefaultSelected: "JP-Auto"},
+		manualLeaf,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{jpProxy, manualLeaf}}},
+	)
+	require.NoError(t, err)
+
+	rootSel, err := NewSelector(
+		GroupCommonOption{Name: "Proxy"},
+		SelectorOption{DefaultSelected: "Japan"},
+		manualLeaf,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{adapter.NewProxy(regionSel), manualLeaf}}},
+	)
+	require.NoError(t, err)
+
+	require.NoError(t, rootSel.Set("manual-leaf"))
+	require.True(t, jpAuto.LastTrafficAt().IsZero(), "switching selector away must clear deselected child traffic activity")
+}

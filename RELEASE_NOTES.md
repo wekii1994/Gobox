@@ -1,9 +1,18 @@
-## 🚀 Gobox v1.19.8-pre1-7 更新说明
+## 🚀 Gobox v1.19.8-pre1-8 更新说明
 
-本版本聚焦通知栏架构解耦、切网探测超时与链路遍历完善、故障统计容错加固及剩余多语言本地化补齐等 6 项核心优化：
+本版本重点修复“故障转移统计误记未使用的闲置地区策略组”的统计口径问题：
 
 ### 🛠️ 核心修复与优化
-1. **常驻通知栏标题同步与 1s 网速 Ticker 彻底解耦**
+1. **按真实流量活跃度严格过滤故障转移统计**
+   - 新增合成测速上下文标记 `constant.WithLatencyTestContext()` / `IsLatencyTestContext()`，并在 `Proxy.URLTest()` 统一打标；手动点击卡片测速、后台 300s 巡检（`HealthCheck`）与切网测试请求不再被误判为用户真实流量或触发 `onDialFailed()` 被动故障计数。
+   - 在 `outboundgroup.GroupBase` 新增原子活跃时间戳 `lastTrafficAt`（仅在真实 `DialContext` / `ListenPacketContext` 转发进入且非测速请求时刷新）；并在 `Selector` 切换选组时通过 `resetDeselectedChainTraffic()` 立即清空被切走链路的活跃状态。
+   - `OnGroupNowChanged` 记录 `recordFailover()` 与清理旧连接前校验 `isTrafficActiveGroup()`（5 分钟活跃窗口），未承接流量的闲置策略组（如 `家宽节点-自动选择`、`台湾-自动选择`、`香港-自动选择`、`自动选择`）仅刷新 UI `notifyGroupsChanged()`，不再污染故障转移统计数据。
+
+---
+
+### 📦 历史版本（v1.19.8-pre1-7）
+本版本继承 v1.19.8-pre1-7 及更早版本全部能力：
+1. **常驻通知栏标题同步与 1s 网速 Ticker 彻底解耦**（v1.19.8-pre1-7）
    - 在 Android Kotlin（`VpnPlugin` / `ServicePlugin` / `GoboxVpnService` / `GoboxService`）与 Dart（`Service` / `Vpn` / `AppController` / `main.dart`）双端新增独立 `updateNotificationTitle` MethodChannel 通道。
    - 关闭"通知栏显示实时网速"时，切节点或亮屏不再意外开启 1s 网速 ticker；开启网速显示且已初始化通知标题后，每秒 `updateTraffic()` 不再重复发送 Dart→Kotlin 标题 IPC；启停与 `restoreNotification()` 同步清理并复位相关状态。
 

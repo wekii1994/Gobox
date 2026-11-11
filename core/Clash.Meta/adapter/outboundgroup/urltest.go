@@ -59,6 +59,10 @@ func (u *URLTest) ForceSet(name string) {
 
 // DialContext implements C.ProxyAdapter
 func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Conn, err error) {
+	isLatencyProbe := C.IsLatencyTestContext(ctx)
+	if !isLatencyProbe {
+		u.markTrafficUsed(ctx)
+	}
 	proxy := u.fast(true)
 	c, err = proxy.DialContext(ctx, metadata)
 	if err == nil {
@@ -66,7 +70,7 @@ func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Co
 		if !N.NeedHandshake(c) {
 			u.onDialSuccess()
 		}
-	} else {
+	} else if !isLatencyProbe {
 		u.onDialFailed(proxy.Type(), metadata, err, u.healthCheck)
 	}
 
@@ -74,7 +78,7 @@ func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Co
 		c = callback.NewFirstWriteCallBackConn(c, func(err error) {
 			if err == nil {
 				u.onDialSuccess()
-			} else {
+			} else if !isLatencyProbe {
 				u.onDialFailed(proxy.Type(), metadata, err, u.healthCheck)
 			}
 		})
@@ -85,11 +89,15 @@ func (u *URLTest) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Co
 
 // ListenPacketContext implements C.ProxyAdapter
 func (u *URLTest) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
+	isLatencyProbe := C.IsLatencyTestContext(ctx)
+	if !isLatencyProbe {
+		u.markTrafficUsed(ctx)
+	}
 	proxy := u.fast(true)
 	pc, err := proxy.ListenPacketContext(ctx, metadata)
 	if err == nil {
 		pc.AppendToChains(u)
-	} else {
+	} else if !isLatencyProbe {
 		u.onDialFailed(proxy.Type(), metadata, err, u.healthCheck)
 	}
 

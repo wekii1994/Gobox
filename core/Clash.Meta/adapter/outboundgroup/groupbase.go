@@ -56,6 +56,7 @@ type GroupBase struct {
 	testTimeout            int
 	maxFailedTimes         int
 	consecutiveAllFailures int
+	lastTrafficAt          atomic.Int64
 	emptyFallback          C.Proxy
 
 	// for GetProxies
@@ -138,6 +139,34 @@ func (gb *GroupBase) TestTimeout() time.Duration {
 		return 5 * time.Second
 	}
 	return time.Duration(gb.testTimeout) * time.Millisecond
+}
+
+// markTrafficUsed records real forwarding activity unless ctx belongs to a synthetic latency probe.
+func (gb *GroupBase) markTrafficUsed(ctx context.Context) {
+	if gb == nil || C.IsLatencyTestContext(ctx) {
+		return
+	}
+	gb.lastTrafficAt.Store(time.Now().UnixNano())
+}
+
+// LastTrafficAt returns the latest timestamp when real traffic entered this group.
+func (gb *GroupBase) LastTrafficAt() time.Time {
+	if gb == nil {
+		return time.Time{}
+	}
+	ns := gb.lastTrafficAt.Load()
+	if ns <= 0 {
+		return time.Time{}
+	}
+	return time.Unix(0, ns)
+}
+
+// ResetTrafficActivity clears recorded forwarding activity, e.g. when a selector switches away.
+func (gb *GroupBase) ResetTrafficActivity() {
+	if gb == nil {
+		return
+	}
+	gb.lastTrafficAt.Store(0)
 }
 
 func (gb *GroupBase) EmptyFallback() C.Proxy {

@@ -259,15 +259,36 @@ func isGroupProxyAlive(group constant.ProxyAdapter, proxyName string) bool {
 	return false
 }
 
+const activeFailoverTrafficWindow = 5 * time.Minute
+
+type trafficActivityGroup interface {
+	LastTrafficAt() time.Time
+}
+
+func isTrafficActiveGroup(group constant.ProxyAdapter, now time.Time) bool {
+	tg, ok := unwrapProxyAdapter(group).(trafficActivityGroup)
+	if !ok {
+		return true
+	}
+	last := tg.LastTrafficAt()
+	return !last.IsZero() && now.Sub(last) <= activeFailoverTrafficWindow
+}
+
 func init() {
 	outboundgroup.OnGroupNowChanged = func(group constant.ProxyAdapter, groupName, before, after string) {
+		now := time.Now()
+		if !isTrafficActiveGroup(group, now) {
+			log.Debugln("[Failover] Ignored switch on idle/unused group %s: [%s] -> [%s]", groupName, before, after)
+			notifyGroupsChanged()
+			return
+		}
 		isHealthyReselect := isNetworkProbing(groupName) && isGroupProxyAlive(group, before)
 		if isHealthyReselect {
 			log.Debugln("[Failover] Suppressed failover count for healthy node latency reselection on group %s: [%s] -> [%s]", groupName, before, after)
 		} else {
 			log.Infoln("[Failover] Proxy group %s auto switched from [%s] to [%s] via passive failure detection", groupName, before, after)
 			recordFailover(groupName, before, after)
-			handleCloseGroupStaleConnections(groupName, before, time.Now())
+			handleCloseGroupStaleConnections(groupName, before, now)
 		}
 		notifyGroupsChanged()
 	}

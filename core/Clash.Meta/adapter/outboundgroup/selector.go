@@ -84,10 +84,48 @@ func (s *Selector) TestURL() string {
 	return s.testUrl
 }
 
+func resetDeselectedChainTraffic(proxy C.Proxy) {
+	visited := make(map[string]struct{})
+	curr := proxy
+	for curr != nil {
+		name := curr.Name()
+		if name != "" {
+			if _, seen := visited[name]; seen {
+				break
+			}
+			visited[name] = struct{}{}
+		}
+		wrapper, ok := curr.(interface{ Adapter() C.ProxyAdapter })
+		if !ok {
+			break
+		}
+		inner := wrapper.Adapter()
+		if inner == nil {
+			break
+		}
+		if resetter, ok := inner.(interface{ ResetTrafficActivity() }); ok {
+			resetter.ResetTrafficActivity()
+		}
+		sel, ok := inner.(*Selector)
+		if !ok {
+			break
+		}
+		curr = sel.selectedProxy(false)
+	}
+}
+
+func (s *Selector) switchSelection(name string) {
+	prev := s.selectedProxy(false)
+	s.selected = name
+	if prev != nil && prev.Name() != name {
+		resetDeselectedChainTraffic(prev)
+	}
+}
+
 func (s *Selector) Set(name string) error {
 	for _, proxy := range s.GetProxies(false) {
 		if proxy.Name() == name {
-			s.selected = name
+			s.switchSelection(name)
 			return nil
 		}
 	}
@@ -96,7 +134,7 @@ func (s *Selector) Set(name string) error {
 }
 
 func (s *Selector) ForceSet(name string) {
-	s.selected = name
+	s.switchSelection(name)
 }
 
 // Unwrap implements C.ProxyAdapter

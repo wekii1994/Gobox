@@ -1,16 +1,23 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/adapter/outbound"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/constant"
+	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -819,5 +826,198 @@ func TestFailoverStatsCorruptFileBackupAndFieldSanitization(t *testing.T) {
 	}
 	if capped.Records == nil {
 		t.Fatalf("expected non-nil empty Records slice")
+	}
+}
+
+type mockTrafficTimeGroup struct {
+	constant.ProxyAdapter
+	last time.Time
+}
+
+func (m *mockTrafficTimeGroup) LastTrafficAt() time.Time { return m.last }
+
+type mockFailoverTestAdapter struct {
+	*outbound.Base
+	alive       atomic.Bool
+	failURLTest atomic.Bool
+}
+
+func (m *mockFailoverTestAdapter) DialContext(ctx context.Context, metadata *constant.Metadata) (constant.Conn, error) {
+	return nil, errors.New("mock dial error")
+}
+
+func (m *mockFailoverTestAdapter) ListenPacketContext(ctx context.Context, metadata *constant.Metadata) (constant.PacketConn, error) {
+	return nil, errors.New("mock udp error")
+}
+
+type mockFailoverProxy struct {
+	constant.Proxy
+	adapter *mockFailoverTestAdapter
+}
+
+func (p *mockFailoverProxy) Name() string               { return p.adapter.Name() }
+func (p *mockFailoverProxy) Type() constant.AdapterType { return p.adapter.Type() }
+func (p *mockFailoverProxy) DialContext(ctx context.Context, metadata *constant.Metadata) (constant.Conn, error) {
+	return p.adapter.DialContext(ctx, metadata)
+}
+func (p *mockFailoverProxy) ListenPacketContext(ctx context.Context, metadata *constant.Metadata) (constant.PacketConn, error) {
+	return p.adapter.ListenPacketContext(ctx, metadata)
+}
+func (p *mockFailoverProxy) AliveForTestUrl(string) bool { return p.adapter.alive.Load() }
+func (p *mockFailoverProxy) LastDelayForTestUrl(string) uint16 {
+	if !p.adapter.alive.Load() {
+		return math.MaxUint16
+	}
+	return 50
+}
+func (p *mockFailoverProxy) URLTest(ctx context.Context, url string, expected utils.IntRanges[uint16]) (uint16, error) {
+	if p.adapter.failURLTest.Load() {
+		p.adapter.alive.Store(false)
+		return 0, errors.New("probe failed")
+	}
+	p.adapter.alive.Store(true)
+	return 50, nil
+}
+
+type mockFailoverProvider struct {
+	cp.ProxyProvider
+	proxies []constant.Proxy
+}
+
+func (p *mockFailoverProvider) Proxies() []constant.Proxy                        { return p.proxies }
+func (p *mockFailoverProvider) Touch()                                           {}
+func (p *mockFailoverProvider) Version() uint32                                    { return 1 }
+func (p *mockFailoverProvider) HealthCheck()                                     {}
+func (p *mockFailoverProvider) HealthCheckExpectedStatus() utils.IntRanges[uint16] { return nil }
+func (p *mockFailoverProvider) HealthCheckTimeout() time.Duration                { return 5 * time.Second }
+
+func TestFailoverStatsIgnoresIdleGroupsAndRecordsTrafficActiveGroup(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "idle_vs_active_*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+	oldHome := constant.Path.HomeDir()
+	constant.SetHomeDir(tempDir)
+	defer constant.SetHomeDir(oldHome)
+
+	if _, err := handleResetFailoverStats(); err != nil {
+		t.Fatal(err)
+	}
+
+	makeNode := func(name string, fail bool) *mockFailoverProxy {
+		base := outbound.NewBase(outbound.BaseOption{Name: name, Type: constant.Vmess})
+		inner := &mockFailoverTestAdapter{Base: base}
+		inner.alive.Store(!fail)
+		inner.failURLTest.Store(fail)
+		return &mockFailoverProxy{Proxy: adapter.NewProxy(inner), adapter: inner}
+	}
+
+	// 1. Idle unused URLTest ("TW-Auto"): switching from tw1 -> tw2 via HealthCheckContext
+	//    or after synthetic latency probe MUST NOT record failover.
+	tw1 := makeNode("TW-1", false)
+	tw2 := makeNode("TW-2", false)
+	twAuto, err := outboundgroup.NewURLTest(
+		outboundgroup.GroupCommonOption{Name: "TW-Auto", URL: "http://example.test", TestTimeout: 300},
+		outboundgroup.URLTestOption{Tolerance: 50},
+		tw1,
+		[]cp.ProxyProvider{&mockFailoverProvider{proxies: []constant.Proxy{tw1, tw2}}},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Seed initial pick to TW-1 while both healthy
+	_, _ = twAuto.HealthCheckContext(context.Background())
+	// Mark TW-1 to fail next probe -> HealthCheckContext switches to TW-2
+	tw1.adapter.failURLTest.Store(true)
+	_, _ = twAuto.HealthCheckContext(context.Background())
+	if got := twAuto.Now(); got != "TW-2" {
+		t.Fatalf("expected idle TW-Auto to switch to TW-2, got %q", got)
+	}
+
+	// Also invoke synthetic latency-test dial on idle group
+	_, _ = twAuto.DialContext(constant.WithLatencyTestContext(context.Background()), &constant.Metadata{Host: "example.test"})
+
+	stats := mustGetFailoverStats(t)
+	if stats.Total != 0 {
+		t.Fatalf("expected idle TW-Auto failover to be ignored (Total=0), got %d (%+v)", stats.Total, stats.Records)
+	}
+
+	// 2. Idle Fallback ("HK-Auto"): HealthCheckContext failover when unused MUST NOT record failover.
+	hk1 := makeNode("HK-1", false)
+	hk2 := makeNode("HK-2", false)
+	hkFallback, err := outboundgroup.NewFallback(
+		outboundgroup.GroupCommonOption{Name: "HK-Auto", URL: "http://example.test", TestTimeout: 300},
+		outboundgroup.FallbackOption{},
+		hk1,
+		[]cp.ProxyProvider{&mockFailoverProvider{proxies: []constant.Proxy{hk1, hk2}}},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = hkFallback.HealthCheckContext(context.Background()) // seed HK-1
+	hk1.adapter.failURLTest.Store(true)
+	_, _ = hkFallback.HealthCheckContext(context.Background())
+	if got := hkFallback.Now(); got != "HK-2" {
+		t.Fatalf("expected idle HK-Auto fallback to switch to HK-2, got %q", got)
+	}
+
+	stats = mustGetFailoverStats(t)
+	if stats.Total != 0 {
+		t.Fatalf("expected idle HK-Auto fallback to be ignored (Total=0), got %d", stats.Total)
+	}
+
+	// 3. Active URLTest ("JP-Auto"): once real traffic dials through it, failover MUST record.
+	jp1 := makeNode("JP-1", false)
+	jp2 := makeNode("JP-2", false)
+	jpAuto, err := outboundgroup.NewURLTest(
+		outboundgroup.GroupCommonOption{Name: "JP-Auto", URL: "http://example.test", TestTimeout: 300},
+		outboundgroup.URLTestOption{Tolerance: 50},
+		jp1,
+		[]cp.ProxyProvider{&mockFailoverProvider{proxies: []constant.Proxy{jp1, jp2}}},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = jpAuto.HealthCheckContext(context.Background()) // picks JP-1
+	_, _ = jpAuto.DialContext(context.Background(), &constant.Metadata{Host: "example.com"})
+	jp1.adapter.failURLTest.Store(true)
+	_, _ = jpAuto.HealthCheckContext(context.Background()) // fails over JP-1 -> JP-2
+
+	stats = mustGetFailoverStats(t)
+	if stats.Total != 1 || len(stats.Records) != 1 || stats.Records[0].GroupName != "JP-Auto" {
+		t.Fatalf("expected active JP-Auto failover recorded (Total=1), got Total=%d Records=%+v", stats.Total, stats.Records)
+	}
+
+	// 4. Deselecting JP-Auto via Selector.Set clears activity so later idle check is ignored.
+	otherNode := makeNode("Other", false)
+	sel, err := outboundgroup.NewSelector(
+		outboundgroup.GroupCommonOption{Name: "Proxy"},
+		outboundgroup.SelectorOption{DefaultSelected: "JP-Auto"},
+		otherNode,
+		[]cp.ProxyProvider{&mockFailoverProvider{proxies: []constant.Proxy{adapter.NewProxy(jpAuto), otherNode}}},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := sel.Set("Other"); err != nil {
+		t.Fatal(err)
+	}
+	jp2.adapter.failURLTest.Store(true)
+	jp1.adapter.failURLTest.Store(false)
+	_, _ = jpAuto.HealthCheckContext(context.Background())
+
+	stats = mustGetFailoverStats(t)
+	if stats.Total != 1 {
+		t.Fatalf("expected deselected JP-Auto switch to be ignored (Total=1), got %d", stats.Total)
+	}
+
+	// 5. Window expiration check on isTrafficActiveGroup.
+	now := time.Now()
+	if !isTrafficActiveGroup(&mockTrafficTimeGroup{last: now.Add(-time.Minute)}, now) {
+		t.Fatalf("expected 1m-old traffic to remain active")
+	}
+	if isTrafficActiveGroup(&mockTrafficTimeGroup{last: now.Add(-activeFailoverTrafficWindow - time.Second)}, now) {
+		t.Fatalf("expected expired traffic (>5m) to be treated as idle")
 	}
 }

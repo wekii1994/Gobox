@@ -215,7 +215,8 @@ func (p *Proxy) URLTest(ctx context.Context, url string, expectedStatus utils.In
 	}
 
 	start := time.Now()
-	instance, err := p.DialContext(ctx, &addr)
+	dialCtx := C.WithLatencyTestContext(ctx)
+	instance, err := p.DialContext(dialCtx, &addr)
 	if err != nil {
 		return
 	}
