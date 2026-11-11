@@ -450,7 +450,6 @@ class AppController {
     return dashboardRefreshManager.isActive();
   }
 
-  String? _lastNotificationTitle;
   Traffic? _lastTraffic;
 
   String getPhysicalOutboundTitle({String? fallbackLabel}) {
@@ -471,21 +470,24 @@ class AppController {
     );
   }
 
-  Future<void> syncNotificationTitleNow() async {
-    if (!system.isAndroid || !globalState.isScreenOn) return;
+  Future<void> _pushNotificationUpdate(String title, Traffic traffic) async {
     final service = vpn_service.service;
     if (service == null) return;
+    final enableSpeed = _ref.read(vpnSettingProvider).networkSpeedNotification;
+    if (enableSpeed && !service.hasSpeedNotificationProfile) {
+      await service.updateNotificationSpeed(title, traffic.toString());
+    } else {
+      await service.updateNotificationTitle(title);
+    }
+  }
+
+  Future<void> syncNotificationTitleNow() async {
+    if (!system.isAndroid || !globalState.isScreenOn) return;
     try {
-      final title = getPhysicalOutboundTitle();
-      final enableSpeed =
-          _ref.read(vpnSettingProvider).networkSpeedNotification;
-      await service.updateNotificationSpeed(
-        title,
-        enableSpeed
-            ? (_lastTraffic ?? Traffic()).toString()
-            : appLocalizations.serviceRunning,
+      await _pushNotificationUpdate(
+        getPhysicalOutboundTitle(),
+        _lastTraffic ?? Traffic(),
       );
-      _lastNotificationTitle = title;
     } catch (e) {
       commonPrint.warn('Failed to sync notification title: $e');
     }
@@ -495,12 +497,14 @@ class AppController {
     if (!system.isAndroid || !globalState.isScreenOn) {
       return null;
     }
+    final service = vpn_service.service;
+    if (service == null) return null;
     final title = getPhysicalOutboundTitle();
     final enableSpeed = _ref.read(vpnSettingProvider).networkSpeedNotification;
-    if (enableSpeed || _lastNotificationTitle != title) {
-      return title;
-    }
-    return null;
+    final needsSync = enableSpeed
+        ? service.needsSpeedNotificationSync(title)
+        : service.needsNotificationTitleSync(title);
+    return needsSync ? title : null;
   }
 
   Future<void> updateTraffic() async {
@@ -530,16 +534,7 @@ class AppController {
     }
 
     if (notificationTitle != null) {
-      final service = vpn_service.service;
-      if (service != null) {
-        final enableSpeed =
-            _ref.read(vpnSettingProvider).networkSpeedNotification;
-        await service.updateNotificationSpeed(
-          notificationTitle,
-          enableSpeed ? traffic.toString() : appLocalizations.serviceRunning,
-        );
-        _lastNotificationTitle = notificationTitle;
-      }
+      await _pushNotificationUpdate(notificationTitle, traffic);
     }
   }
 

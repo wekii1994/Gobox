@@ -42,9 +42,6 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
 
     private var unlockReceiver: BroadcastReceiver? = null
     private val fairMemoryHelper = FairMemoryHelper(TAG)
-    
-    @Volatile
-    private var isSpeedNotificationEnabled = false
 
     @Volatile
     private var lastNotificationText: String? = null
@@ -173,7 +170,8 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
         if (intent?.action == "UPDATE_NOTIFICATION_SPEED") {
             val profileName = intent.getStringExtra("profileName") ?: ""
             val speedInfo = intent.getStringExtra("speedInfo") ?: ""
-            isSpeedNotificationEnabled = true
+            GlobalState.currentProfileName = profileName
+            GlobalState.isSpeedNotificationEnabled = true
             if (!GlobalState.isSmartStopped && hasStartedForeground) {
                 CoroutineScope(Dispatchers.Main).launch {
                     updateNotificationSpeed(profileName, speedInfo)
@@ -184,8 +182,7 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
     }
 
     internal suspend fun restoreNotification() {
-        isSpeedNotificationEnabled = false
-        pendingSpeedProfile = null
+        GlobalState.isSpeedNotificationEnabled = false
         pendingSpeedInfo = null
         if (hasStartedForeground) {
             startForeground()
@@ -197,6 +194,8 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
         isStopped = true
         hasStartedForeground = false
         lastNotificationText = null
+        pendingSpeedProfile = null
+        pendingSpeedInfo = null
 
         runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -239,7 +238,9 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             title = getString(R.string.core_suspended)
             content = getString(R.string.smart_auto_stop_service_running)
         } else {
-            title = getString(R.string.core_connected)
+            title = pendingSpeedProfile?.takeIf { it.isNotBlank() }
+                ?: GlobalState.currentProfileName.takeIf { it.isNotBlank() }
+                ?: getString(R.string.core_connected)
             content = getString(R.string.service_running)
         }
 
@@ -251,8 +252,7 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             .setStyle(null)
             .build()
 
-        val isFirstTime = !hasStartedForeground
-        if (isFirstTime) {
+        if (!hasStartedForeground) {
             hasStartedForeground = true
         }
 
@@ -267,10 +267,26 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
     }
 
     @SuppressLint("ForegroundServiceType")
+    internal suspend fun updateNotificationTitle(profileName: String) {
+        pendingSpeedProfile = profileName
+        val content = if (GlobalState.isSpeedNotificationEnabled) {
+            pendingSpeedInfo ?: getString(R.string.service_running)
+        } else {
+            pendingSpeedInfo = null
+            getString(R.string.service_running)
+        }
+        postNotificationContent(profileName, content)
+    }
+
+    @SuppressLint("ForegroundServiceType")
     internal suspend fun updateNotificationSpeed(profileName: String, speedInfo: String) {
         pendingSpeedProfile = profileName
         pendingSpeedInfo = speedInfo
+        postNotificationContent(profileName, speedInfo)
+    }
 
+    @SuppressLint("ForegroundServiceType")
+    private suspend fun postNotificationContent(title: String, content: String) {
         val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
         if (powerManager?.isInteractive == false) {
             return
@@ -280,7 +296,7 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             return
         }
 
-        val combinedText = "$profileName\n$speedInfo"
+        val combinedText = "$title\n$content"
         if (combinedText == lastNotificationText) {
             return
         }
@@ -288,8 +304,8 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
 
         val builder = notificationBuilder()
         val notification = builder
-            .setContentTitle(profileName)
-            .setContentText(speedInfo)
+            .setContentTitle(title)
+            .setContentText(content)
             .setStyle(null)
             .build()
 
@@ -297,12 +313,12 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             hasStartedForeground = true
             runCatching {
                 this.startForeground(notification, useSpecialType = !GlobalState.isSmartStopped)
-            }.onFailure { Log.e(TAG, "updateNotificationSpeed startForeground error: ${it.message}") }
+            }.onFailure { Log.e(TAG, "postNotificationContent startForeground error: ${it.message}") }
         } else {
             runCatching {
                 getSystemService(android.app.NotificationManager::class.java)
                     ?.notify(GlobalState.NOTIFICATION_ID, notification)
-            }.onFailure { Log.e(TAG, "updateNotificationSpeed notify error: ${it.message}") }
+            }.onFailure { Log.e(TAG, "postNotificationContent notify error: ${it.message}") }
         }
     }
 

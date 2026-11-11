@@ -610,6 +610,8 @@
   "clearDataTipDesc": "此操作將會重置應用程式, 請注意備份, 確定要繼續嗎？",
   "zoom": "縮放",
   "textScale": "文字縮放",
+  "pageScale": "頁面縮放",
+  "pageScaleDesc": "整體介面元素縮放（60% - 120%）",
   "trayIconInvert": "托盤反轉",
   "trayIconInvertDesc": "針對目前托盤圖示顏色取反設定",
   "darkIcon": "深色圖示",

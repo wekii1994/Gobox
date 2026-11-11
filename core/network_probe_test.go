@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/constant"
 	cp "github.com/metacubex/mihomo/constant/provider"
@@ -191,5 +194,158 @@ func TestProbeGroupsConcurrentlyCompletionContract(t *testing.T) {
 	})
 	if ok := probeGroupsConcurrently(context.Background(), []*adapter.Proxy{gSuccess, gSuccess2}); !ok {
 		t.Fatalf("expected true when all group checks succeed, got false")
+	}
+
+	// 5. Group with ErrHealthCheckInFlight -> counts as satisfied (returns true) without error retry
+	gInFlight := adapter.NewProxy(&mockAutoGroupAdapter{
+		name:      "gInFlight",
+		groupType: constant.URLTest,
+		proxies:   make([]constant.Proxy, 2),
+		healthCheckContextFunc: func(ctx context.Context) (map[string]uint16, error) {
+			return nil, outboundgroup.ErrHealthCheckInFlight
+		},
+	})
+	if ok := probeGroupsConcurrently(context.Background(), []*adapter.Proxy{gInFlight}); !ok {
+		t.Fatalf("expected true when group check returns ErrHealthCheckInFlight, got false")
+	}
+
+	// Wrapped ErrHealthCheckInFlight is also recognized via errors.Is
+	gWrappedInFlight := adapter.NewProxy(&mockAutoGroupAdapter{
+		name:      "gWrappedInFlight",
+		groupType: constant.Fallback,
+		proxies:   make([]constant.Proxy, 2),
+		healthCheckContextFunc: func(ctx context.Context) (map[string]uint16, error) {
+			return nil, fmt.Errorf("wrapped: %w", outboundgroup.ErrHealthCheckInFlight)
+		},
+	})
+	if ok := probeGroupsConcurrently(context.Background(), []*adapter.Proxy{gSuccess, gWrappedInFlight}); !ok {
+		t.Fatalf("expected true with wrapped ErrHealthCheckInFlight, got false")
+	}
+	if !errors.Is(fmt.Errorf("wrapped: %w", outboundgroup.ErrHealthCheckInFlight), outboundgroup.ErrHealthCheckInFlight) {
+		t.Fatal("sanity check failed")
+	}
+}
+
+func TestCalculateGroupProbeBudgetProductionGroups(t *testing.T) {
+	emptyFallback := adapter.NewProxy(&mockSelectorAdapter{name: "DIRECT"})
+
+	urlTestCustom, err := outboundgroup.NewURLTest(
+		outboundgroup.GroupCommonOption{
+			Name:        "ProdURLCustom",
+			URL:         "https://www.gstatic.com/generate_204",
+			TestTimeout: 2000,
+		},
+		outboundgroup.URLTestOption{Tolerance: 50},
+		emptyFallback,
+		nil,
+	)
+	if err != nil {
+		t.Fatalf("NewURLTest custom failed: %v", err)
+	}
+	if got := urlTestCustom.TestTimeout(); got != 2*time.Second {
+		t.Fatalf("URLTest.TestTimeout() = %v, want 2s", got)
+	}
+	if budget := calculateGroupProbeBudget(adapter.NewProxy(urlTestCustom)); budget != 2500*time.Millisecond {
+		t.Fatalf("URLTest custom budget = %v, want 2500ms", budget)
+	}
+
+	urlTestDefault, err := outboundgroup.NewURLTest(
+		outboundgroup.GroupCommonOption{
+			Name:        "ProdURLDefault",
+			URL:         "https://www.gstatic.com/generate_204",
+			TestTimeout: 0,
+		},
+		outboundgroup.URLTestOption{},
+		emptyFallback,
+		nil,
+	)
+	if err != nil {
+		t.Fatalf("NewURLTest default failed: %v", err)
+	}
+	if got := urlTestDefault.TestTimeout(); got != 5*time.Second {
+		t.Fatalf("URLTest default TestTimeout() = %v, want 5s", got)
+	}
+	if budget := calculateGroupProbeBudget(adapter.NewProxy(urlTestDefault)); budget != 5500*time.Millisecond {
+		t.Fatalf("URLTest default budget = %v, want 5500ms", budget)
+	}
+
+	fallbackCustom, err := outboundgroup.NewFallback(
+		outboundgroup.GroupCommonOption{
+			Name:        "ProdFallbackCustom",
+			URL:         "https://www.gstatic.com/generate_204",
+			TestTimeout: 3000,
+		},
+		outboundgroup.FallbackOption{},
+		emptyFallback,
+		nil,
+	)
+	if err != nil {
+		t.Fatalf("NewFallback custom failed: %v", err)
+	}
+	if got := fallbackCustom.TestTimeout(); got != 3*time.Second {
+		t.Fatalf("Fallback.TestTimeout() = %v, want 3s", got)
+	}
+	if budget := calculateGroupProbeBudget(adapter.NewProxy(fallbackCustom)); budget != 3500*time.Millisecond {
+		t.Fatalf("Fallback custom budget = %v, want 3500ms", budget)
+	}
+}
+
+func TestClassifyAutoGroupsDeepChainsCyclesAndConvergence(t *testing.T) {
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	// 1. Deep chain (> 6 hops): Sel1 -> Sel2 -> ... -> Sel8 -> DeepAuto, plus an unused Auto group
+	deepProxies := make(map[string]constant.Proxy)
+	for i := 1; i <= 8; i++ {
+		next := fmt.Sprintf("Sel%d", i+1)
+		if i == 8 {
+			next = "DeepAuto"
+		}
+		name := fmt.Sprintf("Sel%d", i)
+		deepProxies[name] = adapter.NewProxy(&mockSelectorAdapter{name: name, now: next})
+	}
+	deepProxies["DeepAuto"] = adapter.NewProxy(&mockAutoGroupAdapter{name: "DeepAuto", groupType: constant.URLTest})
+	deepProxies["UnusedAuto"] = adapter.NewProxy(&mockAutoGroupAdapter{name: "UnusedAuto", groupType: constant.Fallback})
+	tunnel.UpdateProxies(deepProxies, nil)
+
+	primary, secondary := classifyAutoGroups()
+	if len(primary) != 1 || primary[0].Name() != "DeepAuto" {
+		t.Fatalf("expected DeepAuto in primary beyond 6-hop chain, got %v", primary)
+	}
+	if len(secondary) != 1 || secondary[0].Name() != "UnusedAuto" {
+		t.Fatalf("expected UnusedAuto in secondary, got %v", secondary)
+	}
+
+	// 2. Cyclic selectors + active primary & secondary coexistence
+	tunnel.UpdateProxies(map[string]constant.Proxy{
+		"SelCycleA":     adapter.NewProxy(&mockSelectorAdapter{name: "SelCycleA", now: "SelCycleB"}),
+		"SelCycleB":     adapter.NewProxy(&mockSelectorAdapter{name: "SelCycleB", now: "SelCycleA"}),
+		"SelEntry":      adapter.NewProxy(&mockSelectorAdapter{name: "SelEntry", now: "PrimaryAuto"}),
+		"PrimaryAuto":   adapter.NewProxy(&mockAutoGroupAdapter{name: "PrimaryAuto", groupType: constant.URLTest}),
+		"SecondaryAuto": adapter.NewProxy(&mockAutoGroupAdapter{name: "SecondaryAuto", groupType: constant.URLTest}),
+	}, nil)
+
+	primary, secondary = classifyAutoGroups()
+	if len(primary) != 1 || primary[0].Name() != "PrimaryAuto" {
+		t.Fatalf("expected PrimaryAuto despite selector cycle, got %v", primary)
+	}
+	if len(secondary) != 1 || secondary[0].Name() != "SecondaryAuto" {
+		t.Fatalf("expected SecondaryAuto in secondary, got %v", secondary)
+	}
+
+	// 3. Convergent selectors sharing downstream selector -> auto group + unused secondary
+	tunnel.UpdateProxies(map[string]constant.Proxy{
+		"SelLeft":       adapter.NewProxy(&mockSelectorAdapter{name: "SelLeft", now: "SharedMid"}),
+		"SelRight":      adapter.NewProxy(&mockSelectorAdapter{name: "SelRight", now: "SharedMid"}),
+		"SharedMid":     adapter.NewProxy(&mockSelectorAdapter{name: "SharedMid", now: "ConvergedAuto"}),
+		"ConvergedAuto": adapter.NewProxy(&mockAutoGroupAdapter{name: "ConvergedAuto", groupType: constant.Fallback}),
+		"IdleAuto":      adapter.NewProxy(&mockAutoGroupAdapter{name: "IdleAuto", groupType: constant.URLTest}),
+	}, nil)
+
+	primary, secondary = classifyAutoGroups()
+	if len(primary) != 1 || primary[0].Name() != "ConvergedAuto" {
+		t.Fatalf("expected ConvergedAuto in primary, got %v", primary)
+	}
+	if len(secondary) != 1 || secondary[0].Name() != "IdleAuto" {
+		t.Fatalf("expected IdleAuto in secondary, got %v", secondary)
 	}
 }

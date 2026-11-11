@@ -171,6 +171,48 @@ func writeFailoverStatsAtomic(path string, stats FailoverStats) error {
 	return nil
 }
 
+// sanitizeLoadedStats clamps invalid counters, repairs malformed dates, and caps loaded records.
+func sanitizeLoadedStats(loaded FailoverStats) FailoverStats {
+	if loaded.Total < 0 {
+		loaded.Total = 0
+	}
+	if loaded.Today < 0 {
+		loaded.Today = 0
+	}
+	if loaded.Today > loaded.Total {
+		loaded.Today = loaded.Total
+	}
+	if loaded.Date != "" {
+		if _, err := time.Parse("2006-01-02", loaded.Date); err != nil {
+			loaded.Date = todayDateString()
+			loaded.Today = 0
+		}
+	}
+	if loaded.Records == nil {
+		loaded.Records = make([]FailoverRecord, 0)
+	} else {
+		capSize := len(loaded.Records)
+		if capSize > maxFailoverRecords {
+			capSize = maxFailoverRecords
+		}
+		filtered := make([]FailoverRecord, 0, capSize)
+		for _, rec := range loaded.Records {
+			if rec.GroupName == "" || rec.Before == "" || rec.After == "" || rec.Before == rec.After {
+				continue
+			}
+			if rec.Time < 0 {
+				rec.Time = 0
+			}
+			filtered = append(filtered, rec)
+			if len(filtered) >= maxFailoverRecords {
+				break
+			}
+		}
+		loaded.Records = filtered
+	}
+	return loaded
+}
+
 func ensureFailoverLoadedLocked() error {
 	currentHome := constant.Path.HomeDir()
 	if currentHome == "" {
@@ -187,11 +229,15 @@ func ensureFailoverLoadedLocked() error {
 	if err == nil {
 		var loaded FailoverStats
 		if err := json.Unmarshal(data, &loaded); err == nil {
-			failoverStats = loaded
-			if failoverStats.Records == nil {
-				failoverStats.Records = make([]FailoverRecord, 0)
-			}
+			failoverStats = sanitizeLoadedStats(loaded)
 		} else {
+			corruptPath := path + ".corrupt"
+			_ = os.Remove(corruptPath)
+			if backupErr := os.Rename(path, corruptPath); backupErr != nil {
+				log.Warnln("[FailoverStats] corrupted stats file %s could not be backed up: %v (decode err: %v)", path, backupErr, err)
+			} else {
+				log.Warnln("[FailoverStats] backed up corrupted stats file to %s (decode err: %v)", corruptPath, err)
+			}
 			// Corrupted file: initialize empty state for this directory
 			failoverStats = FailoverStats{
 				Total:   0,

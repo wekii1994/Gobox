@@ -258,7 +258,7 @@ func NewURLTest(option GroupCommonOption, urlTestOption URLTestOption, emptyFall
 // and expected-status policy, and invalidates its cached selection afterwards.
 func (u *URLTest) HealthCheckContext(ctx context.Context) (map[string]uint16, error) {
 	if !u.probing.CompareAndSwap(false, true) {
-		return nil, nil
+		return nil, ErrHealthCheckInFlight
 	}
 	defer u.probing.Store(false)
 

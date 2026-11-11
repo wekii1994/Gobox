@@ -88,6 +88,8 @@ class GoboxService : Service(), BaseServiceInterface {
     override fun stop() {
         hasStartedForeground = false
         lastNotificationText = null
+        pendingSpeedProfile = null
+        pendingSpeedInfo = null
 
         runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -123,7 +125,9 @@ class GoboxService : Service(), BaseServiceInterface {
             title = getString(R.string.core_suspended)
             content = getString(R.string.smart_auto_stop_service_running)
         } else {
-            title = getString(R.string.core_connected)
+            title = pendingSpeedProfile?.takeIf { it.isNotBlank() }
+                ?: GlobalState.currentProfileName.takeIf { it.isNotBlank() }
+                ?: getString(R.string.core_connected)
             content = getString(R.string.service_running)
         }
 
@@ -151,7 +155,7 @@ class GoboxService : Service(), BaseServiceInterface {
     }
 
     internal suspend fun restoreNotification() {
-        pendingSpeedProfile = null
+        GlobalState.isSpeedNotificationEnabled = false
         pendingSpeedInfo = null
         if (hasStartedForeground) {
             startForeground()
@@ -159,10 +163,26 @@ class GoboxService : Service(), BaseServiceInterface {
     }
 
     @SuppressLint("ForegroundServiceType")
+    internal suspend fun updateNotificationTitle(profileName: String) {
+        pendingSpeedProfile = profileName
+        val content = if (GlobalState.isSpeedNotificationEnabled) {
+            pendingSpeedInfo ?: getString(R.string.service_running)
+        } else {
+            pendingSpeedInfo = null
+            getString(R.string.service_running)
+        }
+        postNotificationContent(profileName, content)
+    }
+
+    @SuppressLint("ForegroundServiceType")
     internal suspend fun updateNotificationSpeed(profileName: String, speedInfo: String) {
         pendingSpeedProfile = profileName
         pendingSpeedInfo = speedInfo
+        postNotificationContent(profileName, speedInfo)
+    }
 
+    @SuppressLint("ForegroundServiceType")
+    private suspend fun postNotificationContent(title: String, content: String) {
         val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
         if (powerManager?.isInteractive == false) {
             return
@@ -172,15 +192,15 @@ class GoboxService : Service(), BaseServiceInterface {
             return
         }
 
-        val combinedText = "$profileName\n$speedInfo"
+        val combinedText = "$title\n$content"
         if (combinedText == lastNotificationText) {
             return
         }
         lastNotificationText = combinedText
 
         val notification = notificationBuilder()
-            .setContentTitle(profileName)
-            .setContentText(speedInfo)
+            .setContentTitle(title)
+            .setContentText(content)
             .setStyle(null)
             .build()
 
@@ -188,12 +208,12 @@ class GoboxService : Service(), BaseServiceInterface {
             hasStartedForeground = true
             runCatching {
                 this.startForeground(notification, useSpecialType = !GlobalState.isSmartStopped)
-            }.onFailure { android.util.Log.e("GoboxService", "updateNotificationSpeed startForeground error: ${it.message}") }
+            }.onFailure { android.util.Log.e("GoboxService", "postNotificationContent startForeground error: ${it.message}") }
         } else {
             runCatching {
                 getSystemService(android.app.NotificationManager::class.java)
                     ?.notify(GlobalState.NOTIFICATION_ID, notification)
-            }.onFailure { android.util.Log.e("GoboxService", "updateNotificationSpeed notify error: ${it.message}") }
+            }.onFailure { android.util.Log.e("GoboxService", "postNotificationContent notify error: ${it.message}") }
         }
     }
 

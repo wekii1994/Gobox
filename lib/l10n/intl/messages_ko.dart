@@ -1837,6 +1837,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("테스트 URL"),
     "testing": MessageLookupByLibrary.simpleMessage("검사 중"),
     "textScale": MessageLookupByLibrary.simpleMessage("텍스트 배율"),
+    "pageScale": MessageLookupByLibrary.simpleMessage("페이지 배율"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "전체 인터페이스 요소 크기 조정 (60% - 120%)",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("테마"),
     "themeColor": MessageLookupByLibrary.simpleMessage("테마 색상"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("테마 색상 관련 설정"),

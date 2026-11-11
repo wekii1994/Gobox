@@ -93,6 +93,12 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 GlobalState.destroyServiceEngine()
                 result.success(true)
             }
+            "updateNotificationTitle" -> {
+                VpnPlugin.handleUpdateNotificationTitle(
+                    call.argument<String>("profileName") ?: ""
+                )
+                result.success(true)
+            }
             "updateNotificationSpeed" -> {
                 VpnPlugin.handleUpdateNotificationSpeed(
                     call.argument<String>("profileName") ?: "",

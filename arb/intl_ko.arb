@@ -610,6 +610,8 @@
   "clearDataTipDesc": "앱의 모든 설정이 초기화됩니다. 백업을 확인하세요. 계속하시겠습니까?",
   "zoom": "확대/축소",
   "textScale": "텍스트 배율",
+  "pageScale": "페이지 배율",
+  "pageScaleDesc": "전체 인터페이스 요소 크기 조정 (60% - 120%)",
   "trayIconInvert": "트레이 아이콘 반전",
   "trayIconInvertDesc": "현재 트레이 아이콘 색상 반전 설정",
   "darkIcon": "다크 아이콘",

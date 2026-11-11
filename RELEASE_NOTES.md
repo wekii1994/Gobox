@@ -1,8 +1,32 @@
-## 🚀 Gobox v1.19.8-pre1-6 更新说明
+## 🚀 Gobox v1.19.8-pre1-7 更新说明
 
-本版本重点修复了自动选路优选切节点误断连接、单元测试回归、通知栏网速闪烁以及后台快捷启停空指针等 4 个核心 Bug：
+本版本聚焦通知栏架构解耦、切网探测超时与链路遍历完善、故障统计容错加固及剩余多语言本地化补齐等 6 项核心优化：
 
 ### 🛠️ 核心修复与优化
+1. **常驻通知栏标题同步与 1s 网速 Ticker 彻底解耦**
+   - 在 Android Kotlin（`VpnPlugin` / `ServicePlugin` / `GoboxVpnService` / `GoboxService`）与 Dart（`Service` / `Vpn` / `AppController` / `main.dart`）双端新增独立 `updateNotificationTitle` MethodChannel 通道。
+   - 关闭"通知栏显示实时网速"时，切节点或亮屏不再意外开启 1s 网速 ticker；开启网速显示且已初始化通知标题后，每秒 `updateTraffic()` 不再重复发送 Dart→Kotlin 标题 IPC；启停与 `restoreNotification()` 同步清理并复位相关状态。
+
+2. **补全 `GroupBase.TestTimeout()` 并恢复策略组真实超时预算**
+   - 在 `outboundgroup.GroupBase` 新增 `TestTimeout() time.Duration`，使 `calculateGroupProbeBudget()` 能读取 `URLTest`/`Fallback` 策略组配置的真实 `test-timeout`（未配置或 <= 0 时默认 5s）。
+
+3. **显式区分健康检查并发进行中状态（`ErrHealthCheckInFlight`）**
+   - `outboundgroup.ErrHealthCheckInFlight` 取代 `URLTest` 与 `Fallback` 的静默 `nil, nil`；`probeGroupsConcurrently()` 识别该状态并视为本轮满足，避免误判失败触发重复重试。
+
+4. **重写 `classifyAutoGroups()` 选择器链路遍历逻辑**
+   - 移除 `depth < 6` 深度上限，改用每条链路独立的 `chainVisited` 环检测集合，支持深层链路、安全终止环路及多入口汇聚到同一下游策略组，并保持 `primary` / `secondary` 低功耗探测分级。
+
+5. **加固 `failover_stats.go` 加载校验与损坏备份**
+   - JSON 解析失败时备份至 `failover_stats.json.corrupt` 并记录告警日志；新增 `sanitizeLoadedStats()` 规范化负数统计、`Today <= Total`、非法日期、无效记录、负时间戳及超长记录列表。
+
+6. **补全剩余多语言 `pageScale` 与收口 `patch.go` YAML 标量解析**
+   - 补齐 `zh_TC`、`fa`、`ja`、`ko`、`ru` 的 `pageScale` 与 `pageScaleDesc` 本地化词条。
+   - 在 `core/patch.go` 提取共享 `parsePositiveInt` / `normalizeHealthCheckInterval` 辅助函数，保持全部既定夹紧参数不变并统一修复非数字字符串 `interval` 兜底。
+
+---
+
+### 📦 历史版本（v1.19.8-pre1-6）
+本版本继承 v1.19.8-pre1-6 全部能力（健康延迟优选与故障转移区分、`getGroupTestURL` 兼容降级、瞬时网速同步与熄屏缓存修复、无界面独立 isolate 空指针修复等）：
 1. **区分健康延迟优选与节点死亡倒换，防止误断连接与误计 Failover**
    - 在 `outboundgroup` 新增 `OnGroupSelectionChanged` 回调。当 `URLTest.fast()` 因延迟抖动超过容差而切换到更快的健康节点（且原节点依然存活）时，仅触发前端与通知栏刷新，不再错误触发故障转移计数或强制断开正常长连接。
    - 仅在原节点确实失活/移除时触发 `OnGroupNowChanged` 记录故障转移并清理僵尸连接。

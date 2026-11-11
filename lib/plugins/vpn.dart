@@ -111,6 +111,12 @@ class Vpn {
     return await methodChannel.invokeMethod<bool>('status') ?? false;
   }
 
+  Future<void> updateNotificationTitle(String profileName) async {
+    await methodChannel.invokeMethod<void>('updateNotificationTitle', {
+      'profileName': profileName,
+    });
+  }
+
   Future<void> updateNotificationSpeed(
     String profileName,
     String speedInfo,

@@ -2238,6 +2238,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("آدرس تست"),
     "testing": MessageLookupByLibrary.simpleMessage("در حال بررسی"),
     "textScale": MessageLookupByLibrary.simpleMessage("مقیاس متن"),
+    "pageScale": MessageLookupByLibrary.simpleMessage("مقیاس صفحه"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "تغییر مقیاس کلی عناصر رابط کاربری (60% - 120%)",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("پوسته"),
     "themeColor": MessageLookupByLibrary.simpleMessage("رنگ پوسته"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

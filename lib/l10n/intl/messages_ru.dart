@@ -2306,6 +2306,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("URL теста"),
     "testing": MessageLookupByLibrary.simpleMessage("Проверка"),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштаб текста"),
+    "pageScale": MessageLookupByLibrary.simpleMessage("Масштаб страницы"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "Масштабирование всех элементов интерфейса (60% - 120%)",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Тема"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Цвет темы"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

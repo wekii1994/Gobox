@@ -714,3 +714,110 @@ func TestFailoverStatsEmptyHomeReturnsError(t *testing.T) {
 		t.Fatalf("expected handleResetFailoverStats to return error when HomeDir is empty")
 	}
 }
+
+func TestFailoverStatsCorruptFileBackupAndFieldSanitization(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "corrupt_sanitize_*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	oldHome := constant.Path.HomeDir()
+	defer constant.SetHomeDir(oldHome)
+
+	// 1. Corrupted JSON is backed up to .corrupt and resets cleanly to zero state
+	subDirCorrupt := filepath.Join(tempDir, "corrupt_case")
+	if err := os.MkdirAll(subDirCorrupt, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	statsPath := filepath.Join(subDirCorrupt, failoverStatsFile)
+	corruptRaw := []byte("{invalid json!!!")
+	if err := os.WriteFile(statsPath, corruptRaw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	constant.SetHomeDir(subDirCorrupt)
+	stats := mustGetFailoverStats(t)
+	if stats.Total != 0 || stats.Today != 0 || len(stats.Records) != 0 {
+		t.Fatalf("expected clean zero state after corrupt JSON, got %+v", stats)
+	}
+	backupData, err := os.ReadFile(statsPath + ".corrupt")
+	if err != nil {
+		t.Fatalf("expected .corrupt backup file to exist, got err: %v", err)
+	}
+	if string(backupData) != string(corruptRaw) {
+		t.Fatalf("corrupt backup mismatch: got %q, want %q", string(backupData), string(corruptRaw))
+	}
+
+	// 2. Negative counts, bad date, negative timestamps, invalid records, and >50 records are sanitized
+	subDirSanitize := filepath.Join(tempDir, "sanitize_case")
+	if err := os.MkdirAll(subDirSanitize, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	oversized := make([]FailoverRecord, 0, maxFailoverRecords+15)
+	// Invalid records should be filtered out
+	oversized = append(oversized,
+		FailoverRecord{Time: 100, GroupName: "", Before: "A", After: "B"},
+		FailoverRecord{Time: 101, GroupName: "G", Before: "A", After: "A"},
+	)
+	for i := 0; i < maxFailoverRecords+10; i++ {
+		ts := int64(1000 + i)
+		if i == 0 {
+			ts = -999
+		}
+		oversized = append(oversized, FailoverRecord{
+			Time:      ts,
+			GroupName: "Auto",
+			Before:    "NodeA",
+			After:     "NodeB",
+		})
+	}
+	dirtyStats := FailoverStats{
+		Total:   -10,
+		Today:   -5,
+		Date:    "invalid-date",
+		Records: oversized,
+	}
+	dirtyData, _ := json.Marshal(dirtyStats)
+	if err := os.WriteFile(filepath.Join(subDirSanitize, failoverStatsFile), dirtyData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	constant.SetHomeDir(subDirSanitize)
+	sanitized := mustGetFailoverStats(t)
+	if sanitized.Total != 0 || sanitized.Today != 0 {
+		t.Fatalf("expected negative Total/Today clamped to 0, got Total=%d Today=%d", sanitized.Total, sanitized.Today)
+	}
+	if sanitized.Date != todayDateString() {
+		t.Fatalf("expected invalid Date reset to today (%s), got %q", todayDateString(), sanitized.Date)
+	}
+	if len(sanitized.Records) != maxFailoverRecords {
+		t.Fatalf("expected Records truncated to %d, got %d", maxFailoverRecords, len(sanitized.Records))
+	}
+	if sanitized.Records[0].Time != 0 {
+		t.Fatalf("expected negative record timestamp clamped to 0, got %d", sanitized.Records[0].Time)
+	}
+
+	// 3. Today > Total is clamped down to Total when date matches today
+	subDirTodayCap := filepath.Join(tempDir, "today_cap_case")
+	if err := os.MkdirAll(subDirTodayCap, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	cappedStats := FailoverStats{
+		Total:   3,
+		Today:   9,
+		Date:    todayDateString(),
+		Records: nil,
+	}
+	cappedData, _ := json.Marshal(cappedStats)
+	if err := os.WriteFile(filepath.Join(subDirTodayCap, failoverStatsFile), cappedData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	constant.SetHomeDir(subDirTodayCap)
+	capped := mustGetFailoverStats(t)
+	if capped.Total != 3 || capped.Today != 3 {
+		t.Fatalf("expected Today capped to Total (3), got Total=%d Today=%d", capped.Total, capped.Today)
+	}
+	if capped.Records == nil {
+		t.Fatalf("expected non-nil empty Records slice")
+	}
+}

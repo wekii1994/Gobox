@@ -440,6 +440,45 @@ func combineExcludeFilter(target map[string]any, filter string) {
 	target["exclude-filter"] = filter
 }
 
+// parsePositiveInt extracts a strictly positive integer from common decoded YAML scalar types.
+func parsePositiveInt(v any) (int, bool) {
+	const maxInt = int(^uint(0) >> 1)
+	switch value := v.(type) {
+	case int:
+		return value, value > 0
+	case int64:
+		if value <= 0 || value > int64(maxInt) {
+			return 0, false
+		}
+		return int(value), true
+	case uint64:
+		if value == 0 || value > uint64(maxInt) {
+			return 0, false
+		}
+		return int(value), true
+	case float64:
+		n := int(value)
+		return n, n > 0
+	case string:
+		parsed, err := strconv.Atoi(strings.TrimSpace(value))
+		if err != nil || parsed <= 0 {
+			return 0, false
+		}
+		return parsed, true
+	default:
+		return 0, false
+	}
+}
+
+// normalizeHealthCheckInterval clamps or defaults a map's interval field to fallbackInterval.
+func normalizeHealthCheckInterval(target map[string]any, fallbackInterval int) {
+	intervalVal, ok := parsePositiveInt(target["interval"])
+	if !ok || intervalVal > fallbackInterval {
+		intervalVal = fallbackInterval
+	}
+	target["interval"] = intervalVal
+}
+
 func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 	filter := params.NodeExcludeFilter
 	if raw.ProxyGroup != nil && (filter != "" || params.HealthCheckTimeout != defaultHealthCheckTimeout) {
@@ -540,63 +579,26 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 			groupType = strings.ToLower(strings.TrimSpace(t))
 		}
 
-		tolVal := 0
-		switch tolerance := group["tolerance"].(type) {
-		case int:
-			tolVal = tolerance
-		case float64:
-			tolVal = int(tolerance)
-		case string:
-			if value, err := strconv.Atoi(strings.TrimSpace(tolerance)); err == nil {
-				tolVal = value
-			}
-		}
-		if groupType == "url-test" {
-			if tolVal <= 0 || tolVal > maxAllowedTolerance {
-				tolVal = optimalTolerance
-			}
+		tolVal, tolOK := parsePositiveInt(group["tolerance"])
+		if groupType == "url-test" && (!tolOK || tolVal > maxAllowedTolerance) {
+			tolVal = optimalTolerance
 		}
 		if tolVal > 0 {
 			group["tolerance"] = tolVal
 		}
 
 		if groupType == "url-test" || groupType == "fallback" || groupType == "load-balance" {
-			switch interval := group["interval"].(type) {
-			case int:
-				if interval <= 0 || interval > optimalHealthCheckInterval {
-					group["interval"] = optimalHealthCheckInterval
-				}
-			case float64:
-				if int(interval) <= 0 || int(interval) > optimalHealthCheckInterval {
-					group["interval"] = optimalHealthCheckInterval
-				}
-			case string:
-				if value, err := strconv.Atoi(strings.TrimSpace(interval)); err == nil {
-					if value <= 0 || value > optimalHealthCheckInterval {
-						group["interval"] = optimalHealthCheckInterval
-					}
-				}
-			case nil:
-				group["interval"] = optimalHealthCheckInterval
-			}
+			normalizeHealthCheckInterval(group, optimalHealthCheckInterval)
 
 			if status, ok := group["expected-status"].(string); !ok || strings.TrimSpace(status) == "" {
 				group["expected-status"] = defaultExpectedStatus
 			}
 
-			maxFailedVal := 0
-			switch maxFailed := group["max-failed-times"].(type) {
-			case int:
-				maxFailedVal = maxFailed
-			case float64:
-				maxFailedVal = int(maxFailed)
-			case string:
-				if value, err := strconv.Atoi(strings.TrimSpace(maxFailed)); err == nil {
-					maxFailedVal = value
-				}
-			}
-			if maxFailedVal <= 0 || maxFailedVal > maxAllowedMaxFailedTimes {
+			maxFailedVal, ok := parsePositiveInt(group["max-failed-times"])
+			if !ok || maxFailedVal > maxAllowedMaxFailedTimes {
 				group["max-failed-times"] = defaultMaxFailedTimes
+			} else {
+				group["max-failed-times"] = maxFailedVal
 			}
 		}
 	}
@@ -609,24 +611,7 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 			if status, ok := hc["expected-status"].(string); !ok || strings.TrimSpace(status) == "" {
 				hc["expected-status"] = defaultExpectedStatus
 			}
-			switch interval := hc["interval"].(type) {
-			case int:
-				if interval <= 0 || interval > optimalHealthCheckInterval {
-					hc["interval"] = optimalHealthCheckInterval
-				}
-			case float64:
-				if int(interval) <= 0 || int(interval) > optimalHealthCheckInterval {
-					hc["interval"] = optimalHealthCheckInterval
-				}
-			case string:
-				if v, err := strconv.Atoi(strings.TrimSpace(interval)); err == nil {
-					if v <= 0 || v > optimalHealthCheckInterval {
-						hc["interval"] = optimalHealthCheckInterval
-					}
-				}
-			case nil:
-				hc["interval"] = optimalHealthCheckInterval
-			}
+			normalizeHealthCheckInterval(hc, optimalHealthCheckInterval)
 			if params.HealthCheckTimeout != defaultHealthCheckTimeout {
 				if timeout, exist := hc["timeout"]; !exist || timeout == nil {
 					hc["timeout"] = params.HealthCheckTimeout

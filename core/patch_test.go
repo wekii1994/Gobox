@@ -697,3 +697,82 @@ func TestEnsureTunInet6(t *testing.T) {
 		}
 	}
 }
+
+func TestPatchProxyGroupsHealthCheckClampingAndScalarParsing(t *testing.T) {
+	rawCfg := parsePatchProfile(t, `
+proxy-providers:
+  subValidStr:
+    type: http
+    url: https://example.com/1
+    health-check: {enable: true, interval: "180", expected-status: "200"}
+  subInvalidStr:
+    type: http
+    url: https://example.com/2
+    health-check: {enable: true, interval: "invalid"}
+  subTooLarge:
+    type: http
+    url: https://example.com/3
+    health-check: {enable: true, interval: 900.0}
+proxies:
+  - {name: Node1, type: direct}
+proxy-groups:
+  - {name: GValid, type: url-test, proxies: [Node1], tolerance: "60", interval: "120", max-failed-times: 4.0, expected-status: "200"}
+  - {name: GClamped, type: url-test, proxies: [Node1], tolerance: 120, interval: "abc", max-failed-times: 10}
+  - {name: GDefaults, type: fallback, proxies: [Node1], interval: 0, max-failed-times: -1}
+rules:
+  - MATCH,GValid
+`)
+	params := patchParams(t, `{}`)
+	if _, err := applyPatch(rawCfg, params); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := rawCfg.ProxyGroup[0]["tolerance"]; got != 60 {
+		t.Errorf("GValid tolerance = %v (%T), want 60", got, got)
+	}
+	if got := rawCfg.ProxyGroup[0]["interval"]; got != 120 {
+		t.Errorf("GValid interval = %v (%T), want 120", got, got)
+	}
+	if got := rawCfg.ProxyGroup[0]["max-failed-times"]; got != 4 {
+		t.Errorf("GValid max-failed-times = %v (%T), want 4", got, got)
+	}
+	if got := rawCfg.ProxyGroup[0]["expected-status"]; got != "200" {
+		t.Errorf("GValid expected-status = %v, want 200", got)
+	}
+
+	if got := rawCfg.ProxyGroup[1]["tolerance"]; got != 50 {
+		t.Errorf("GClamped tolerance = %v, want 50", got)
+	}
+	if got := rawCfg.ProxyGroup[1]["interval"]; got != 300 {
+		t.Errorf("GClamped invalid-string interval = %v, want 300", got)
+	}
+	if got := rawCfg.ProxyGroup[1]["max-failed-times"]; got != 3 {
+		t.Errorf("GClamped max-failed-times = %v, want 3", got)
+	}
+	if got := rawCfg.ProxyGroup[1]["expected-status"]; got != "200-204" {
+		t.Errorf("GClamped expected-status = %v, want 200-204", got)
+	}
+
+	if got := rawCfg.ProxyGroup[2]["interval"]; got != 300 {
+		t.Errorf("GDefaults interval = %v, want 300", got)
+	}
+	if got := rawCfg.ProxyGroup[2]["max-failed-times"]; got != 3 {
+		t.Errorf("GDefaults max-failed-times = %v, want 3", got)
+	}
+
+	hc1 := rawCfg.ProxyProvider["subValidStr"]["health-check"].(map[string]any)
+	if got := hc1["interval"]; got != 180 {
+		t.Errorf("subValidStr interval = %v (%T), want 180", got, got)
+	}
+	hc2 := rawCfg.ProxyProvider["subInvalidStr"]["health-check"].(map[string]any)
+	if got := hc2["interval"]; got != 300 {
+		t.Errorf("subInvalidStr interval = %v, want 300", got)
+	}
+	if got := hc2["expected-status"]; got != "200-204" {
+		t.Errorf("subInvalidStr expected-status = %v, want 200-204", got)
+	}
+	hc3 := rawCfg.ProxyProvider["subTooLarge"]["health-check"].(map[string]any)
+	if got := hc3["interval"]; got != 300 {
+		t.Errorf("subTooLarge interval = %v, want 300", got)
+	}
+}

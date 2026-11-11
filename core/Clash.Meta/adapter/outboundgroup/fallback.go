@@ -198,7 +198,7 @@ func (f *Fallback) healthCheck() {
 // HealthCheckContext refreshes all candidates, including currently unselected ones.
 func (f *Fallback) HealthCheckContext(ctx context.Context) (map[string]uint16, error) {
 	if !f.probing.CompareAndSwap(false, true) {
-		return nil, nil
+		return nil, ErrHealthCheckInFlight
 	}
 	defer f.probing.Store(false)
 

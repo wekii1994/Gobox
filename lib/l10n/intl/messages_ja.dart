@@ -1842,6 +1842,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("テストURL"),
     "testing": MessageLookupByLibrary.simpleMessage("検出中"),
     "textScale": MessageLookupByLibrary.simpleMessage("テキスト倍率"),
+    "pageScale": MessageLookupByLibrary.simpleMessage("ページ倍率"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "インターフェース全体の表示倍率を調整（60% - 120%）",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("テーマ"),
     "themeColor": MessageLookupByLibrary.simpleMessage("テーマカラー"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("テーマカラー関連の設定"),

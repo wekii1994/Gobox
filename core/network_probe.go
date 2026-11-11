@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/constant"
 	P "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -106,8 +108,11 @@ func classifyAutoGroups() (primary []*adapter.Proxy, secondary []*adapter.Proxy)
 		if !ok || p.Type() != constant.Selector {
 			continue
 		}
+		chainVisited := map[string]struct{}{
+			p.Name(): {},
+		}
 		curr := p
-		for depth := 0; depth < 6 && curr != nil; depth++ {
+		for curr != nil {
 			pg, ok := curr.ProxyAdapter.(outboundgroup.ProxyGroup)
 			if !ok {
 				break
@@ -116,10 +121,11 @@ func classifyAutoGroups() (primary []*adapter.Proxy, secondary []*adapter.Proxy)
 			if nowName == "" {
 				break
 			}
-			if _, visited := activeNames[nowName]; visited {
+			activeNames[nowName] = struct{}{}
+			if _, visited := chainVisited[nowName]; visited {
 				break
 			}
-			activeNames[nowName] = struct{}{}
+			chainVisited[nowName] = struct{}{}
 			nextRaw, exists := allProxies[nowName]
 			if !exists {
 				break
@@ -252,6 +258,11 @@ func probeGroupsConcurrently(ctx context.Context, groups []*adapter.Proxy) bool 
 			defer cancel()
 			results, err := checker.HealthCheckContext(testCtx)
 
+			if errors.Is(err, outboundgroup.ErrHealthCheckInFlight) {
+				log.Debugln("[NetworkProbe] Group %s health check already in progress, skipping duplicate retry", g.Name())
+				completedGroups.Add(1)
+				return true
+			}
 			if err == nil && len(results) > 0 {
 				completedGroups.Add(1)
 				return true

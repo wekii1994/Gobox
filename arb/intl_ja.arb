@@ -610,6 +610,8 @@
   "clearDataTipDesc": "アプリのすべての設定がリセットされます。バックアップを確認してください。続行しますか？",
   "zoom": "ズーム",
   "textScale": "テキスト倍率",
+  "pageScale": "ページ倍率",
+  "pageScaleDesc": "インターフェース全体の表示倍率を調整（60% - 120%）",
   "trayIconInvert": "トレイアイコン反転",
   "trayIconInvertDesc": "現在のトレイアイコンの色を反転設定",
   "darkIcon": "ダークアイコン",

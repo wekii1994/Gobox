@@ -240,12 +240,11 @@ Future<void> _service(List<String> flags) async {
               'Service: resolve initial outbound title failed: $e',
             );
           }
-          await vpn?.updateNotificationSpeed(
-            profileName,
-            globalState.config.vpnProps.networkSpeedNotification
-                ? '↑0B/s ↓0B/s'
-                : appLocalizations.serviceRunning,
-          );
+          if (globalState.config.vpnProps.networkSpeedNotification) {
+            await vpn?.updateNotificationSpeed(profileName, '↑0B/s ↓0B/s');
+          } else {
+            await vpn?.updateNotificationTitle(profileName);
+          }
 
           clashLibHandler.startListener();
         } catch (e) {

@@ -241,6 +241,13 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 result.success(handleSmartResume(Gson().fromJson(data, VpnOptions::class.java)))
             }
 
+            "updateNotificationTitle" -> {
+                handleUpdateNotificationTitle(
+                    call.argument<String>("profileName") ?: ""
+                )
+                result.success(true)
+            }
+
             "updateNotificationSpeed" -> {
                 handleUpdateNotificationSpeed(
                     call.argument<String>("profileName") ?: "",
@@ -574,6 +581,13 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         }
     }
 
+    fun handleUpdateNotificationTitle(profileName: String) {
+        if (profileName != GlobalState.currentProfileName) {
+            GlobalState.currentProfileName = profileName
+        }
+        updateNotificationTitle(profileName)
+    }
+
     fun handleUpdateNotificationSpeed(profileName: String, speedInfo: String) {
         if (profileName != GlobalState.currentProfileName ||
             !GlobalState.isSpeedNotificationEnabled
@@ -616,6 +630,20 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         }
     }
 
+    fun updateNotificationTitle(profileName: String) {
+        scope.launch {
+            runCatching {
+                when (val service = goBoxService) {
+                    is GoboxVpnService -> service.updateNotificationTitle(profileName)
+                    is GoboxService -> service.updateNotificationTitle(profileName)
+                    else -> Unit
+                }
+            }.onFailure {
+                android.util.Log.e("VpnPlugin", "updateNotificationTitle error: ${it.message}")
+            }
+        }
+    }
+
     fun updateNotificationSpeed(profileName: String, speedInfo: String) {
         scope.launch {
             runCatching {
@@ -631,6 +659,7 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     fun restoreNotification() {
+        GlobalState.isSpeedNotificationEnabled = false
         stopSpeedTicker()
         scope.launch {
             runCatching {
@@ -872,6 +901,9 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             shouldForceStop = force || goBoxService == null
         }
 
+        stopSpeedTicker()
+        GlobalState.isSpeedNotificationEnabled = false
+        GlobalState.currentProfileName = ""
         suspendModule?.uninstall()
         suspendModule = null
         Core.stopTun()

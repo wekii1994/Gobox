@@ -37,6 +37,9 @@ var OnGroupNowChanged func(group C.ProxyAdapter, groupName, before, after string
 // different healthy proxy due to latency optimization without a node failure.
 var OnGroupSelectionChanged func(groupName, before, after string)
 
+// ErrHealthCheckInFlight indicates a health check probe is already active for this group.
+var ErrHealthCheckInFlight = errors.New("health check already in progress")
+
 type GroupBase struct {
 	*outbound.Base
 	hidden            bool
@@ -128,6 +131,13 @@ func (gb *GroupBase) Hidden() bool {
 
 func (gb *GroupBase) Icon() string {
 	return gb.icon
+}
+
+func (gb *GroupBase) TestTimeout() time.Duration {
+	if gb == nil || gb.testTimeout <= 0 {
+		return 5 * time.Second
+	}
+	return time.Duration(gb.testTimeout) * time.Millisecond
 }
 
 func (gb *GroupBase) EmptyFallback() C.Proxy {
