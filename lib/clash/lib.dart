@@ -261,6 +261,7 @@ class ClashLibHandler {
     final action = Action(
       id: '${ActionMethod.getProxies.name}#${utils.id}',
       method: ActionMethod.getProxies,
+      data: null,
     );
     final rawMessage = await invokeAction(json.encode(action));
     final data = decodeActionResult(rawMessage)?.data;
