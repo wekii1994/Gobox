@@ -474,7 +474,7 @@ class AppController {
     final service = vpn_service.service;
     if (service == null) return;
     final enableSpeed = _ref.read(vpnSettingProvider).networkSpeedNotification;
-    if (enableSpeed && !service.hasSpeedNotificationProfile) {
+    if (enableSpeed) {
       await service.updateNotificationSpeed(title, traffic.toString());
     } else {
       await service.updateNotificationTitle(title);
@@ -501,9 +501,10 @@ class AppController {
     if (service == null) return null;
     final title = getPhysicalOutboundTitle();
     final enableSpeed = _ref.read(vpnSettingProvider).networkSpeedNotification;
-    final needsSync = enableSpeed
-        ? service.needsSpeedNotificationSync(title)
-        : service.needsNotificationTitleSync(title);
+    if (enableSpeed) {
+      return title;
+    }
+    final needsSync = service.needsNotificationTitleSync(title);
     return needsSync ? title : null;
   }
 

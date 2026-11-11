@@ -332,13 +332,12 @@ type probeTask struct {
 type cancellableProbePool struct {
 	mu           sync.Mutex
 	tasks        map[string]*probeTask
-	currentRound any
-	results      map[string]uint16
+	roundResults map[any]map[string]uint16
 }
 
 var globalProbePool = &cancellableProbePool{
-	tasks:   make(map[string]*probeTask),
-	results: make(map[string]uint16),
+	tasks:        make(map[string]*probeTask),
+	roundResults: make(map[any]map[string]uint16),
 }
 
 func (p *cancellableProbePool) CleanupRound(round any) {
@@ -347,9 +346,8 @@ func (p *cancellableProbePool) CleanupRound(round any) {
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.currentRound == round {
-		p.currentRound = nil
-		p.results = nil
+	if p.roundResults != nil {
+		delete(p.roundResults, round)
 	}
 }
 
@@ -381,12 +379,16 @@ func (p *cancellableProbePool) Do(
 
 	p.mu.Lock()
 	if roundVal != nil {
-		if p.currentRound != roundVal {
-			p.currentRound = roundVal
-			p.results = make(map[string]uint16)
-		} else if cachedVal, ok := p.results[key]; ok {
-			p.mu.Unlock()
-			return cachedVal, nil
+		if p.roundResults == nil {
+			p.roundResults = make(map[any]map[string]uint16)
+		}
+		if cache, exists := p.roundResults[roundVal]; exists {
+			if cachedVal, ok := cache[key]; ok {
+				p.mu.Unlock()
+				return cachedVal, nil
+			}
+		} else {
+			p.roundResults[roundVal] = make(map[string]uint16)
 		}
 	}
 
@@ -410,11 +412,10 @@ func (p *cancellableProbePool) Do(
 					if p.tasks[key] == task {
 						delete(p.tasks, key)
 					}
-					if task.err == nil && roundVal != nil && p.currentRound == roundVal {
-						if p.results == nil {
-							p.results = make(map[string]uint16)
+					if task.err == nil && roundVal != nil && p.roundResults != nil {
+						if cache, ok := p.roundResults[roundVal]; ok {
+							cache[key] = task.val
 						}
-						p.results[key] = task.val
 					}
 					task.retiring = true
 					close(task.done)

@@ -30,7 +30,11 @@ type URLTest struct {
 }
 
 func (u *URLTest) Now() string {
-	return u.fast(false).Name()
+	fastProxy := u.fast(false)
+	if fastProxy == nil {
+		return ""
+	}
+	return fastProxy.Name()
 }
 
 func (u *URLTest) TestURL() string {

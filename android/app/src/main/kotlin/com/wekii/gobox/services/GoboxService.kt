@@ -147,10 +147,19 @@ class GoboxService : Service(), BaseServiceInterface {
             .build()
 
         if (!hasStartedForeground) {
-            this.startForeground(notification, useSpecialType = !isSuspended)
-            hasStartedForeground = true
+            runCatching {
+                this.startForeground(notification, useSpecialType = !isSuspended)
+                hasStartedForeground = true
+            }.onFailure {
+                android.util.Log.e("GoboxService", "postNotificationContent startForeground error: ${it.message}")
+                runCatching {
+                    getSystemService(android.app.NotificationManager::class.java)?.notify(GlobalState.NOTIFICATION_ID, notification)
+                }
+            }
         } else {
-            getSystemService(android.app.NotificationManager::class.java)?.notify(GlobalState.NOTIFICATION_ID, notification)
+            runCatching {
+                getSystemService(android.app.NotificationManager::class.java)?.notify(GlobalState.NOTIFICATION_ID, notification)
+            }.onFailure { android.util.Log.e("GoboxService", "postNotificationContent notify error: ${it.message}") }
         }
     }
 

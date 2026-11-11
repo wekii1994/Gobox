@@ -310,10 +310,16 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             .build()
 
         if (!hasStartedForeground) {
-            hasStartedForeground = true
             runCatching {
                 this.startForeground(notification, useSpecialType = !GlobalState.isSmartStopped)
-            }.onFailure { Log.e(TAG, "postNotificationContent startForeground error: ${it.message}") }
+                hasStartedForeground = true
+            }.onFailure {
+                Log.e(TAG, "postNotificationContent startForeground error: ${it.message}")
+                runCatching {
+                    getSystemService(android.app.NotificationManager::class.java)
+                        ?.notify(GlobalState.NOTIFICATION_ID, notification)
+                }
+            }
         } else {
             runCatching {
                 getSystemService(android.app.NotificationManager::class.java)

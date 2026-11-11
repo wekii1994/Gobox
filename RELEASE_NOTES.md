@@ -1,4 +1,22 @@
-## 🚀 Gobox v1.19.8-pre1-8 更新说明
+## 🚀 Gobox v1.19.8-pre1-9 更新说明
+
+本版本集中修复由全链路 Code Review 排查出的 5 项并发与边界关键 Bug：
+
+### 🛠️ 核心修复与优化
+1. **修复通知栏实时网速逻辑倒挂冻结**
+   - 移除了 `lib/controller.dart` 中误将持续网速分流进静态标题更新的守卫条件；开启网速通知后，每秒可靠调用 `updateNotificationSpeed` 推送实时动态网速；关闭网速显示时仅在物理节点变动时调用 `updateNotificationTitle` 同步标题。
+2. **多策略组并发测速缓存隔离（解决 Cache Thrashing）**
+   - 将 `groupbase.go` 中的单例探测池升级为 `map[any]map[string]uint16`；彻底消除多个自动选择组并发测速或两阶段网络探测重试时，不同轮次（Round）互相重置覆盖并清空彼此测速缓存的并发踩踏 Bug。
+3. **Android 14+ 前台服务标记置位时机后移**
+   - 修正 `GoboxVpnService.kt` 与 `GoboxService.kt` 中 `hasStartedForeground = true` 的置位时机至 `startForeground()` 成功之后；若遇系统权限等偶发异常，状态不再被错误锁死，后续更新可重试进入前台，避免被 Android 14 系统机制误判定为后台服务进而被冻结强杀。
+4. **后台无界面 Isolate 直连多语言组件安全兜底**
+   - 在 `resolvePhysicalOutboundTitle` 中增加防空指针保护；当通过控制中心快捷磁贴由后台独立 Isolate（`_service`）拉起直连模式时，安全降级回 `'Direct'`，防止底层 Localizations 未初始化抛出 `NullCheckError` 异常闪退。
+5. **URLTest 空代理列表防 Panic 保护**
+   - 为 `URLTest.Now()` 增加 `if fastProxy == nil { return "" }` 安全防护，防止节点被正则过滤全部清空等极端配置下触发 Go 内核致命空指针 Panic。
+
+---
+
+## 📦 历史版本（v1.19.8-pre1-8）
 
 本版本重点修复“故障转移统计误记未使用的闲置地区策略组”的统计口径问题：
 

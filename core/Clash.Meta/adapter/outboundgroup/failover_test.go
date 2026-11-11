@@ -977,8 +977,8 @@ func TestReview3PassiveHealthCheckQueueBudget(t *testing.T) {
 
 func TestCancellableProbePoolSameRoundResultReuse(t *testing.T) {
 	pool := &cancellableProbePool{
-		tasks:   make(map[string]*probeTask),
-		results: make(map[string]uint16),
+		tasks:        make(map[string]*probeTask),
+		roundResults: make(map[any]map[string]uint16),
 	}
 
 	round1 := "round-1"

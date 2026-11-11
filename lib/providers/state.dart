@@ -1133,7 +1133,13 @@ String resolvePhysicalOutboundTitle({
   String fallbackLabel = AppIdentity.displayName,
 }) {
   if (mode == Mode.direct) {
-    return appLocalizations.direct;
+    try {
+      final label = appLocalizations.direct;
+      if (label.isNotEmpty) return label;
+    } catch (_) {
+      // Fallback for background service isolate where localizations may not be initialized
+    }
+    return 'Direct';
   }
   final resolvedMainGroup =
       mainGroupName ??
