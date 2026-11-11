@@ -236,19 +236,14 @@ jobs:
           base_version=$(echo "$VERSION" | sed 's/-pre[0-9]*.*//')
           
           if [ -f "RELEASE_NOTES.md" ]; then
-            cat RELEASE_NOTES.md > release.md
-            echo "" >> release.md
-            echo "---" >> release.md
-            echo "" >> release.md
+            awk '/^---/ || /^## .*历史版本/ {exit} {print}' RELEASE_NOTES.md > release.md
           else
             printf '%s\n' "- Fixes and improvements" "- Recommended version update" > release.md
           fi
           if [[ "$TAG_NAME" == *"-pre"* || "$TAG_NAME" == *"-test"* ]]; then
             echo "IS_PRE=true" >> "$GITHUB_ENV"
-            sed -e "s|BASE_VERSION|$base_version|g" -e "s|VERSION|$VERSION|g" ./.github/release_template_pre.md >> release.md
           else
             echo "IS_PRE=false" >> "$GITHUB_ENV"
-            sed -e "s|BASE_VERSION|$base_version|g" -e "s|VERSION|$VERSION|g" ./.github/release_template.md >> release.md
           fi
 
       - name: Publish Release to GitHub
