@@ -582,6 +582,8 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     fun handleUpdateNotificationTitle(profileName: String) {
+        GlobalState.isSpeedNotificationEnabled = false
+        stopSpeedTicker()
         if (profileName != GlobalState.currentProfileName) {
             GlobalState.currentProfileName = profileName
         }

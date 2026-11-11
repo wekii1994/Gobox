@@ -1,4 +1,15 @@
-## 🚀 Gobox v1.19.8-pre1-10 更新说明
+## 🚀 Gobox v1.19.8-pre1-11 更新说明
+
+本版本针对 Android 通知栏网速动态切换场景进行深度闭环优化：
+
+### 🛠️ 核心修复与优化
+1. **彻底解决动态关闭网速通知时通知栏残留旧网速冻结问题**
+   - 在 `android/app/src/main/kotlin/com/wekii/gobox/plugins/VpnPlugin.kt` 的 `handleUpdateNotificationTitle` 中补充 `GlobalState.isSpeedNotificationEnabled = false` 并显式调用 `stopSpeedTicker()` 取消轮询任务。
+   - 在 `GoboxVpnService.kt` 与 `GoboxService.kt` 中，当接收到纯标题更新时彻底清空 `pendingSpeedInfo = null` 并复位内容为默认服务运行文案，杜绝由于状态未复位导致通知栏常驻静态历史网速。
+
+---
+
+## 📦 历史版本（v1.19.8-pre1-10）
 
 本版本继续深化代码审查，集中修复 3 项深层隐患并优化构建工具链：
 

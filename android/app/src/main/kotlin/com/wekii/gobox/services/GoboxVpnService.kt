@@ -269,13 +269,10 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
 
     @SuppressLint("ForegroundServiceType")
     internal suspend fun updateNotificationTitle(profileName: String) {
+        GlobalState.isSpeedNotificationEnabled = false
         pendingSpeedProfile = profileName
-        val content = if (GlobalState.isSpeedNotificationEnabled) {
-            pendingSpeedInfo ?: getString(R.string.service_running)
-        } else {
-            pendingSpeedInfo = null
-            getString(R.string.service_running)
-        }
+        pendingSpeedInfo = null
+        val content = getString(R.string.service_running)
         postNotificationContent(profileName, content)
     }
 
