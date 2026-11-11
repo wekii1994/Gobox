@@ -304,6 +304,24 @@ func TestNetworkProbingHealthyReselectionSuppressed(t *testing.T) {
 	if stats.Total != 2 {
 		t.Fatalf("expected dead node switch during network probe to be recorded (Total=2), got %d", stats.Total)
 	}
+
+	// Case 4: Routine healthy reselection via OnGroupSelectionChanged -> must NOT increment Total!
+	groupNowsLock.Lock()
+	groupsChangedSent = false
+	groupNowsLock.Unlock()
+
+	outboundgroup.OnGroupSelectionChanged("TestGroup", "NodeB", "NodeA")
+
+	groupNowsLock.Lock()
+	sent := groupsChangedSent
+	groupNowsLock.Unlock()
+	if !sent {
+		t.Fatalf("expected OnGroupSelectionChanged to mark groupsChangedSent=true")
+	}
+	stats = mustGetFailoverStats(t)
+	if stats.Total != 2 {
+		t.Fatalf("expected OnGroupSelectionChanged not to increment Total (want 2), got %d", stats.Total)
+	}
 }
 
 func TestFailoverStatsResetWinsOverStaleSave(t *testing.T) {

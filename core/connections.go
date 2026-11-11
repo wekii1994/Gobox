@@ -198,17 +198,50 @@ func isNetworkProbing(name string) bool {
 	return networkProbingGroups[name] > 0
 }
 
-func getGroupTestURL(group constant.ProxyAdapter) string {
+func unwrapProxyAdapter(group constant.ProxyAdapter) constant.ProxyAdapter {
+	for group != nil {
+		unwrapped, ok := group.(interface{ Adapter() constant.ProxyAdapter })
+		if !ok {
+			break
+		}
+		inner := unwrapped.Adapter()
+		if inner == nil || inner == group {
+			break
+		}
+		group = inner
+	}
+	return group
+}
+
+func getGroupTestURL(group constant.ProxyAdapter) (testURL string) {
+	group = unwrapProxyAdapter(group)
 	if group == nil {
 		return ""
 	}
 	if t, ok := group.(interface{ TestURL() string }); ok {
 		return t.TestURL()
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			testURL = ""
+		}
+	}()
+	if m, ok := group.(interface{ MarshalJSON() ([]byte, error) }); ok {
+		data, err := m.MarshalJSON()
+		if err == nil {
+			var parsed struct {
+				TestURL string `json:"testUrl"`
+			}
+			if json.Unmarshal(data, &parsed) == nil && parsed.TestURL != "" {
+				return parsed.TestURL
+			}
+		}
+	}
 	return ""
 }
 
 func isGroupProxyAlive(group constant.ProxyAdapter, proxyName string) bool {
+	group = unwrapProxyAdapter(group)
 	if group == nil || proxyName == "" {
 		return false
 	}
@@ -236,6 +269,11 @@ func init() {
 			recordFailover(groupName, before, after)
 			handleCloseGroupStaleConnections(groupName, before, time.Now())
 		}
+		notifyGroupsChanged()
+	}
+
+	outboundgroup.OnGroupSelectionChanged = func(groupName, before, after string) {
+		log.Debugln("[AutoSelect] Healthy latency reselection on group %s: [%s] -> [%s] (connections preserved)", groupName, before, after)
 		notifyGroupsChanged()
 	}
 }

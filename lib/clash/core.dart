@@ -14,7 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
-@visibleForTesting
 List<Group> buildGroups(String proxiesRaw) {
   final decoded = json.decode(proxiesRaw);
   if (decoded is! Map) return [];

@@ -9,6 +9,7 @@ import 'package:gobox/plugins/app.dart';
 import 'package:gobox/plugins/clipboard_ext.dart';
 import 'package:gobox/plugins/tile.dart';
 import 'package:gobox/plugins/vpn.dart';
+import 'package:gobox/providers/state.dart' show resolvePhysicalOutboundTitle;
 import 'package:gobox/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -221,11 +222,24 @@ Future<void> _service(List<String> flags) async {
           final profile = globalState.config.profiles
               .where((e) => e.id == profileId)
               .firstOrNull;
-          final fallbackName = profile?.label ?? 'Gobox';
-          final profileName =
-              globalState.appController.getPhysicalOutboundTitle(
-            fallbackLabel: fallbackName,
-          );
+          final fallbackName = profile?.label ?? AppIdentity.displayName;
+          var profileName = fallbackName;
+          try {
+            final proxiesRaw = await clashLibHandler.getProxiesRaw();
+            final groups = proxiesRaw.isNotEmpty
+                ? buildGroups(proxiesRaw)
+                : const <Group>[];
+            profileName = resolvePhysicalOutboundTitle(
+              mode: globalState.config.patchClashConfig.mode,
+              groups: groups,
+              selectedMap: profile?.selectedMap ?? const {},
+              fallbackLabel: fallbackName,
+            );
+          } catch (e) {
+            commonPrint.warn(
+              'Service: resolve initial outbound title failed: $e',
+            );
+          }
           await vpn?.updateNotificationSpeed(
             profileName,
             globalState.config.vpnProps.networkSpeedNotification

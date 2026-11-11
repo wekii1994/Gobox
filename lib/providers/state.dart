@@ -1125,6 +1125,42 @@ String? currentMainGroupName(Ref ref) => ref.watch(
   }),
 );
 
+String resolvePhysicalOutboundTitle({
+  required Mode mode,
+  required List<Group> groups,
+  required SelectedMap selectedMap,
+  String? mainGroupName,
+  String fallbackLabel = AppIdentity.displayName,
+}) {
+  if (mode == Mode.direct) {
+    return appLocalizations.direct;
+  }
+  final resolvedMainGroup =
+      mainGroupName ??
+      (() {
+        final visibleGroups = getVisibleGroups(
+          mode: mode,
+          groups: groups,
+          showHiddenItems: false,
+        );
+        return (visibleGroups.getGroup(GroupName.GLOBAL.name) ??
+                visibleGroups.firstOrNull)
+            ?.name;
+      })();
+  if (resolvedMainGroup != null && resolvedMainGroup.isNotEmpty) {
+    final leafState = resolveProxyCardState(
+      groups,
+      selectedMap,
+      ProxyCardState(proxyName: resolvedMainGroup),
+    );
+    if (leafState.proxyName.isNotEmpty &&
+        groups.getGroup(leafState.proxyName) == null) {
+      return leafState.proxyName;
+    }
+  }
+  return fallbackLabel.isNotEmpty ? fallbackLabel : AppIdentity.displayName;
+}
+
 HomeWidgetColors _homeWidgetColors(ColorScheme scheme) {
   final isLight = scheme.brightness == Brightness.light;
   return HomeWidgetColors(

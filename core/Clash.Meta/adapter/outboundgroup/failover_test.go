@@ -1203,3 +1203,80 @@ func TestHealthCheckContextIncompleteNoConsecutiveFailures(t *testing.T) {
 	require.ErrorIs(t, err, context.DeadlineExceeded)
 	require.Equal(t, 0, group.ConsecutiveFailures(), "incomplete check truncated by deadline must not increment consecutive failures")
 }
+
+type urlTestMockProxy struct {
+	C.Proxy
+	name      string
+	alive     atomic.Bool
+	lastDelay atomic.Uint32
+}
+
+func (p *urlTestMockProxy) Name() string                      { return p.name }
+func (p *urlTestMockProxy) Type() C.AdapterType               { return C.Vmess }
+func (p *urlTestMockProxy) AliveForTestUrl(string) bool       { return p.alive.Load() }
+func (p *urlTestMockProxy) LastDelayForTestUrl(string) uint16 { return uint16(p.lastDelay.Load()) }
+
+func TestURLTestFastDistinguishesHealthySwitchFromFailure(t *testing.T) {
+	failoverCh := make(chan string, 4)
+	selectCh := make(chan string, 4)
+
+	oldNowCb := OnGroupNowChanged
+	oldSelCb := OnGroupSelectionChanged
+	OnGroupNowChanged = func(g C.ProxyAdapter, groupName, before, after string) {
+		if m, ok := g.(interface{ MarshalJSON() ([]byte, error) }); ok {
+			_, _ = m.MarshalJSON()
+		}
+		failoverCh <- before + "->" + after
+	}
+	OnGroupSelectionChanged = func(groupName, before, after string) {
+		selectCh <- before + "->" + after
+	}
+	t.Cleanup(func() {
+		OnGroupNowChanged = oldNowCb
+		OnGroupSelectionChanged = oldSelCb
+	})
+
+	nodeA := &urlTestMockProxy{name: "node-a"}
+	nodeA.alive.Store(true)
+	nodeA.lastDelay.Store(80)
+
+	nodeB := &urlTestMockProxy{name: "node-b"}
+	nodeB.alive.Store(true)
+	nodeB.lastDelay.Store(100)
+
+	providers := []P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{nodeA, nodeB}}}
+	options := GroupCommonOption{Name: "urltest-fast", TestTimeout: 300, URL: "http://example.test"}
+	group, err := NewURLTest(options, URLTestOption{Tolerance: 50}, namedProxy("DIRECT"), providers)
+	require.NoError(t, err)
+
+	require.Equal(t, "node-a", group.Now())
+
+	// Scenario 1: node-b becomes >50ms faster (20ms vs 200ms) while node-a is STILL ALIVE.
+	nodeA.lastDelay.Store(200)
+	nodeB.lastDelay.Store(20)
+	group.fastSingle.Reset()
+	require.Equal(t, "node-b", group.Now())
+
+	select {
+	case msg := <-selectCh:
+		require.Equal(t, "node-a->node-b", msg)
+	case msg := <-failoverCh:
+		t.Fatalf("healthy latency reselection must NOT invoke OnGroupNowChanged, got %s", msg)
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for OnGroupSelectionChanged")
+	}
+
+	// Scenario 2: node-b DIES -> switches back to node-a (must invoke OnGroupNowChanged).
+	nodeB.alive.Store(false)
+	group.fastSingle.Reset()
+	require.Equal(t, "node-a", group.Now())
+
+	select {
+	case msg := <-failoverCh:
+		require.Equal(t, "node-b->node-a", msg)
+	case msg := <-selectCh:
+		t.Fatalf("dead node switch must invoke OnGroupNowChanged, got OnGroupSelectionChanged: %s", msg)
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for OnGroupNowChanged")
+	}
+}

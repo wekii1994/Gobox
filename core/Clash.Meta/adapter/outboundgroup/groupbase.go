@@ -33,6 +33,10 @@ type failedTarget struct {
 
 var OnGroupNowChanged func(group C.ProxyAdapter, groupName, before, after string)
 
+// OnGroupSelectionChanged notifies listeners when an auto-select group shifts to a
+// different healthy proxy due to latency optimization without a node failure.
+var OnGroupSelectionChanged func(groupName, before, after string)
+
 type GroupBase struct {
 	*outbound.Base
 	hidden            bool

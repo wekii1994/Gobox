@@ -451,44 +451,41 @@ class AppController {
   }
 
   String? _lastNotificationTitle;
+  Traffic? _lastTraffic;
 
   String getPhysicalOutboundTitle({String? fallbackLabel}) {
     final mode =
         _ref.read(patchClashConfigProvider.select((state) => state.mode));
-    if (mode == Mode.direct) {
-      return appLocalizations.direct;
-    }
-    final mainGroupName = _ref.read(currentMainGroupNameProvider);
-    if (mainGroupName != null && mainGroupName.isNotEmpty) {
-      final leafState = getProxyCardState(mainGroupName);
-      final groups = _ref.read(groupsProvider);
-      if (leafState.proxyName.isNotEmpty &&
-          groups.getGroup(leafState.proxyName) == null) {
-        return leafState.proxyName;
-      }
-    }
-    if (fallbackLabel != null && fallbackLabel.isNotEmpty) {
-      return fallbackLabel;
-    }
     final currentProfileId = _ref.read(currentProfileIdProvider);
     final profiles = _ref.read(profilesProvider);
     final profile = profiles.where((e) => e.id == currentProfileId).firstOrNull;
-    return profile?.label ?? AppIdentity.displayName;
+    final resolvedFallback = (fallbackLabel != null && fallbackLabel.isNotEmpty)
+        ? fallbackLabel
+        : (profile?.label ?? AppIdentity.displayName);
+    return resolvePhysicalOutboundTitle(
+      mode: mode,
+      groups: _ref.read(groupsProvider),
+      selectedMap: _ref.read(selectedMapProvider),
+      mainGroupName: _ref.read(currentMainGroupNameProvider),
+      fallbackLabel: resolvedFallback,
+    );
   }
 
   Future<void> syncNotificationTitleNow() async {
-    if (!system.isAndroid) return;
+    if (!system.isAndroid || !globalState.isScreenOn) return;
+    final service = vpn_service.service;
+    if (service == null) return;
     try {
       final title = getPhysicalOutboundTitle();
-      _lastNotificationTitle = title;
       final enableSpeed =
           _ref.read(vpnSettingProvider).networkSpeedNotification;
-      await vpn_service.service?.updateNotificationSpeed(
+      await service.updateNotificationSpeed(
         title,
         enableSpeed
-            ? globalState.appState.totalTraffic.toString()
+            ? (_lastTraffic ?? Traffic()).toString()
             : appLocalizations.serviceRunning,
       );
+      _lastNotificationTitle = title;
     } catch (e) {
       commonPrint.warn('Failed to sync notification title: $e');
     }
@@ -500,12 +497,7 @@ class AppController {
     }
     final title = getPhysicalOutboundTitle();
     final enableSpeed = _ref.read(vpnSettingProvider).networkSpeedNotification;
-    if (enableSpeed) {
-      _lastNotificationTitle = title;
-      return title;
-    }
-    if (_lastNotificationTitle != title) {
-      _lastNotificationTitle = title;
+    if (enableSpeed || _lastNotificationTitle != title) {
       return title;
     }
     return null;
@@ -527,6 +519,7 @@ class AppController {
     _ref.read(totalTrafficProvider.notifier).value = snapshot.total;
 
     final traffic = snapshot.now;
+    _lastTraffic = traffic;
 
     if (shouldUpdateDashboard) {
       _ref.read(trafficsProvider.notifier).addTraffic(traffic);
@@ -537,12 +530,16 @@ class AppController {
     }
 
     if (notificationTitle != null) {
-      final enableSpeed =
-          _ref.read(vpnSettingProvider).networkSpeedNotification;
-      await vpn_service.service?.updateNotificationSpeed(
-        notificationTitle,
-        enableSpeed ? traffic.toString() : appLocalizations.serviceRunning,
-      );
+      final service = vpn_service.service;
+      if (service != null) {
+        final enableSpeed =
+            _ref.read(vpnSettingProvider).networkSpeedNotification;
+        await service.updateNotificationSpeed(
+          notificationTitle,
+          enableSpeed ? traffic.toString() : appLocalizations.serviceRunning,
+        );
+        _lastNotificationTitle = notificationTitle;
+      }
     }
   }
 

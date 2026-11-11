@@ -257,6 +257,17 @@ class ClashLibHandler {
     return AndroidVpnOptions.fromJson(vpnOptions);
   }
 
+  Future<String> getProxiesRaw() async {
+    final action = Action(
+      id: '${ActionMethod.getProxies.name}#${utils.id}',
+      method: ActionMethod.getProxies,
+    );
+    final rawMessage = await invokeAction(json.encode(action));
+    final data = decodeActionResult(rawMessage)?.data;
+    if (data == null) return '';
+    return data is String ? data : json.encode(data);
+  }
+
   Traffic getTraffic() {
     final trafficRaw = clashFFI.getTraffic();
     final trafficString = trafficRaw.cast<Utf8>().toDartString();

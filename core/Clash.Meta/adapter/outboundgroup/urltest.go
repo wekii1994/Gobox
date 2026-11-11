@@ -113,6 +113,7 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 	u.forgetUnmeasuredPick()
 	var (
 		notifyChanged bool
+		oldNodeAlive  bool
 		oldNodeName   string
 		newNodeName   string
 	)
@@ -157,6 +158,8 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 		}
 		if !u.probing.Load() && oldFast != nil && u.fastNode != nil && oldFast.Name() != u.fastNode.Name() {
 			notifyChanged = true
+			oldExists := !fastNotExist || (len(proxies) > 0 && proxies[0].Name() == oldFast.Name())
+			oldNodeAlive = oldExists && oldFast.AliveForTestUrl(u.testUrl)
 			oldNodeName = oldFast.Name()
 			newNodeName = u.fastNode.Name()
 		}
@@ -166,8 +169,14 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 		u.Touch()
 	}
 
-	if notifyChanged && OnGroupNowChanged != nil {
-		go OnGroupNowChanged(u, u.Name(), oldNodeName, newNodeName)
+	if notifyChanged {
+		if !oldNodeAlive {
+			if OnGroupNowChanged != nil {
+				go OnGroupNowChanged(u, u.Name(), oldNodeName, newNodeName)
+			}
+		} else if OnGroupSelectionChanged != nil {
+			go OnGroupSelectionChanged(u.Name(), oldNodeName, newNodeName)
+		}
 	}
 
 	return elm
