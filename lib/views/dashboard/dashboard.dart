@@ -207,17 +207,24 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   ThemeMode.dark => appLocalizations.dark,
                 },
                 onPressed: () {
+                  final nextThemeMode = switch (themeMode) {
+                    ThemeMode.system => ThemeMode.light,
+                    ThemeMode.light => ThemeMode.dark,
+                    ThemeMode.dark => ThemeMode.system,
+                  };
                   ref
                       .read(themeSettingProvider.notifier)
                       .updateState(
-                        (state) => state.copyWith(
-                          themeMode: switch (themeMode) {
-                            ThemeMode.system => ThemeMode.light,
-                            ThemeMode.light => ThemeMode.dark,
-                            ThemeMode.dark => ThemeMode.system,
-                          },
-                        ),
+                        (state) => state.copyWith(themeMode: nextThemeMode),
                       );
+                  final label = switch (nextThemeMode) {
+                    ThemeMode.system => appLocalizations.auto,
+                    ThemeMode.light => appLocalizations.light,
+                    ThemeMode.dark => appLocalizations.dark,
+                  };
+                  globalState.showNotifier(
+                    '${appLocalizations.themeMode}: $label',
+                  );
                 },
               ),
               PopupMenuItemData(

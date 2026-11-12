@@ -1770,7 +1770,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "pulse": MessageLookupByLibrary.simpleMessage("پالس"),
     "pulsingGrid": MessageLookupByLibrary.simpleMessage("شبکه تپنده"),
     "pumpingHeart": MessageLookupByLibrary.simpleMessage("قلب تپنده"),
-    "pureBlackMode": MessageLookupByLibrary.simpleMessage("حالت مشکی خالص"),
     "qrcode": MessageLookupByLibrary.simpleMessage("کد QR"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "اسکن کد QR برای وارد کردن پروفایل",
@@ -2241,7 +2240,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "testing": MessageLookupByLibrary.simpleMessage("در حال بررسی"),
     "textScale": MessageLookupByLibrary.simpleMessage("مقیاس متن"),
     "pageScale": MessageLookupByLibrary.simpleMessage("مقیاس صفحه"),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage("تغییر مقیاس کلی عناصر رابط کاربری (60% - 120%)"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "تغییر مقیاس کلی عناصر رابط کاربری (60% - 120%)",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("پوسته"),
     "themeColor": MessageLookupByLibrary.simpleMessage("رنگ پوسته"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2319,7 +2320,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("روند"),
     "failoverStats": MessageLookupByLibrary.simpleMessage("آمار تغییر مسیر"),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("پیگیری تغییر مسیر خودکار سرورها"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
+      "پیگیری تغییر مسیر خودکار سرورها",
+    ),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("مصرف ترافیک"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage(
       "رفتار کلیک روی سینی",

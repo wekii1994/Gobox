@@ -358,7 +358,6 @@
   "autoCloseConnectionsDesc": "ノード切り替え時に既存接続を自動切断",
   "onlyStatisticsProxy": "プロキシ通信のみ統計",
   "onlyStatisticsProxyDesc": "プロキシ経由の通信量のみカウント",
-  "pureBlackMode": "ピュアブラックモード",
   "keepAliveIntervalDesc": "TCP Keep-Alive間隔",
   "entries": "件",
   "local": "ローカル",

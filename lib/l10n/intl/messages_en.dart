@@ -1745,7 +1745,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "pulse": MessageLookupByLibrary.simpleMessage("Pulse"),
     "pulsingGrid": MessageLookupByLibrary.simpleMessage("Pulsing Grid"),
     "pumpingHeart": MessageLookupByLibrary.simpleMessage("Pumping Heart"),
-    "pureBlackMode": MessageLookupByLibrary.simpleMessage("Pure Black Mode"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR Code"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Scan QR code to import profile",
@@ -2208,7 +2207,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "testing": MessageLookupByLibrary.simpleMessage("Testing"),
     "textScale": MessageLookupByLibrary.simpleMessage("Text Scaling"),
     "pageScale": MessageLookupByLibrary.simpleMessage("Page scaling"),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage("Scale overall interface elements (60% - 120%)"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "Scale overall interface elements (60% - 120%)",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Theme Color"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2283,8 +2284,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Fetch icons from the sites first, use Google\'s icon service when a site has no sharp icon, and cache them locally",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("Trend"),
-    "failoverStats": MessageLookupByLibrary.simpleMessage("Failover Statistics"),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("Tracks automatic failovers from passive failure detection"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage(
+      "Failover Statistics",
+    ),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
+      "Tracks automatic failovers from passive failure detection",
+    ),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic Usage"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage(
       "Tray Click Behavior",

@@ -358,7 +358,6 @@
   "autoCloseConnectionsDesc": "قطع خودکار اتصالات هنگام تغییر نود",
   "onlyStatisticsProxy": "آمار ترافیک پروکسی",
   "onlyStatisticsProxyDesc": "محاسبه ترافیک فقط برای پروکسی‌ها",
-  "pureBlackMode": "حالت مشکی خالص",
   "keepAliveIntervalDesc": "فاصله زمانی TCP Keep-Alive",
   "entries": "مورد",
   "local": "محلی",

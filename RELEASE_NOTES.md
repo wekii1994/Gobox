@@ -1,4 +1,18 @@
-## 🚀 Gobox v1.19.8-1 更新说明
+## 🚀 Gobox v1.19.8-2 更新说明
+
+本版本完全对齐上游 `appshubcc/Bettbox` `v1.19.8` 正式版重推源码（`88b9597a`）：
+
+### ✨ 上游 v1.19.8 重编版同步
+1. **更新内置托管分流脚本（`assets/scripts/managed.js`）**
+   - 支持仅包含 `proxy-providers` 节点提供器的订阅配置，避免无静态节点时误报未找到代理节点。
+   - 调整直连探测地址为 `http://dns.alidns.com`，并在 `proxyServerDNS` 与 `hosts` 中补充 `https://doh.pub/dns-query#DIRECT` 及 `dns.alidns.com` / `doh.pub` 双栈解析条目。
+2. **UI 与主题行为对齐**
+   - 仪表盘快捷切换主题模式（自动 / 浅色 / 深色）时新增轻量提示反馈。
+   - 同步上游移除「纯黑模式」（`pureBlackMode`）相关配置、界面入口及词条。
+
+---
+
+## 📦 历史版本（v1.19.8-1）
 
 本版本正式同步上游 `appshubcc/Bettbox` `v1.19.8` 正式版全量代码，保留并适配 Gobox 全部自定义特性，并修复审查中发现的策略组容差与缩放交互问题：
 

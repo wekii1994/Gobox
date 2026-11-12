@@ -76,7 +76,7 @@ const directProxies = [
 
 const iconBaseUrl = 'https://cdn.jsdelivr.net/gh/appshubcc/Qure_Style_SVG@main/icon/svg/';
 const ruleSetBaseUrl = 'https://cdn.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/';
-const directTestUrl = 'http://223.6.6.6/';
+const directTestUrl = 'http://dns.alidns.com';
 
 const regionDefinitions = [
   {
@@ -783,7 +783,12 @@ function filterAndNormalizeProxies(config) {
 
   const filteredProxies = normalizedProxies.map((proxy) => fixDialerProxy(proxy, renameMap, normalizedProxyNames));
 
-  if (!filteredProxies.length) {
+  const proxyProviders = config['proxy-providers'] || config.proxyProviders;
+  const hasProviders = Boolean(
+    proxyProviders && typeof proxyProviders === 'object' && Object.keys(proxyProviders).length > 0,
+  );
+
+  if (!filteredProxies.length && !hasProviders) {
     throw new Error('配置文件中未找到任何代理节点');
   }
 
@@ -1276,7 +1281,11 @@ const douyinDNS = ['180.184.1.1#直连', '180.184.2.2#直连'];
 const policyDNS = (group) => [`1.0.0.1#${group}`, `1.1.1.1#${group}`];
 const foreignDNS = policyDNS('默认代理');
 const defaultDNS = ['114.114.114.114#DIRECT', 'tls://223.5.5.5#DIRECT'];
-const proxyServerDNS = ['114.114.114.114#DIRECT', 'tls://223.5.5.5#DIRECT'];
+const proxyServerDNS = [
+  '114.114.114.114#DIRECT',
+  'tls://223.5.5.5#DIRECT',
+  'https://doh.pub/dns-query#DIRECT',
+];
 
 /**
  * hosts 匹配优先级：精确 > +. > . > *（同级按出现顺序）
@@ -1668,6 +1677,9 @@ function buildDnsAndHostsConfig(config, filteredProxies, dnsPolicyGroups) {
   const hosts = {
     // 解决谷歌商店无法下载的问题
     'services.googleapis.cn': 'services.googleapis.com',
+
+    'dns.alidns.com': ['223.5.5.5', '223.6.6.6', '2400:3200::1', '2400:3200:baba::1'],
+    'doh.pub': ['120.53.53.53', '1.12.12.12', '2402:4e00:1::', '2402:4e00::'],
 
     // 屏蔽哔哩哔哩 PCDN，解决访问视频/直播卡顿问题
     '+.mcdn.bilivideo.com': ['0.0.0.0'],

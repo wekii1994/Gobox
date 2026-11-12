@@ -249,19 +249,13 @@ class CommonCard extends StatelessWidget {
 
       final hasShadows = elevated || subtle;
       if (hasShadows) {
-        final isPureBlack =
-            !isLight && context.colorScheme.surface == Colors.black;
         final shadows = subtle
-            ? (isPureBlack
-                  ? null
-                  : (isLight ? _lightSubtleShadows : _darkSubtleShadows))
+            ? (isLight ? _lightSubtleShadows : _darkSubtleShadows)
             : (isLight ? _lightShadows : _darkShadows);
-        if (shadows != null) {
-          card = DecoratedBox(
-            decoration: ShapeDecoration(shape: shape, shadows: shadows),
-            child: card,
-          );
-        }
+        card = DecoratedBox(
+          decoration: ShapeDecoration(shape: shape, shadows: shadows),
+          child: card,
+        );
       }
       return card;
     }

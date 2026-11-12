@@ -426,7 +426,6 @@ abstract class ThemeProps with _$ThemeProps {
     @Default(defaultPrimaryColors) List<int> primaryColors,
     @Default(ThemeMode.system) ThemeMode themeMode,
     @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
-    @Default(false) bool pureBlack,
     @Default(TextScale()) TextScale textScale,
     @Default(defaultPageScale) double pageScale,
     @Default(false) bool useDarkIcon,
@@ -500,10 +499,8 @@ abstract class CustomRoute with _$CustomRoute {
 
 @freezed
 abstract class CustomRegion with _$CustomRegion {
-  const factory CustomRegion({
-    required String name,
-    required String regex,
-  }) = _CustomRegion;
+  const factory CustomRegion({required String name, required String regex}) =
+      _CustomRegion;
 
   factory CustomRegion.fromJson(Map<String, Object?> json) =>
       _$CustomRegionFromJson(json);

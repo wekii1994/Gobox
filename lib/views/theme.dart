@@ -5,7 +5,6 @@ import 'package:gobox/common/common.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/plugins/app.dart';
 import 'package:gobox/providers/config.dart';
-import 'package:gobox/providers/state.dart';
 import 'package:gobox/state.dart';
 import 'package:gobox/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +35,6 @@ class ThemeView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final brightness = ref.watch(currentBrightnessProvider);
     final shouldShowHarmonyFont = ref.watch(
       appSettingProvider.select(
         (state) => switch (state.locale) {
@@ -57,7 +55,6 @@ class ThemeView extends ConsumerWidget {
     final items = <Widget>[
       const _ThemeModeItem(),
       const _PrimaryColorItem(),
-      if (brightness == Brightness.dark) const _PrueBlackItem(),
       if (toggleItems.isNotEmpty) ...generateSection(items: toggleItems),
     ];
     return generateListView(items);
@@ -333,35 +330,6 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
   }
 }
 
-class _PrueBlackItem extends ConsumerWidget {
-  const _PrueBlackItem();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final prueBlack = ref.watch(
-      themeSettingProvider.select((state) => state.pureBlack),
-    );
-    return ListItem.switchItem(
-      leading: const Icon(Icons.contrast),
-      horizontalTitleGap: 12,
-      title: Text(
-        appLocalizations.pureBlackMode,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: context.colorScheme.onSurfaceVariant,
-        ),
-      ),
-      delegate: SwitchDelegate(
-        value: prueBlack,
-        onChanged: (value) {
-          ref
-              .read(themeSettingProvider.notifier)
-              .updateState((state) => state.copyWith(pureBlack: value));
-        },
-      ),
-    );
-  }
-}
-
 class _HarmonyFontItem extends ConsumerWidget {
   const _HarmonyFontItem();
 
@@ -490,9 +458,8 @@ class _TextScaleFactorItem extends ConsumerWidget {
             horizontalTitleGap: 12,
             title: Text(
               appLocalizations.textScale,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
-              ),
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(color: context.colorScheme.onSurfaceVariant),
             ),
             delegate: SwitchDelegate(
               value: enable,
@@ -777,9 +744,9 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get overlayColor => _overlayColor;
 
   @override
-  TextStyle? get valueIndicatorTextStyle => Theme.of(
-    context,
-  ).textTheme.labelLarge?.copyWith(color: _colors.onInverseSurface);
+  TextStyle? get valueIndicatorTextStyle =>
+      Theme.of(context).textTheme.labelLarge
+          ?.copyWith(color: _colors.onInverseSurface);
 
   @override
   Color? get valueIndicatorColor => _colors.inverseSurface;
@@ -892,9 +859,7 @@ class _PageScaleItemState extends ConsumerState<_PageScaleItem> {
               ),
               Text(
                 process,
-                style: textTheme.titleMedium?.copyWith(
-                  color: onSurfaceVariant,
-                ),
+                style: textTheme.titleMedium?.copyWith(color: onSurfaceVariant),
               ),
             ],
           ),
@@ -903,4 +868,3 @@ class _PageScaleItemState extends ConsumerState<_PageScaleItem> {
     );
   }
 }
-

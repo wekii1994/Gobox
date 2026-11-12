@@ -379,9 +379,9 @@ class ApplicationState extends ConsumerState<Application>
             final lightColorScheme = ref.read(
               genColorSchemeProvider(Brightness.light),
             );
-            final darkColorScheme = ref
-                .read(genColorSchemeProvider(Brightness.dark))
-                .toPureBlack(themeProps.pureBlack);
+            final darkColorScheme = ref.read(
+              genColorSchemeProvider(Brightness.dark),
+            );
 
             return MaterialApp(
               debugShowCheckedModeBanner: false,

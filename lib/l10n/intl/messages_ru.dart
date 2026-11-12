@@ -1826,7 +1826,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "pulse": MessageLookupByLibrary.simpleMessage("Пульсация"),
     "pulsingGrid": MessageLookupByLibrary.simpleMessage("Пульсирующая сетка"),
     "pumpingHeart": MessageLookupByLibrary.simpleMessage("Бьющееся сердце"),
-    "pureBlackMode": MessageLookupByLibrary.simpleMessage("Чистый чёрный"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR-код"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Сканировать QR для импорта профиля",
@@ -2311,7 +2310,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "testing": MessageLookupByLibrary.simpleMessage("Проверка"),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштаб текста"),
     "pageScale": MessageLookupByLibrary.simpleMessage("Масштаб страницы"),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage("Масштабирование всех элементов интерфейса (60% - 120%)"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "Масштабирование всех элементов интерфейса (60% - 120%)",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Тема"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Цвет темы"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2390,8 +2391,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сначала загружать значки с сайтов, а если чёткого значка нет — через сервис значков Google, и хранить локально",
     ),
     "trafficTrend": MessageLookupByLibrary.simpleMessage("Динамика"),
-    "failoverStats": MessageLookupByLibrary.simpleMessage("Статистика переключений"),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("Отслеживание автоматических переключений узлов"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage(
+      "Статистика переключений",
+    ),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
+      "Отслеживание автоматических переключений узлов",
+    ),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Трафик"),
     "trayClickBehavior": MessageLookupByLibrary.simpleMessage(
       "Действие при нажатии на значок",

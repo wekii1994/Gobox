@@ -2975,16 +2975,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Pure Black Mode`
-  String get pureBlackMode {
-    return Intl.message(
-      'Pure Black Mode',
-      name: 'pureBlackMode',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `TCP keep-alive interval`
   String get keepAliveIntervalDesc {
     return Intl.message(

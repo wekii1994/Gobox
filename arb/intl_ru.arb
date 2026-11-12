@@ -358,7 +358,6 @@
   "autoCloseConnectionsDesc": "Закрывать соединения при смене узла",
   "onlyStatisticsProxy": "Только прокси-трафик",
   "onlyStatisticsProxyDesc": "Считать только трафик через прокси",
-  "pureBlackMode": "Чистый чёрный",
   "keepAliveIntervalDesc": "Интервал TCP keep-alive",
   "entries": " записей",
   "local": "Локальное хранилище",

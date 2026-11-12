@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:gobox/common/common.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/common.dart';
@@ -9,7 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Color navBarBodyColor(ColorScheme colorScheme, bool pureBlack) {
+Color navBarBodyColor(ColorScheme colorScheme) {
   if (colorScheme.brightness == Brightness.light) {
     return Color.lerp(
       colorScheme.surface,
@@ -17,7 +18,7 @@ Color navBarBodyColor(ColorScheme colorScheme, bool pureBlack) {
       0.5,
     )!;
   }
-  return pureBlack ? Colors.black : colorScheme.surfaceContainerHigh;
+  return colorScheme.surfaceContainerHigh;
 }
 
 double navBarSlotResistance(double slot, int count) {
@@ -194,18 +195,12 @@ class _GoogleBottomNavBarState extends ConsumerState<GoogleBottomNavBar>
     final enableFeedback = ref.watch(
       appSettingProvider.select((state) => state.enableNavBarHapticFeedback),
     );
-    final pureBlack = ref.watch(
-      themeSettingProvider.select((s) => s.pureBlack),
-    );
     final colorScheme = context.colorScheme;
     final isLight = colorScheme.brightness == Brightness.light;
     final primaryColor = colorScheme.primary;
     final onSurfaceVariantColor = colorScheme.onSurfaceVariant;
 
-    final navColor = navBarBodyColor(
-      colorScheme,
-      pureBlack,
-    ).withValues(alpha: 0.98);
+    final navColor = navBarBodyColor(colorScheme).withValues(alpha: 0.98);
     final shadowStrength = isLight ? 1.0 : 3.0;
 
     const itemTextStyle = TextStyle(

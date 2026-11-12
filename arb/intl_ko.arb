@@ -358,7 +358,6 @@
   "autoCloseConnectionsDesc": "노드 변경 시 기존 연결 자동 끊기",
   "onlyStatisticsProxy": "프록시 트래픽만 집계",
   "onlyStatisticsProxyDesc": "프록시를 통과하는 트래픽만 계산",
-  "pureBlackMode": "트루 블랙 모드",
   "keepAliveIntervalDesc": "TCP Keep-Alive 간격",
   "entries": "개 항목",
   "local": "로컬",
