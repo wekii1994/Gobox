@@ -1,5 +1,6 @@
 import 'package:gobox/common/common.dart';
 import 'package:gobox/providers/config.dart';
+import 'package:gobox/views/config/network.dart';
 import 'package:gobox/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ class Ipv6Switch extends ConsumerWidget {
     ref
         .read(patchClashConfigProvider.notifier)
         .updateState((state) => state.copyWith(ipv6: value));
+    showVpnRestartTip(ref);
   }
 
   @override

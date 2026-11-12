@@ -27,7 +27,7 @@ class _ConfigViewState extends State<ConfigView> {
       ListItem.next(
         title: Text(appLocalizations.general),
         subtitle: Text(appLocalizations.generalDesc),
-        leading: const Icon(Icons.build),
+        leading: const Icon(Icons.build_outlined),
         delegate: NextDelegate(
           title: appLocalizations.general,
           builder: (_) => const GeneralListView(),
@@ -37,7 +37,7 @@ class _ConfigViewState extends State<ConfigView> {
       ListItem.next(
         title: Text(appLocalizations.network),
         subtitle: Text(appLocalizations.networkDesc),
-        leading: const Icon(Icons.vpn_key),
+        leading: const Icon(Icons.vpn_key_outlined),
         delegate: NextDelegate(
           title: appLocalizations.network,
           blur: false,
@@ -80,7 +80,7 @@ class _ConfigViewState extends State<ConfigView> {
       ListItem.next(
         title: const Text('NTP'),
         subtitle: Text(appLocalizations.ntpDesc),
-        leading: const Icon(Icons.access_time),
+        leading: const Icon(Icons.access_time_outlined),
         delegate: NextDelegate(
           title: 'NTP',
           actions: [
@@ -138,7 +138,9 @@ class _ConfigViewState extends State<ConfigView> {
                     !(system.isAndroid &&
                         storeFix &&
                         item.key == 'services.googleapis.cn') &&
-                    !(networkFix && item.key == 'dns.msftncsi.com'),
+                    !(system.isWindows &&
+                        networkFix &&
+                        item.key == 'dns.msftncsi.com'),
                 onChange: (value) {
                   ref
                       .read(patchClashConfigProvider.notifier)
@@ -152,7 +154,7 @@ class _ConfigViewState extends State<ConfigView> {
       ListItem.next(
         title: Text(appLocalizations.sniffer),
         subtitle: Text(appLocalizations.snifferDesc),
-        leading: const Icon(Icons.radar),
+        leading: const Icon(Icons.radar_outlined),
         delegate: NextDelegate(
           title: appLocalizations.sniffer,
           actions: [
@@ -186,7 +188,7 @@ class _ConfigViewState extends State<ConfigView> {
       ListItem.next(
         title: Text(appLocalizations.tunnel),
         subtitle: Text(appLocalizations.tunnelDesc),
-        leading: const Icon(Icons.swap_horiz),
+        leading: const Icon(Icons.swap_horiz_outlined),
         delegate: NextDelegate(
           title: appLocalizations.tunnel,
           actions: [
@@ -220,7 +222,7 @@ class _ConfigViewState extends State<ConfigView> {
       ListItem.next(
         title: Text(appLocalizations.experimental),
         subtitle: Text(appLocalizations.experimentalDesc),
-        leading: const Icon(Icons.science),
+        leading: const Icon(Icons.science_outlined),
         delegate: NextDelegate(
           title: appLocalizations.experimental,
           actions: [

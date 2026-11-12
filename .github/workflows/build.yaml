@@ -154,7 +154,7 @@ jobs:
           EOF
 
       - name: Setup Golang
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.25.x'
           cache-dependency-path: core/go.sum
@@ -185,6 +185,22 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           dart setup.dart android --arch arm64 ${{ env.IS_STABLE == 'true' && '--env stable' || '' }}
+
+      - name: Verify (Flutter Analyze, Unit/Widget Tests & Go Tests)
+        shell: bash
+        run: |
+          flutter analyze --no-fatal-infos
+          flutter test \
+            test/clash \
+            test/common \
+            test/models \
+            test/pages \
+            test/providers \
+            test/views \
+            test/widgets \
+            test/plugins/tray_menu_open_state_test.dart
+          (cd core && go test -count=1 .)
+          (cd core/Clash.Meta && go test -race -count=1 ./adapter/... ./tunnel/... ./component/age/...)
 
       - name: Generate Checksums
         shell: bash

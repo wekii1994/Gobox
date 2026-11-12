@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh_CN';
 
-  static String m0(log) => "分析Gobox(Mihomo)日志:${log}";
+  static String m0(log) => "分析Bettbox(Mihomo)日志:${log}";
 
   static String m1(error) => "自动备份失败：${error}";
 
@@ -201,6 +201,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("添加"),
     "addBundleMember": MessageLookupByLibrary.simpleMessage("添加成员"),
     "addProfile": MessageLookupByLibrary.simpleMessage("添加配置"),
+    "addRegion": MessageLookupByLibrary.simpleMessage("添加地区"),
     "addRoute": MessageLookupByLibrary.simpleMessage("分流管理"),
     "addRule": MessageLookupByLibrary.simpleMessage("添加规则"),
     "addRuleSet": MessageLookupByLibrary.simpleMessage("添加规则集"),
@@ -298,6 +299,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoUpdate": MessageLookupByLibrary.simpleMessage("自动更新"),
     "autoUpdateInterval": MessageLookupByLibrary.simpleMessage("自动更新间隔（分钟）"),
     "back": MessageLookupByLibrary.simpleMessage("返回"),
+    "backgroundWatermark": MessageLookupByLibrary.simpleMessage("背景水印"),
     "backup": MessageLookupByLibrary.simpleMessage("备份"),
     "backupAndRecovery": MessageLookupByLibrary.simpleMessage("备份与恢复"),
     "backupAndRecoveryDesc": MessageLookupByLibrary.simpleMessage(
@@ -331,7 +333,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bundleAddUrlDesc": MessageLookupByLibrary.simpleMessage("导入为新订阅并加入成员"),
     "bundleCollapse": MessageLookupByLibrary.simpleMessage("收起成员订阅"),
     "bundleCollapseDesc": MessageLookupByLibrary.simpleMessage(
-      "配置列表中只显示合并订阅，点按卡片右下角展开",
+      "开启后配置列表中只显示合并后的订阅信息，点按卡片右下角可展开或收起",
     ),
     "bundleDedupTip": MessageLookupByLibrary.simpleMessage(
       "内容相同的节点只保留一份，按成员顺序优先",
@@ -420,7 +422,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "controlSecretDesc": MessageLookupByLibrary.simpleMessage(
       "RESTful API 的访问密码",
     ),
-    "copiedPackageName": MessageLookupByLibrary.simpleMessage("已复制包名"),
     "copiedToClipboard": MessageLookupByLibrary.simpleMessage("已复制到剪贴板"),
     "copy": MessageLookupByLibrary.simpleMessage("复制"),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage("复制环境变量"),
@@ -471,7 +472,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m12,
     "deleteTunnel": MessageLookupByLibrary.simpleMessage("删除转发"),
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Gobox 基于强大灵活的 Mihomo 内核深度打造，致力于更好的客户端体验，我们的愿景: Connecting Open Source and AI，Accelerating Innovation",
+      "Bettbox 基于强大灵活的 Mihomo 内核深度打造，致力于更好的客户端体验，我们的愿景: Connecting Open Source and AI，Accelerating Innovation",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("目标地址"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("目标地理定位"),
@@ -487,7 +488,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "disableQuic": MessageLookupByLibrary.simpleMessage("禁用QUIC"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
-      "禁用 QUIC 以解决特定网络问题",
+      "禁用 QUIC 以缓解特定网络问题",
     ),
     "disableQuicManagedDesc": MessageLookupByLibrary.simpleMessage(
       "启用脚本时禁用 QUIC 功能不生效",
@@ -585,10 +586,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "entries": MessageLookupByLibrary.simpleMessage("个条目"),
     "exclude": MessageLookupByLibrary.simpleMessage("后台隐藏"),
-    "excludeChina": MessageLookupByLibrary.simpleMessage("排除国内"),
-    "excludeChinaDesc": MessageLookupByLibrary.simpleMessage(
-      "放行中国 QUIC 流量而非全部禁用",
-    ),
     "excludeDesc": MessageLookupByLibrary.simpleMessage("从最近任务中隐藏应用"),
     "existsTip": m19,
     "exit": MessageLookupByLibrary.simpleMessage("退出"),
@@ -659,7 +656,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "geodataLoader": MessageLookupByLibrary.simpleMessage("GEO 节能"),
     "geodataLoaderDesc": MessageLookupByLibrary.simpleMessage("使用 GEO 低内存加载器"),
     "geodataUse": MessageLookupByLibrary.simpleMessage("GEO加载"),
-    "getOriginRules": MessageLookupByLibrary.simpleMessage("获取原始规则"),
     "global": MessageLookupByLibrary.simpleMessage("全局"),
     "go": MessageLookupByLibrary.simpleMessage("前往"),
     "goDownload": MessageLookupByLibrary.simpleMessage("前往下载"),
@@ -692,8 +688,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "icmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "开启后将支持 ICMP Ping",
     ),
-    "icon": MessageLookupByLibrary.simpleMessage("图片"),
-    "iconConfiguration": MessageLookupByLibrary.simpleMessage("图片配置"),
+    "icon": MessageLookupByLibrary.simpleMessage("图标"),
+    "iconConfiguration": MessageLookupByLibrary.simpleMessage("图标设置"),
     "iconConfigurationDesc": MessageLookupByLibrary.simpleMessage(
       "自定义代理组 ICON 图标",
     ),
@@ -743,7 +739,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ipRiskAmountMedium": MessageLookupByLibrary.simpleMessage("中等"),
     "ipRiskAnonymousVpn": MessageLookupByLibrary.simpleMessage("匿名 VPN"),
     "ipRiskBlacklist": MessageLookupByLibrary.simpleMessage("黑名单标记"),
-    "ipRiskCheck": MessageLookupByLibrary.simpleMessage("检测纯净度"),
+    "ipRiskCheck": MessageLookupByLibrary.simpleMessage("纯净度检测"),
     "ipRiskCommercialServer": MessageLookupByLibrary.simpleMessage("商业服务器"),
     "ipRiskDatacenter": MessageLookupByLibrary.simpleMessage("数据中心"),
     "ipRiskHigh": MessageLookupByLibrary.simpleMessage("高风险"),
@@ -821,7 +817,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "iperfErrorUdp": MessageLookupByLibrary.simpleMessage("UDP 握手失败，可能被防火墙拦截"),
     "iperfErrorUnreachable": MessageLookupByLibrary.simpleMessage("无法连接到服务器"),
     "iperfFirewallTip": MessageLookupByLibrary.simpleMessage(
-      "如果其他设备连接不上，请在系统防火墙中允许 Gobox 内核的传入连接。",
+      "如果其他设备连接不上，请在系统防火墙中允许 Bettbox 内核的传入连接。",
     ),
     "iperfLostPackets": m28,
     "iperfNoAddress": MessageLookupByLibrary.simpleMessage(
@@ -843,7 +839,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "iperfRunning": MessageLookupByLibrary.simpleMessage("测试中"),
     "iperfScan": MessageLookupByLibrary.simpleMessage("扫码连接"),
     "iperfScanHint": MessageLookupByLibrary.simpleMessage(
-      "在另一台设备的 Gobox 中扫码，即可一键连接",
+      "在另一台设备的 Bettbox 中扫码，即可一键连接",
     ),
     "iperfScanInvalid": MessageLookupByLibrary.simpleMessage(
       "这不是 iPerf3 连接二维码",
@@ -941,6 +937,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "localPingUnreachable": MessageLookupByLibrary.simpleMessage("目标不可达"),
     "localRecoveryDesc": MessageLookupByLibrary.simpleMessage("通过文件恢复数据"),
     "locate": MessageLookupByLibrary.simpleMessage("定位"),
+    "lockProxy": MessageLookupByLibrary.simpleMessage("锁定节点"),
     "log": MessageLookupByLibrary.simpleMessage("日志"),
     "logAiSearch": MessageLookupByLibrary.simpleMessage("AI 搜索"),
     "logLevel": MessageLookupByLibrary.simpleMessage("日志等级"),
@@ -1141,6 +1138,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "networkFix": MessageLookupByLibrary.simpleMessage("网络修复"),
     "networkFixDesc": MessageLookupByLibrary.simpleMessage("修复系统网络检测地球图标问题"),
+    "networkInterface": MessageLookupByLibrary.simpleMessage("网卡选择"),
     "networkMatch": MessageLookupByLibrary.simpleMessage("网络匹配"),
     "networkMatchHint": MessageLookupByLibrary.simpleMessage(
       "输入 IP、CIDR 或 Gateway:IP/CIDR",
@@ -1197,6 +1195,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ntpStatusDesc": MessageLookupByLibrary.simpleMessage("开启 NTP 时间服务"),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage("没有配置文件,请先添加配置文件"),
     "nullTip": m53,
+    "nullUdpConnections": MessageLookupByLibrary.simpleMessage("暂无 UDP 连接"),
     "numberRangeInvalid": m54,
     "numberTip": m55,
     "oneColumn": MessageLookupByLibrary.simpleMessage("一列"),
@@ -1235,12 +1234,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideNtpDesc": MessageLookupByLibrary.simpleMessage(
       "开启后将覆盖配置中的 NTP 选项",
     ),
-    "overrideOriginRules": MessageLookupByLibrary.simpleMessage("覆盖原始规则"),
     "overrideSniffer": MessageLookupByLibrary.simpleMessage("覆写 Sniffer"),
     "overrideSnifferDesc": MessageLookupByLibrary.simpleMessage(
       "开启后将覆盖配置中的 Sniffer 选项",
     ),
-    "overrideTestUrl": MessageLookupByLibrary.simpleMessage("覆盖配置"),
     "overrideTunnel": MessageLookupByLibrary.simpleMessage("覆写 Tunnel"),
     "overrideTunnelDesc": MessageLookupByLibrary.simpleMessage(
       "开启后将覆盖配置中的 Tunnel 选项",
@@ -1362,6 +1359,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "refreshAppListConfirm": MessageLookupByLibrary.simpleMessage("是否刷新应用列表？"),
     "regExp": MessageLookupByLibrary.simpleMessage("正则"),
     "regenerate": MessageLookupByLibrary.simpleMessage("重新生成"),
+    "regexInvalid": MessageLookupByLibrary.simpleMessage("正则表达式格式错误"),
+    "regionGroups": MessageLookupByLibrary.simpleMessage("地区分组"),
+    "regionGroupsTip": MessageLookupByLibrary.simpleMessage(
+      "没有匹配节点的地区不会生成策略组，未匹配任何地区的节点归入「其他节点」",
+    ),
+    "regionName": MessageLookupByLibrary.simpleMessage("国家名称"),
+    "regionRegex": MessageLookupByLibrary.simpleMessage("匹配正则"),
     "reject": MessageLookupByLibrary.simpleMessage("拦截"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("剩余流量"),
     "remote": MessageLookupByLibrary.simpleMessage("远程"),
@@ -1756,6 +1760,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("统一延迟"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage("去除握手解析等额外延迟"),
     "unknown": MessageLookupByLibrary.simpleMessage("未知"),
+    "unlockProxy": MessageLookupByLibrary.simpleMessage("解除锁定"),
     "unlocked": MessageLookupByLibrary.simpleMessage("已完成"),
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpin": MessageLookupByLibrary.simpleMessage("取消置顶"),

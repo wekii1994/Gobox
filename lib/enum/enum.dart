@@ -284,6 +284,7 @@ enum ActionMethod {
   getMode,
   parseExternalProviderContent,
   getCoreStatus,
+  getInterfaces,
   startSpeedTest,
   cancelSpeedTest,
   probeSpeedTest,
@@ -607,8 +608,6 @@ extension RuleActionExt on RuleAction {
     RuleAction.RULE_SET,
   ].contains(this);
 }
-
-enum OverrideRuleType { override, added }
 
 enum RuleTarget { DIRECT, REJECT }
 

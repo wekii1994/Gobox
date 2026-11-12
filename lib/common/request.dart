@@ -418,6 +418,7 @@ class Request {
     CancelToken? cancelToken,
     Duration? timeout, {
     void Function(IpInfo info)? onUpdate,
+    String? proxy,
   }) async {
     final effectiveTimeout = timeout ?? const Duration(seconds: 5);
 
@@ -433,6 +434,7 @@ class Request {
         final client = HttpClient();
         client.autoUncompress = false;
         client.connectionTimeout = effectiveTimeout;
+        if (proxy != null) client.findProxy = (_) => proxy;
         return client;
       },
     );
@@ -546,12 +548,14 @@ class Request {
     CancelToken? cancelToken,
     Duration? timeout,
     void Function(IpInfo info)? onUpdate,
+    String? proxy,
   }) async {
     return _checkIpFromSources(
       _getPrimaryIpSources(),
       cancelToken,
       timeout,
       onUpdate: onUpdate,
+      proxy: proxy,
     );
   }
 
@@ -639,6 +643,7 @@ class Request {
         cancelToken: cancelToken,
         options: Options(
           responseType: ResponseType.json,
+          connectTimeout: effectiveTimeout,
           receiveTimeout: effectiveTimeout,
           sendTimeout: effectiveTimeout,
         ),
@@ -667,7 +672,7 @@ class Request {
   Future<IpRisk?> readIpRiskCache(String ip) async {
     try {
       final cached = await readIpCache('risk_$ip');
-      return cached == null ? null : IpRisk.fromJson(cached);
+      return cached == null ? null : IpRisk.fromJson(cached).normalized;
     } catch (_) {
       return null;
     }
@@ -690,6 +695,7 @@ class Request {
         cancelToken: cancelToken,
         options: Options(
           responseType: ResponseType.bytes,
+          connectTimeout: timeout,
           receiveTimeout: timeout,
           sendTimeout: timeout,
         ),

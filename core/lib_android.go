@@ -139,7 +139,7 @@ func handleStartTun(fd int, callback unsafe.Pointer) bool {
 		}
 		tunHandler.Store(handler)
 		initTunHook()
-		tunListener, _ := t.Start(fd, currentConfig.General.Tun.Device, currentConfig.General.Tun.Stack, currentConfig.General.Tun.DisableICMPForwarding, uint32(currentConfig.General.Tun.MTU), currentConfig.General.Tun.CongestionController)
+		tunListener, _ := t.Start(fd, currentConfig.General.Tun.Device, currentConfig.General.Tun.Stack, currentConfig.General.Tun.DisableICMPForwarding, uint32(currentConfig.General.Tun.MTU), currentConfig.General.IPv6, currentConfig.General.Tun.CongestionController)
 		if tunListener == nil {
 			tunHandler.Store(nil)
 			handler.close()
@@ -187,11 +187,15 @@ func handleGetAndroidVpnOptions() string {
 		log.Warnln("[APP] handleGetAndroidVpnOptions called before setupConfig")
 		return ""
 	}
+	ipv6Address := ""
+	if currentConfig.General.IPv6 {
+		ipv6Address = state.DefaultIpv6Address
+	}
 	options := state.AndroidVpnOptions{
 		Enable:                state.CurrentState.VpnProps.Enable,
 		Port:                  currentConfig.General.MixedPort,
 		Ipv4Address:           state.DefaultIpv4Address,
-		Ipv6Address:           state.DefaultIpv6Address,
+		Ipv6Address:           ipv6Address,
 		AccessControl:         state.CurrentState.VpnProps.AccessControl,
 		SystemProxy:           state.CurrentState.VpnProps.SystemProxy,
 		AllowBypass:           state.CurrentState.VpnProps.AllowBypass,
@@ -213,6 +217,9 @@ func handleGetAndroidVpnOptions() string {
 
 func handleUpdateDns(value string) {
 	go func() {
+		defer func() {
+			_ = recover()
+		}()
 		log.Infoln("[DNS] updateDns %s", value)
 		dns.UpdateSystemDNS(strings.Split(value, ","))
 		resolver.ResetConnection()
@@ -253,6 +260,11 @@ func quickStart(initParamsChar *C.char, paramsChar *C.char, stateParamsChar *C.c
 	bytes := []byte(C.GoString(paramsChar))
 	stateParams := C.GoString(stateParamsChar)
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				bridge.SendToPort(i, fmt.Sprintf("panic: %v", r))
+			}
+		}()
 		res := handleInitClash(paramsString)
 		if res == false {
 			bridge.SendToPort(i, "init error")
@@ -265,7 +277,13 @@ func quickStart(initParamsChar *C.char, paramsChar *C.char, stateParamsChar *C.c
 }
 
 //export startTUN
-func startTUN(fd C.int, callback unsafe.Pointer) bool {
+func startTUN(fd C.int, callback unsafe.Pointer) (ok bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorln("[APP] startTUN panic: %v", r)
+			ok = false
+		}
+	}()
 	return handleStartTun(int(fd), callback)
 }
 
@@ -276,6 +294,9 @@ func getRunTime() *C.char {
 
 //export stopTun
 func stopTun() {
+	defer func() {
+		_ = recover()
+	}()
 	handleStopTun()
 }
 
@@ -296,6 +317,9 @@ func setScreenState(on C.int) {
 
 //export setState
 func setState(s *C.char) {
+	defer func() {
+		_ = recover()
+	}()
 	paramsString := C.GoString(s)
 	handleSetState(paramsString)
 }
@@ -308,6 +332,9 @@ func updateDns(s *C.char) {
 
 //export networkChanged
 func networkChanged() {
+	defer func() {
+		_ = recover()
+	}()
 	handleNetworkChanged()
 }
 

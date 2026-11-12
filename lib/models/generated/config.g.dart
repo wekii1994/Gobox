@@ -56,7 +56,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
       json['enableNavBarHapticFeedback'] as bool? ?? true,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
   showLabel: json['showLabel'] as bool? ?? false,
-  disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
+  disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? true,
   minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
   hidden: json['hidden'] as bool? ?? false,
   keepDockIcon: json['keepDockIcon'] as bool? ?? true,
@@ -83,6 +83,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
       ? defaultSidebarFlyoutEntries
       : sidebarFlyoutEntriesSafeFromJson(json['sidebarFlyoutEntries'] as List?),
   dashboardTitle: json['dashboardTitle'] as String?,
+  dashboardWatermark: json['dashboardWatermark'] as bool? ?? false,
   toolboxTiles:
       (json['toolboxTiles'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -172,6 +173,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
           .map((e) => _$SidebarFlyoutEntryEnumMap[e]!)
           .toList(),
       'dashboardTitle': instance.dashboardTitle,
+      'dashboardWatermark': instance.dashboardWatermark,
       'toolboxTiles': instance.toolboxTiles,
       'mrsTapAction': _$MrsTapActionEnumMap[instance.mrsTapAction]!,
       'mrsResolveDns': instance.mrsResolveDns,
@@ -391,7 +393,6 @@ _VpnProps _$VpnPropsFromJson(Map<String, dynamic> json) => _VpnProps(
   disableQuic: json['disableQuic'] as bool? ?? false,
   highPriorityNotification: json['highPriorityNotification'] as bool? ?? false,
   networkSpeedNotification: json['networkSpeedNotification'] as bool? ?? false,
-  excludeChina: json['excludeChina'] as bool? ?? false,
   trayEnhancement: json['trayEnhancement'] as bool? ?? false,
   trayLeftClickBehavior:
       $enumDecodeNullable(
@@ -427,7 +428,6 @@ Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
   'disableQuic': instance.disableQuic,
   'highPriorityNotification': instance.highPriorityNotification,
   'networkSpeedNotification': instance.networkSpeedNotification,
-  'excludeChina': instance.excludeChina,
   'trayEnhancement': instance.trayEnhancement,
   'trayLeftClickBehavior':
       _$TrayClickBehaviorEnumMap[instance.trayLeftClickBehavior]!,
@@ -692,6 +692,12 @@ Map<String, dynamic> _$CustomRouteToJson(_CustomRoute instance) =>
       'enabled': instance.enabled,
     };
 
+_CustomRegion _$CustomRegionFromJson(Map<String, dynamic> json) =>
+    _CustomRegion(name: json['name'] as String, regex: json['regex'] as String);
+
+Map<String, dynamic> _$CustomRegionToJson(_CustomRegion instance) =>
+    <String, dynamic>{'name': instance.name, 'regex': instance.regex};
+
 _ManagedProps _$ManagedPropsFromJson(Map<String, dynamic> json) =>
     _ManagedProps(
       options:
@@ -713,6 +719,14 @@ _ManagedProps _$ManagedPropsFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      regions: (json['regions'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      customRegions:
+          (json['customRegions'] as List<dynamic>?)
+              ?.map((e) => CustomRegion.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$ManagedPropsToJson(_ManagedProps instance) =>
@@ -722,6 +736,8 @@ Map<String, dynamic> _$ManagedPropsToJson(_ManagedProps instance) =>
       'routes': instance.routes,
       'order': instance.order,
       'removed': instance.removed,
+      'regions': instance.regions,
+      'customRegions': instance.customRegions,
     };
 
 _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
@@ -745,7 +761,6 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
   overrideSniffer: json['overrideSniffer'] as bool? ?? false,
   overrideTunnel: json['overrideTunnel'] as bool? ?? false,
   overrideExperimental: json['overrideExperimental'] as bool? ?? false,
-  overrideTestUrl: json['overrideTestUrl'] as bool? ?? true,
   dav: json['dav'] == null
       ? null
       : DAV.fromJson(json['dav'] as Map<String, dynamic>),
@@ -793,7 +808,6 @@ Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'overrideSniffer': instance.overrideSniffer,
   'overrideTunnel': instance.overrideTunnel,
   'overrideExperimental': instance.overrideExperimental,
-  'overrideTestUrl': instance.overrideTestUrl,
   'dav': instance.dav,
   'networkProps': instance.networkProps,
   'vpnProps': instance.vpnProps,

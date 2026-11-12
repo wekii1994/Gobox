@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"maps"
 	"os"
@@ -162,7 +163,7 @@ func patchSelectGroup(mapping map[string]string) {
 
 func defaultSetupParams() *SetupParams {
 	return &SetupParams{
-		TestURL:     "https://g.cn/generate_204",
+		TestURL:     "https://www.gstatic.com/generate_204",
 		SelectedMap: map[string]string{},
 	}
 }
@@ -394,7 +395,7 @@ var (
 	preparedSetupLock  sync.Mutex
 	lastPreparedSetup  *preparedSetup
 	preparedSetupTimer *time.Timer
-	preparedSetupLimit = time.Minute
+	preparedSetupLimit = 10 * time.Second
 )
 
 func storePreparedSetup(prepared *preparedSetup) {
@@ -410,9 +411,14 @@ func storePreparedSetup(prepared *preparedSetup) {
 	}
 	preparedSetupTimer = time.AfterFunc(preparedSetupLimit, func() {
 		preparedSetupLock.Lock()
-		defer preparedSetupLock.Unlock()
-		if lastPreparedSetup == prepared {
+		matched := lastPreparedSetup == prepared
+		if matched {
 			lastPreparedSetup = nil
+		}
+		preparedSetupLock.Unlock()
+		if matched {
+			tryUnloadGeoData()
+			debug.FreeOSMemory()
 		}
 	})
 }
@@ -442,9 +448,6 @@ func setupKey(params *SetupParams, profile []byte) string {
 	hash.Write([]byte(params.AgeSecretKey))
 	hash.Write([]byte{0})
 	hash.Write([]byte(params.TestURL))
-	if params.OverrideTestUrl {
-		hash.Write([]byte{1})
-	}
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
@@ -486,12 +489,6 @@ func prepareSetup(params *SetupParams) (*preparedSetup, error) {
 		return nil, err
 	}
 
-	if params.OverrideTestUrl && rawCfg.ProxyGroup != nil {
-		for _, group := range rawCfg.ProxyGroup {
-			group["url"] = params.TestURL
-		}
-	}
-
 	cfg, err := config.ParseRawConfig(rawCfg)
 	if err != nil {
 		return nil, err
@@ -500,9 +497,15 @@ func prepareSetup(params *SetupParams) (*preparedSetup, error) {
 	return &preparedSetup{key: key, rawCfg: rawCfg, cfg: cfg, global: global}, nil
 }
 
-func setupConfig(params *SetupParams) (string, error) {
+func setupConfig(params *SetupParams) (global string, err error) {
 	runLock.Lock()
 	defer runLock.Unlock()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorln("[APP] setupConfig panic: %v", r)
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
 	cancelDelayBatches()
 
 	constant.DefaultTestURL = params.TestURL

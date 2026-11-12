@@ -48,6 +48,7 @@ const clashConfigKey = 'clash_config';
 const configKey = 'config';
 const customSidebarIconKey = 'custom_sidebar_icon';
 const customDashboardTitleKey = 'custom_dashboard_title';
+const lastManagedScriptVersionKey = 'last_managed_script_version';
 const double dialogCommonWidth = 300;
 const repository = 'wekii1994/Gobox';
 const ipInfoToken = String.fromEnvironment('IPINFO_TOKEN', defaultValue: '');
@@ -72,7 +73,7 @@ double getFloatingBottomBarFABReserveHeight(BuildContext context) {
   return 84.0 - min(viewBottom, 12.0);
 }
 
-const defaultTestUrl = 'https://www.apple.com/library/test/success.html';
+const defaultTestUrl = 'https://www.gstatic.com/generate_204';
 
 // Preset test URLs
 const presetTestUrls = [

@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ja';
 
-  static String m0(log) => "Gobox(Mihomo)のログを分析:${log}";
+  static String m0(log) => "Bettbox(Mihomo)のログを分析:${log}";
 
   static String m1(error) => "自動バックアップに失敗しました：${error}";
 
@@ -205,6 +205,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("追加"),
     "addBundleMember": MessageLookupByLibrary.simpleMessage("メンバーを追加"),
     "addProfile": MessageLookupByLibrary.simpleMessage("プロファイル追加"),
+    "addRegion": MessageLookupByLibrary.simpleMessage("地域を追加"),
     "addRoute": MessageLookupByLibrary.simpleMessage("振り分け管理"),
     "addRule": MessageLookupByLibrary.simpleMessage("ルール追加"),
     "addRuleSet": MessageLookupByLibrary.simpleMessage("ルールセットを追加"),
@@ -318,6 +319,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoUpdate": MessageLookupByLibrary.simpleMessage("自動更新"),
     "autoUpdateInterval": MessageLookupByLibrary.simpleMessage("自動更新間隔（分）"),
     "back": MessageLookupByLibrary.simpleMessage("戻る"),
+    "backgroundWatermark": MessageLookupByLibrary.simpleMessage("背景ウォーターマーク"),
     "backup": MessageLookupByLibrary.simpleMessage("バックアップ"),
     "backupAndRecovery": MessageLookupByLibrary.simpleMessage("バックアップと復元"),
     "backupAndRecoveryDesc": MessageLookupByLibrary.simpleMessage(
@@ -357,7 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "bundleCollapse": MessageLookupByLibrary.simpleMessage("メンバーを折りたたむ"),
     "bundleCollapseDesc": MessageLookupByLibrary.simpleMessage(
-      "一覧には統合サブスクリプションのみ表示し、カード右下の矢印で展開します",
+      "有効にすると、一覧には統合後のサブスクリプション情報のみ表示され、カード右下をタップして展開・折りたたみができます",
     ),
     "bundleDedupTip": MessageLookupByLibrary.simpleMessage(
       "同じ内容のノードは1つだけ残し、先のメンバーを優先します",
@@ -462,7 +464,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "controlSecretDesc": MessageLookupByLibrary.simpleMessage(
       "RESTful APIアクセスパスワード",
     ),
-    "copiedPackageName": MessageLookupByLibrary.simpleMessage("パッケージ名をコピーしました"),
     "copiedToClipboard": MessageLookupByLibrary.simpleMessage(
       "クリップボードにコピーしました",
     ),
@@ -517,7 +518,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m12,
     "deleteTunnel": MessageLookupByLibrary.simpleMessage("転送削除"),
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Goboxは強力で柔軟なMihomoカーネルをベースに深く作り込まれ、より優れたクライアント体験を追求しています。私たちのビジョン：Connecting Open Source and AI, Accelerating Innovation",
+      "Bettboxは強力で柔軟なMihomoカーネルをベースに深く作り込まれ、より優れたクライアント体験を追求しています。私たちのビジョン：Connecting Open Source and AI, Accelerating Innovation",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("宛先アドレス"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("宛先GeoIP"),
@@ -537,7 +538,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
     "disableQuic": MessageLookupByLibrary.simpleMessage("QUIC無効化"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
-      "特定の通信問題を解決するためQUICを無効化",
+      "特定の通信問題を緩和するためQUICを無効化",
     ),
     "disableQuicManagedDesc": MessageLookupByLibrary.simpleMessage(
       "スクリプト有効時は QUIC 無効化は適用されません",
@@ -643,10 +644,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "entries": MessageLookupByLibrary.simpleMessage("件"),
     "exclude": MessageLookupByLibrary.simpleMessage("タスク一覧で非表示"),
-    "excludeChina": MessageLookupByLibrary.simpleMessage("中国通信を除外"),
-    "excludeChinaDesc": MessageLookupByLibrary.simpleMessage(
-      "中国のQUIC通信を許可（他は遮断）",
-    ),
     "excludeDesc": MessageLookupByLibrary.simpleMessage("最近のタスク履歴からアプリを隠す"),
     "existsTip": m19,
     "exit": MessageLookupByLibrary.simpleMessage("終了"),
@@ -725,7 +722,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "メモリ消費を抑えたGEOローダーを使用",
     ),
     "geodataUse": MessageLookupByLibrary.simpleMessage("GEO読込"),
-    "getOriginRules": MessageLookupByLibrary.simpleMessage("元のルールを取得"),
     "global": MessageLookupByLibrary.simpleMessage("グローバル"),
     "go": MessageLookupByLibrary.simpleMessage("移動"),
     "goDownload": MessageLookupByLibrary.simpleMessage("ダウンロードへ"),
@@ -770,8 +766,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "icmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "有効化するとICMP Pingをサポート",
     ),
-    "icon": MessageLookupByLibrary.simpleMessage("画像"),
-    "iconConfiguration": MessageLookupByLibrary.simpleMessage("画像設定"),
+    "icon": MessageLookupByLibrary.simpleMessage("アイコン"),
+    "iconConfiguration": MessageLookupByLibrary.simpleMessage("アイコン設定"),
     "iconConfigurationDesc": MessageLookupByLibrary.simpleMessage(
       "プロキシグループのICONアイコンをカスタマイズ",
     ),
@@ -919,7 +915,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "サーバーに接続できません",
     ),
     "iperfFirewallTip": MessageLookupByLibrary.simpleMessage(
-      "他のデバイスから接続できない場合は、システムのファイアウォールで Gobox コアの受信接続を許可してください。",
+      "他のデバイスから接続できない場合は、システムのファイアウォールで Bettbox コアの受信接続を許可してください。",
     ),
     "iperfLostPackets": m28,
     "iperfNoAddress": MessageLookupByLibrary.simpleMessage(
@@ -943,7 +939,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "iperfRunning": MessageLookupByLibrary.simpleMessage("テスト中"),
     "iperfScan": MessageLookupByLibrary.simpleMessage("スキャンして接続"),
     "iperfScanHint": MessageLookupByLibrary.simpleMessage(
-      "別のデバイスの Gobox でスキャンするとワンタップで接続できます",
+      "別のデバイスの Bettbox でスキャンするとワンタップで接続できます",
     ),
     "iperfScanInvalid": MessageLookupByLibrary.simpleMessage(
       "iPerf3 の接続用 QR コードではありません",
@@ -1051,6 +1047,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "localPingUnreachable": MessageLookupByLibrary.simpleMessage("宛先に到達できません"),
     "localRecoveryDesc": MessageLookupByLibrary.simpleMessage("ファイルからデータを復元"),
     "locate": MessageLookupByLibrary.simpleMessage("位置"),
+    "lockProxy": MessageLookupByLibrary.simpleMessage("ノードを固定"),
     "log": MessageLookupByLibrary.simpleMessage("ログ"),
     "logAiSearch": MessageLookupByLibrary.simpleMessage("AI 検索"),
     "logLevel": MessageLookupByLibrary.simpleMessage("ログレベル"),
@@ -1267,6 +1264,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkFixDesc": MessageLookupByLibrary.simpleMessage(
       "システムネットワーク検出アイコンの問題を修復",
     ),
+    "networkInterface": MessageLookupByLibrary.simpleMessage("ネットワークインターフェース"),
     "networkMatch": MessageLookupByLibrary.simpleMessage("ネットワークマッチ"),
     "networkMatchHint": MessageLookupByLibrary.simpleMessage(
       "IP、CIDR または Gateway:IP/CIDR",
@@ -1331,6 +1329,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "プロファイルがありません。追加してください",
     ),
     "nullTip": m53,
+    "nullUdpConnections": MessageLookupByLibrary.simpleMessage("UDP 接続はありません"),
     "numberRangeInvalid": m54,
     "numberTip": m55,
     "oneColumn": MessageLookupByLibrary.simpleMessage("1列"),
@@ -1369,12 +1368,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideNtpDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイル内のNTP設定を上書き",
     ),
-    "overrideOriginRules": MessageLookupByLibrary.simpleMessage("元のルールを上書き"),
     "overrideSniffer": MessageLookupByLibrary.simpleMessage("スニッファーオーバーライド"),
     "overrideSnifferDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイル内のスニッファー設定を上書き",
     ),
-    "overrideTestUrl": MessageLookupByLibrary.simpleMessage("テストURL上書き"),
     "overrideTunnel": MessageLookupByLibrary.simpleMessage("トンネルオーバーライド"),
     "overrideTunnelDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイル内のトンネル設定を上書き",
@@ -1512,6 +1509,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "regExp": MessageLookupByLibrary.simpleMessage("正規表現"),
     "regenerate": MessageLookupByLibrary.simpleMessage("再生成"),
+    "regexInvalid": MessageLookupByLibrary.simpleMessage("正規表現の形式が無効です"),
+    "regionGroups": MessageLookupByLibrary.simpleMessage("地域グループ"),
+    "regionGroupsTip": MessageLookupByLibrary.simpleMessage(
+      "該当ノードがない地域はグループを作成しません。どの地域にも該当しないノードは「其他节点」(その他のノード)に入ります",
+    ),
+    "regionName": MessageLookupByLibrary.simpleMessage("国/地域名"),
+    "regionRegex": MessageLookupByLibrary.simpleMessage("マッチング正規表現"),
     "reject": MessageLookupByLibrary.simpleMessage("ブロック"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("残りデータ量"),
     "remote": MessageLookupByLibrary.simpleMessage("リモート"),
@@ -1843,9 +1847,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "testing": MessageLookupByLibrary.simpleMessage("検出中"),
     "textScale": MessageLookupByLibrary.simpleMessage("テキスト倍率"),
     "pageScale": MessageLookupByLibrary.simpleMessage("ページ倍率"),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
-      "インターフェース全体の表示倍率を調整（60% - 120%）",
-    ),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage("インターフェース全体の表示倍率を調整（60% - 120%）"),
     "theme": MessageLookupByLibrary.simpleMessage("テーマ"),
     "themeColor": MessageLookupByLibrary.simpleMessage("テーマカラー"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("テーマカラー関連の設定"),
@@ -1980,6 +1982,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ハンドシェイク等の追加レイテンシを除外",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("不明"),
+    "unlockProxy": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "unlocked": MessageLookupByLibrary.simpleMessage("完了"),
     "unnamed": MessageLookupByLibrary.simpleMessage("無題"),
     "unpin": MessageLookupByLibrary.simpleMessage("固定解除"),

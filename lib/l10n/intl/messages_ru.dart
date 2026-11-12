@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ru';
 
-  static String m0(log) => "Проанализируй лог Gobox (Mihomo): ${log}";
+  static String m0(log) => "Проанализируй лог Bettbox (Mihomo): ${log}";
 
   static String m1(error) => "Ошибка автоматического резервирования: ${error}";
 
@@ -225,6 +225,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Добавить участников",
     ),
     "addProfile": MessageLookupByLibrary.simpleMessage("Добавить профиль"),
+    "addRegion": MessageLookupByLibrary.simpleMessage("Добавить регион"),
     "addRoute": MessageLookupByLibrary.simpleMessage("Управление маршрутами"),
     "addRule": MessageLookupByLibrary.simpleMessage("Добавить правило"),
     "addRuleSet": MessageLookupByLibrary.simpleMessage("Добавить набор правил"),
@@ -390,6 +391,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Интервал автообновления (минуты)",
     ),
     "back": MessageLookupByLibrary.simpleMessage("Назад"),
+    "backgroundWatermark": MessageLookupByLibrary.simpleMessage(
+      "Фоновый водяной знак",
+    ),
     "backup": MessageLookupByLibrary.simpleMessage("Создать копию"),
     "backupAndRecovery": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование",
@@ -445,7 +449,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Свернуть участников",
     ),
     "bundleCollapseDesc": MessageLookupByLibrary.simpleMessage(
-      "В списке показывается только объединённая подписка; нажмите стрелку на карточке, чтобы развернуть",
+      "При включении в списке отображается только информация об объединённой подписке; нажмите в правом нижнем углу карточки, чтобы развернуть или свернуть",
     ),
     "bundleDedupTip": MessageLookupByLibrary.simpleMessage(
       "Одинаковые узлы сохраняются один раз, приоритет у первых участников",
@@ -568,9 +572,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "controlSecretDesc": MessageLookupByLibrary.simpleMessage(
       "Пароль для доступа к RESTful API",
     ),
-    "copiedPackageName": MessageLookupByLibrary.simpleMessage(
-      "Скопировано имя пакета",
-    ),
     "copiedToClipboard": MessageLookupByLibrary.simpleMessage(
       "Скопировано в буфер обмена",
     ),
@@ -635,7 +636,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Удалить перенаправление",
     ),
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Gobox глубоко проработан на базе мощного и гибкого ядра Mihomo и ориентирован на лучший клиентский опыт. Наше видение: Connecting Open Source and AI, Accelerating Innovation",
+      "Bettbox глубоко проработан на базе мощного и гибкого ядра Mihomo и ориентирован на лучший клиентский опыт. Наше видение: Connecting Open Source and AI, Accelerating Innovation",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Адрес назначения"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(
@@ -661,7 +662,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("Напрямую"),
     "disableQuic": MessageLookupByLibrary.simpleMessage("Отключить QUIC"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
-      "Отключить QUIC для решения сетевых проблем",
+      "Отключить QUIC для смягчения сетевых проблем",
     ),
     "disableQuicManagedDesc": MessageLookupByLibrary.simpleMessage(
       "При включённом скрипте отключение QUIC не действует",
@@ -787,10 +788,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "entries": MessageLookupByLibrary.simpleMessage(" записей"),
     "exclude": MessageLookupByLibrary.simpleMessage("Скрыть из недавних"),
-    "excludeChina": MessageLookupByLibrary.simpleMessage("Исключить Китай"),
-    "excludeChinaDesc": MessageLookupByLibrary.simpleMessage(
-      "Разрешить QUIC для Китая",
-    ),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Скрыть приложение из недавних задач",
     ),
@@ -893,9 +890,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Использовать загрузчик GEO с низким потреблением памяти",
     ),
     "geodataUse": MessageLookupByLibrary.simpleMessage("Загрузка GEO"),
-    "getOriginRules": MessageLookupByLibrary.simpleMessage(
-      "Получить исходные правила",
-    ),
     "global": MessageLookupByLibrary.simpleMessage("Глобально"),
     "go": MessageLookupByLibrary.simpleMessage("Перейти"),
     "goDownload": MessageLookupByLibrary.simpleMessage("Перейти к загрузке"),
@@ -958,7 +952,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "icon": MessageLookupByLibrary.simpleMessage("Иконка"),
     "iconConfiguration": MessageLookupByLibrary.simpleMessage(
-      "Настройка иконки",
+      "Настройки значков",
     ),
     "iconConfigurationDesc": MessageLookupByLibrary.simpleMessage(
       "Настройка значков ICON групп прокси",
@@ -1151,7 +1145,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не удаётся связаться с сервером",
     ),
     "iperfFirewallTip": MessageLookupByLibrary.simpleMessage(
-      "Если другие устройства не могут подключиться, разрешите входящие подключения для ядра Gobox в брандмауэре.",
+      "Если другие устройства не могут подключиться, разрешите входящие подключения для ядра Bettbox в брандмауэре.",
     ),
     "iperfLostPackets": m28,
     "iperfNoAddress": MessageLookupByLibrary.simpleMessage(
@@ -1177,7 +1171,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сканировать для подключения",
     ),
     "iperfScanHint": MessageLookupByLibrary.simpleMessage(
-      "Отсканируйте в Gobox на другом устройстве, чтобы подключиться одним касанием",
+      "Отсканируйте в Bettbox на другом устройстве, чтобы подключиться одним касанием",
     ),
     "iperfScanInvalid": MessageLookupByLibrary.simpleMessage(
       "Это не QR-код подключения iPerf3",
@@ -1307,6 +1301,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Восстановление из файла",
     ),
     "locate": MessageLookupByLibrary.simpleMessage("Найти"),
+    "lockProxy": MessageLookupByLibrary.simpleMessage("Закрепить узел"),
     "log": MessageLookupByLibrary.simpleMessage("Лог"),
     "logAiSearch": MessageLookupByLibrary.simpleMessage("Поиск с ИИ"),
     "logLevel": MessageLookupByLibrary.simpleMessage("Уровень логов"),
@@ -1575,6 +1570,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkFixDesc": MessageLookupByLibrary.simpleMessage(
       "Исправляет значок сети в системе",
     ),
+    "networkInterface": MessageLookupByLibrary.simpleMessage(
+      "Сетевой интерфейс",
+    ),
     "networkMatch": MessageLookupByLibrary.simpleMessage("Сопоставление сети"),
     "networkMatchHint": MessageLookupByLibrary.simpleMessage(
       "Введите IP или CIDR, максимум 2, через запятую",
@@ -1655,6 +1653,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Нет профиля, добавьте его",
     ),
     "nullTip": m53,
+    "nullUdpConnections": MessageLookupByLibrary.simpleMessage(
+      "Нет UDP-соединений",
+    ),
     "numberRangeInvalid": m54,
     "numberTip": m55,
     "oneColumn": MessageLookupByLibrary.simpleMessage("1 колонка"),
@@ -1707,17 +1708,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideNtpDesc": MessageLookupByLibrary.simpleMessage(
       "Включить переопределение настроек NTP в конфигурации",
     ),
-    "overrideOriginRules": MessageLookupByLibrary.simpleMessage(
-      "Переопределить исходные правила",
-    ),
     "overrideSniffer": MessageLookupByLibrary.simpleMessage(
       "Переопределить сниффер",
     ),
     "overrideSnifferDesc": MessageLookupByLibrary.simpleMessage(
       "Включить переопределение настроек сниффера в конфигурации",
-    ),
-    "overrideTestUrl": MessageLookupByLibrary.simpleMessage(
-      "Переопределить конфигурацию",
     ),
     "overrideTunnel": MessageLookupByLibrary.simpleMessage(
       "Переопределить туннель",
@@ -1892,6 +1887,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "regExp": MessageLookupByLibrary.simpleMessage("Регулярное выражение"),
     "regenerate": MessageLookupByLibrary.simpleMessage("Пересоздать"),
+    "regexInvalid": MessageLookupByLibrary.simpleMessage(
+      "Неверный формат регулярного выражения",
+    ),
+    "regionGroups": MessageLookupByLibrary.simpleMessage("Региональные группы"),
+    "regionGroupsTip": MessageLookupByLibrary.simpleMessage(
+      "Регионы без подходящих узлов не создаются; узлы без региона попадают в 其他节点 (прочие узлы)",
+    ),
+    "regionName": MessageLookupByLibrary.simpleMessage("Название региона"),
+    "regionRegex": MessageLookupByLibrary.simpleMessage("Регулярное выражение"),
     "reject": MessageLookupByLibrary.simpleMessage("Блокировать"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Осталось"),
     "remote": MessageLookupByLibrary.simpleMessage("Удалённый сервер"),
@@ -2307,9 +2311,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "testing": MessageLookupByLibrary.simpleMessage("Проверка"),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштаб текста"),
     "pageScale": MessageLookupByLibrary.simpleMessage("Масштаб страницы"),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
-      "Масштабирование всех элементов интерфейса (60% - 120%)",
-    ),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage("Масштабирование всех элементов интерфейса (60% - 120%)"),
     "theme": MessageLookupByLibrary.simpleMessage("Тема"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Цвет темы"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(
@@ -2482,6 +2484,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Убрать задержку рукопожатия и разбора",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("Неизвестно"),
+    "unlockProxy": MessageLookupByLibrary.simpleMessage("Открепить"),
     "unlocked": MessageLookupByLibrary.simpleMessage("Завершено"),
     "unnamed": MessageLookupByLibrary.simpleMessage("Без имени"),
     "unpin": MessageLookupByLibrary.simpleMessage("Открепить"),

@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(log) => "Analyze Gobox (Mihomo) log: ${log}";
+  static String m0(log) => "Analyze Bettbox (Mihomo) log: ${log}";
 
   static String m1(error) => "Auto backup failed: ${error}";
 
@@ -220,6 +220,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("Add"),
     "addBundleMember": MessageLookupByLibrary.simpleMessage("Add members"),
     "addProfile": MessageLookupByLibrary.simpleMessage("Add Profile"),
+    "addRegion": MessageLookupByLibrary.simpleMessage("Add Region"),
     "addRoute": MessageLookupByLibrary.simpleMessage("Manage routes"),
     "addRule": MessageLookupByLibrary.simpleMessage("Add Rule"),
     "addRuleSet": MessageLookupByLibrary.simpleMessage("Add rule set"),
@@ -377,6 +378,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Auto update interval (min)",
     ),
     "back": MessageLookupByLibrary.simpleMessage("Back"),
+    "backgroundWatermark": MessageLookupByLibrary.simpleMessage(
+      "Background Watermark",
+    ),
     "backup": MessageLookupByLibrary.simpleMessage("Backup"),
     "backupAndRecovery": MessageLookupByLibrary.simpleMessage(
       "Backup & Restore",
@@ -422,7 +426,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "bundleCollapse": MessageLookupByLibrary.simpleMessage("Collapse members"),
     "bundleCollapseDesc": MessageLookupByLibrary.simpleMessage(
-      "Show only the merged subscription in the list; tap the arrow on its card to expand",
+      "When enabled, only merged subscription info is shown in the list; tap the bottom-right corner of the card to expand or collapse",
     ),
     "bundleDedupTip": MessageLookupByLibrary.simpleMessage(
       "Identical nodes are kept once, earlier members first",
@@ -545,9 +549,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "controlSecretDesc": MessageLookupByLibrary.simpleMessage(
       "RESTful API access password",
     ),
-    "copiedPackageName": MessageLookupByLibrary.simpleMessage(
-      "Copied package name",
-    ),
     "copiedToClipboard": MessageLookupByLibrary.simpleMessage(
       "Copied to clipboard",
     ),
@@ -612,7 +613,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m12,
     "deleteTunnel": MessageLookupByLibrary.simpleMessage("Delete Forwarding"),
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Gobox is deeply crafted on the powerful and flexible Mihomo kernel, dedicated to a superior client experience. Our vision: Connecting Open Source and AI, Accelerating Innovation",
+      "Bettbox is deeply crafted on the powerful and flexible Mihomo kernel, dedicated to a superior client experience. Our vision: Connecting Open Source and AI, Accelerating Innovation",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Destination"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(
@@ -638,7 +639,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "disableQuic": MessageLookupByLibrary.simpleMessage("Disable QUIC"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
-      "Disable QUIC to resolve specific network issues",
+      "Disable QUIC to mitigate specific network issues",
     ),
     "disableQuicManagedDesc": MessageLookupByLibrary.simpleMessage(
       "Disable QUIC has no effect with scripts enabled",
@@ -760,10 +761,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
     "exclude": MessageLookupByLibrary.simpleMessage("Hide from Recents"),
-    "excludeChina": MessageLookupByLibrary.simpleMessage("Exclude China"),
-    "excludeChinaDesc": MessageLookupByLibrary.simpleMessage(
-      "Allow China QUIC instead of blocking all",
-    ),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Hide app from recent tasks list",
     ),
@@ -862,7 +859,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use GEO low memory loader",
     ),
     "geodataUse": MessageLookupByLibrary.simpleMessage("GEO Load"),
-    "getOriginRules": MessageLookupByLibrary.simpleMessage("Original Rules"),
     "global": MessageLookupByLibrary.simpleMessage("Global"),
     "go": MessageLookupByLibrary.simpleMessage("Go"),
     "goDownload": MessageLookupByLibrary.simpleMessage("Download Now"),
@@ -920,9 +916,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enable ICMP Ping",
     ),
     "icon": MessageLookupByLibrary.simpleMessage("Icon"),
-    "iconConfiguration": MessageLookupByLibrary.simpleMessage(
-      "Icon Configuration",
-    ),
+    "iconConfiguration": MessageLookupByLibrary.simpleMessage("Icon Settings"),
     "iconConfigurationDesc": MessageLookupByLibrary.simpleMessage(
       "Customize proxy group ICON icons",
     ),
@@ -1098,7 +1092,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Can\'t reach the server",
     ),
     "iperfFirewallTip": MessageLookupByLibrary.simpleMessage(
-      "If other devices can\'t connect, allow incoming connections for the Gobox core in your system firewall.",
+      "If other devices can\'t connect, allow incoming connections for the Bettbox core in your system firewall.",
     ),
     "iperfLostPackets": m28,
     "iperfNoAddress": MessageLookupByLibrary.simpleMessage(
@@ -1122,7 +1116,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "iperfRunning": MessageLookupByLibrary.simpleMessage("Testing"),
     "iperfScan": MessageLookupByLibrary.simpleMessage("Scan to connect"),
     "iperfScanHint": MessageLookupByLibrary.simpleMessage(
-      "Scan with Gobox on another device to connect in one tap",
+      "Scan with Bettbox on another device to connect in one tap",
     ),
     "iperfScanInvalid": MessageLookupByLibrary.simpleMessage(
       "This isn\'t an iPerf3 connection QR code",
@@ -1248,6 +1242,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Restore data from file",
     ),
     "locate": MessageLookupByLibrary.simpleMessage("Locate"),
+    "lockProxy": MessageLookupByLibrary.simpleMessage("Lock Node"),
     "log": MessageLookupByLibrary.simpleMessage("Log"),
     "logAiSearch": MessageLookupByLibrary.simpleMessage("AI Search"),
     "logLevel": MessageLookupByLibrary.simpleMessage("Log Level"),
@@ -1508,6 +1503,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkFixDesc": MessageLookupByLibrary.simpleMessage(
       "Fix system network globe icon issue",
     ),
+    "networkInterface": MessageLookupByLibrary.simpleMessage(
+      "Network Interface",
+    ),
     "networkMatch": MessageLookupByLibrary.simpleMessage("Network Match"),
     "networkMatchHint": MessageLookupByLibrary.simpleMessage(
       "Enter IP, CIDR or Gateway:IP/CIDR",
@@ -1580,6 +1578,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "No profile. Please add one.",
     ),
     "nullTip": m53,
+    "nullUdpConnections": MessageLookupByLibrary.simpleMessage(
+      "No UDP connections",
+    ),
     "numberRangeInvalid": m54,
     "numberTip": m55,
     "oneColumn": MessageLookupByLibrary.simpleMessage("1 Column"),
@@ -1632,14 +1633,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideNtpDesc": MessageLookupByLibrary.simpleMessage(
       "Override profile\'s NTP settings",
     ),
-    "overrideOriginRules": MessageLookupByLibrary.simpleMessage(
-      "Override Original Rules",
-    ),
     "overrideSniffer": MessageLookupByLibrary.simpleMessage("Override Sniffer"),
     "overrideSnifferDesc": MessageLookupByLibrary.simpleMessage(
       "Override profile\'s Sniffer settings",
     ),
-    "overrideTestUrl": MessageLookupByLibrary.simpleMessage("Override Config"),
     "overrideTunnel": MessageLookupByLibrary.simpleMessage("Override Tunnel"),
     "overrideTunnelDesc": MessageLookupByLibrary.simpleMessage(
       "Override profile\'s Tunnel settings",
@@ -1809,6 +1806,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "regExp": MessageLookupByLibrary.simpleMessage("RegExp"),
     "regenerate": MessageLookupByLibrary.simpleMessage("Regenerate"),
+    "regexInvalid": MessageLookupByLibrary.simpleMessage(
+      "Invalid regular expression",
+    ),
+    "regionGroups": MessageLookupByLibrary.simpleMessage("Region groups"),
+    "regionGroupsTip": MessageLookupByLibrary.simpleMessage(
+      "Regions without matching nodes are skipped; nodes that match no region go to 其他节点 (other nodes)",
+    ),
+    "regionName": MessageLookupByLibrary.simpleMessage("Region Name"),
+    "regionRegex": MessageLookupByLibrary.simpleMessage("Matching Regex"),
     "reject": MessageLookupByLibrary.simpleMessage("Block"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remote": MessageLookupByLibrary.simpleMessage("Remote"),
@@ -2359,6 +2365,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Exclude handshake delays from testing",
     ),
     "unknown": MessageLookupByLibrary.simpleMessage("Unknown"),
+    "unlockProxy": MessageLookupByLibrary.simpleMessage("Unlock"),
     "unlocked": MessageLookupByLibrary.simpleMessage("Completed"),
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),

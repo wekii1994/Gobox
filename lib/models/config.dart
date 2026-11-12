@@ -223,6 +223,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(fromJson: sidebarFlyoutEntriesSafeFromJson)
     List<SidebarFlyoutEntry> sidebarFlyoutEntries,
     String? dashboardTitle,
+    @Default(false) bool dashboardWatermark,
     @Default(<String>[]) List<String> toolboxTiles,
     @JsonKey(unknownEnumValue: MrsTapAction.viewRules)
     @Default(MrsTapAction.viewRules)
@@ -322,7 +323,6 @@ abstract class VpnProps with _$VpnProps {
     @Default(false) bool disableQuic,
     @Default(false) bool highPriorityNotification,
     @Default(false) bool networkSpeedNotification,
-    @Default(false) bool excludeChina,
     @Default(false) bool trayEnhancement,
     @Default(TrayClickBehavior.showPanel)
     TrayClickBehavior trayLeftClickBehavior,
@@ -499,6 +499,17 @@ abstract class CustomRoute with _$CustomRoute {
 }
 
 @freezed
+abstract class CustomRegion with _$CustomRegion {
+  const factory CustomRegion({
+    required String name,
+    required String regex,
+  }) = _CustomRegion;
+
+  factory CustomRegion.fromJson(Map<String, Object?> json) =>
+      _$CustomRegionFromJson(json);
+}
+
+@freezed
 abstract class ManagedProps with _$ManagedProps {
   const factory ManagedProps({
     @Default({}) Map<String, bool> options,
@@ -506,6 +517,8 @@ abstract class ManagedProps with _$ManagedProps {
     @Default([]) List<CustomRoute> routes,
     @Default([]) List<String> order,
     @Default([]) List<String> removed,
+    List<String>? regions,
+    @Default([]) List<CustomRegion> customRegions,
   }) = _ManagedProps;
 
   factory ManagedProps.fromJson(Map<String, Object?> json) =>
@@ -525,7 +538,6 @@ abstract class Config with _$Config {
     @Default(false) bool overrideSniffer,
     @Default(false) bool overrideTunnel,
     @Default(false) bool overrideExperimental,
-    @Default(true) bool overrideTestUrl,
     DAV? dav,
     @Default(defaultNetworkProps) NetworkProps networkProps,
     @JsonKey(fromJson: VpnProps.safeFromJson)

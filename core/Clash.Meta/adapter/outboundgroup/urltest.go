@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/metacubex/mihomo/common/callback"
@@ -21,11 +22,13 @@ type URLTestOption struct {
 type URLTest struct {
 	*GroupBase
 	selected       string
+	selectedMu     sync.RWMutex
 	testUrl        string
 	expectedStatus string
 	tolerance      uint16
 	disableUDP     bool
 	fastNode       C.Proxy
+	fastMu         sync.Mutex
 	fastSingle     *singledo.Single[C.Proxy]
 }
 
@@ -57,7 +60,9 @@ func (u *URLTest) Set(name string) error {
 }
 
 func (u *URLTest) ForceSet(name string) {
+	u.selectedMu.Lock()
 	u.selected = name
+	u.selectedMu.Unlock()
 	u.fastSingle.Reset()
 }
 
@@ -130,13 +135,19 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 		newNodeName   string
 	)
 	elm, _, shared := u.fastSingle.Do(func() (C.Proxy, error) {
+		u.fastMu.Lock()
+		defer u.fastMu.Unlock()
+
 		proxies := u.GetProxies(touch)
-		if u.selected != "" {
+		u.selectedMu.RLock()
+		selected := u.selected
+		u.selectedMu.RUnlock()
+		if selected != "" {
 			for _, proxy := range proxies {
 				if !proxy.AliveForTestUrl(u.testUrl) {
 					continue
 				}
-				if proxy.Name() == u.selected {
+				if proxy.Name() == selected {
 					u.fastNode = proxy
 					return proxy, nil
 				}
@@ -145,7 +156,7 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 
 		fast := proxies[0]
 		minDelay := fast.LastDelayForTestUrl(u.testUrl)
-		fastNotExist := true
+		fastNotExist := u.fastNode == nil || fast.Name() != u.fastNode.Name()
 
 		for _, proxy := range proxies[1:] {
 			if u.fastNode != nil && proxy.Name() == u.fastNode.Name() {
@@ -170,7 +181,7 @@ func (u *URLTest) fast(touch bool) C.Proxy {
 		}
 		if !u.probing.Load() && oldFast != nil && u.fastNode != nil && oldFast.Name() != u.fastNode.Name() {
 			notifyChanged = true
-			oldExists := !fastNotExist || (len(proxies) > 0 && proxies[0].Name() == oldFast.Name())
+			oldExists := !fastNotExist
 			oldNodeAlive = oldExists && oldFast.AliveForTestUrl(u.testUrl)
 			oldNodeName = oldFast.Name()
 			newNodeName = u.fastNode.Name()
@@ -213,13 +224,16 @@ func (u *URLTest) MarshalJSON() ([]byte, error) {
 	for _, proxy := range u.GetProxies(false) {
 		all = append(all, proxy.Name())
 	}
+	u.selectedMu.RLock()
+	selected := u.selected
+	u.selectedMu.RUnlock()
 	return json.Marshal(map[string]any{
 		"type":           u.Type().String(),
 		"now":            u.Now(),
 		"all":            all,
 		"testUrl":        u.testUrl,
 		"expectedStatus": u.expectedStatus,
-		"fixed":          u.selected,
+		"fixed":          selected,
 		"hidden":         u.Hidden(),
 		"icon":           u.Icon(),
 		"emptyFallback":  u.EmptyFallback().Name(),

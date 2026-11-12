@@ -93,9 +93,8 @@ class _PaletteState extends State<Palette> {
     final radius = trackRadius(size);
     final radiusOuter = radius + _thickness;
     final effectiveSquareRadius = squareRadius(radius, _padding);
-    final startPosition = renderBox.localToGlobal(Offset.zero);
     final center = Offset(size.width / 2, size.height / 2);
-    final vector = offset - startPosition - center;
+    final vector = renderBox.globalToLocal(offset) - center;
     final vectorLength = _Computer.vectorLength(vector);
     isSquare =
         vector.dx.abs() < effectiveSquareRadius &&
@@ -126,9 +125,8 @@ class _PaletteState extends State<Palette> {
     final size = renderBox.size;
     final radius = trackRadius(size);
     final effectiveSquareRadius = squareRadius(radius, _padding);
-    final startPosition = renderBox.localToGlobal(Offset.zero);
     final center = Offset(size.width / 2, size.height / 2);
-    final vector = offset - startPosition - center;
+    final vector = renderBox.globalToLocal(offset) - center;
     if (isSquare) {
       isTrack = false;
       colorSaturation = _Computer.vectorToSaturation(

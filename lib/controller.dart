@@ -387,8 +387,24 @@ class AppController {
       pathConfig: realPatchConfig,
     );
     _cancelDelayTests();
-    final result = await clashCore.setupConfig(params);
-    final message = result.message;
+    var result = await clashCore.setupConfig(params);
+    var message = result.message;
+    if (message.isNotEmpty && params.scriptedConfig.isNotEmpty) {
+      commonPrint.error('[Core] Scripted setup config failed: $message');
+      globalState.showNotifier(
+        '${appLocalizations.profileParseErrorDesc}: $message',
+      );
+      final fallbackScripted =
+          currentProfile.runsManagedScript &&
+              ManagedScript.syncedVersion(globalState.config.managedProps) !=
+                  null
+          ? await globalState.writeBundledManagedConfig(currentProfile)
+          : '';
+      result = await clashCore.setupConfig(
+        params.copyWith(scriptedConfig: fallbackScripted),
+      );
+      message = result.message;
+    }
     if (message.isNotEmpty) {
       commonPrint.error('[Core] Setup config failed: $message');
       throw message;
@@ -710,6 +726,25 @@ class AppController {
       for (final profile in _ref.read(profilesProvider))
         if (profile.bundle != null) profile.id,
     ]);
+  }
+
+  Future<void> checkManagedScriptVersionUpgrade() async {
+    final currentVersion = ManagedScript.version(
+      _ref.read(managedSettingProvider),
+    );
+    if (currentVersion.isEmpty) return;
+    final prefs = await preferences.sharedPreferencesCompleter.future;
+    final lastVersion = prefs?.getString(lastManagedScriptVersionKey);
+    if (lastVersion == currentVersion) return;
+    await prefs?.setString(lastManagedScriptVersionKey, currentVersion);
+    final hasBundles = _ref.read(profilesProvider).any((p) => p.bundle != null);
+    if (hasBundles) {
+      generateAllBundles();
+    }
+    final current = _ref.read(currentProfileProvider);
+    if (current != null && current.runsManagedScript) {
+      applyProfileDebounce(silence: true);
+    }
   }
 
   void scheduleBundles(Iterable<String> ids) {
@@ -1719,6 +1754,7 @@ class AppController {
     }
 
     await updateGroups();
+    unawaited(checkManagedScriptVersionUpgrade());
 
     autoLaunch?.updateStatus(_ref.read(appSettingProvider).autoLaunch);
     Future.delayed(const Duration(seconds: 5), () {
@@ -1855,10 +1891,10 @@ class AppController {
   void toPage(PageLabel pageLabel) {
     final context = globalState.navigatorKey.currentState?.context;
     if (context != null && context.mounted) {
-      Navigator.of(
-        context,
-        rootNavigator: true,
-      ).popUntil((route) => route.isFirst);
+      final navigator = Navigator.of(context, rootNavigator: true);
+      if (navigator.canPop()) {
+        navigator.popUntil((route) => route.isFirst);
+      }
     }
     _ref.read(currentPageLabelProvider.notifier).value = pageLabel;
   }
@@ -2061,7 +2097,6 @@ class AppController {
       groups: _ref.read(groupsProvider),
       selectedMap: _ref.read(selectedMapProvider),
       delayMap: _ref.read(delayDataSourceProvider),
-      overrideTestUrl: _ref.read(overrideTestUrlProvider),
       defaultTestUrl: _ref.read(appSettingProvider).testUrl,
     );
     return sortProxies(
@@ -2673,7 +2708,7 @@ class AppController {
       await _cleanProfilesDirForOverride();
     }
 
-    await restoreBackupFiles(profiles, homeDirPath);
+    await _restoreArchiveProfiles(tempConfig.profiles, profiles, homeDirPath);
 
     if (recoveryOption != RecoveryOption.onlyProfiles) {
       tempConfig = tempConfig.copyWith(
@@ -2685,6 +2720,31 @@ class AppController {
     await savePreferences();
     if (globalState.isStart) {
       await applyProfile(silence: true);
+    }
+  }
+
+  Future<void> _restoreArchiveProfiles(
+    List<Profile> profiles,
+    Iterable<ArchiveFile> files,
+    String homeDirPath,
+  ) async {
+    final fileMap = <String, ArchiveFile>{};
+    final otherFiles = <ArchiveFile>[];
+    for (final file in files) {
+      final name = file.name.replaceAll('\\', '/');
+      if (!name.contains('/providers/') &&
+          (name.endsWith('.yaml') || name.endsWith('.yml'))) {
+        fileMap[basenameWithoutExtension(name)] = file;
+      } else {
+        otherFiles.add(file);
+      }
+    }
+    await restoreBackupFiles(otherFiles, homeDirPath);
+    for (final profile in profiles) {
+      final file = fileMap[profile.id];
+      if (file != null) {
+        await profile.saveFile(file.content);
+      }
     }
   }
 
@@ -2746,8 +2806,6 @@ class AppController {
       await _cleanProfilesDirForOverride();
     }
 
-    await restoreBackupFiles(profileFiles, homeDirPath);
-
     List<Profile> profiles = [];
 
     if (backupConfig.profiles.isNotEmpty) {
@@ -2770,6 +2828,8 @@ class AppController {
         }
       }
     }
+
+    await _restoreArchiveProfiles(profiles, profileFiles, homeDirPath);
 
     Config limitedConfig = globalState.config.copyWith(profiles: profiles);
 

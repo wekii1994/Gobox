@@ -12,6 +12,7 @@ import 'package:gobox/enum/enum.dart';
 import 'package:intl/intl.dart';
 
 import 'tile.dart';
+import 'quick_options.dart';
 
 class StartButton extends ConsumerStatefulWidget {
   final DashboardTileSize? size;
@@ -91,13 +92,19 @@ class _StartButtonState extends ConsumerState<StartButton> {
           Mode.direct => Icons.east_rounded,
         },
         label: Intl.message(mode.name),
+        onTap: () => showOutboundModeSheet(context),
       ),
       if (system.isDesktop && tun)
-        DashboardChip(icon: Icons.vpn_lock_rounded, label: appLocalizations.tun)
+        DashboardChip(
+          icon: Icons.vpn_lock_rounded,
+          label: appLocalizations.tun,
+          onTap: () => showTunSheet(context),
+        )
       else if (system.isDesktop && systemProxy)
         DashboardChip(
           icon: Icons.settings_ethernet_rounded,
           label: appLocalizations.systemProxy,
+          onTap: () => showSystemProxySheet(context),
         ),
     ];
   }
@@ -193,8 +200,8 @@ class _StartButtonState extends ConsumerState<StartButton> {
       mark: DashboardDecor.icon(context, Icons.power_settings_new, 80),
       markBottom: !isTall,
       markAngle: isTall ? -0.08 : 0.1,
-      onPressed: isTall ? null : onPressed,
-      onLongPress: isTall ? null : onLongPress,
+      onPressed: null,
+      onLongPress: null,
       child: isTall
           ? Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 12, 14),
@@ -252,13 +259,28 @@ class _StartButtonState extends ConsumerState<StartButton> {
               ),
             )
           : Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 72, 14),
+              padding: const EdgeInsets.fromLTRB(11, 0, 72, 14),
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Row(
                   children: [
-                    Icon(icon, size: 22, color: colorScheme.primary),
-                    const SizedBox(width: 6),
+                    Material(
+                      type: MaterialType.transparency,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: onPressed,
+                        onLongPress: onLongPress,
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Icon(
+                            icon,
+                            size: 22,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 3),
                     Flexible(
                       child: FittedBox(fit: BoxFit.scaleDown, child: status),
                     ),
