@@ -190,15 +190,8 @@ jobs:
         shell: bash
         run: |
           flutter analyze --no-fatal-infos
-          flutter test \
-            test/clash \
-            test/common \
-            test/models \
-            test/pages \
-            test/providers \
-            test/views \
-            test/widgets \
-            test/plugins/tray_menu_open_state_test.dart
+          cargo build --release --manifest-path plugins/code_forge/rust/Cargo.toml
+          flutter test
           (cd core && go test -count=1 .)
           (cd core/Clash.Meta && go test -race -count=1 ./adapter/... ./tunnel/... ./component/age/...)
 

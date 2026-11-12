@@ -179,33 +179,32 @@ void main() {
     expect(changes, [0, 3]);
   });
 
-  testWidgets('跨多格点击时抬手不重启滑行，并立即切换页面', (tester) async {
+  testWidgets('跨多格点击时直接落位到目标格，抬手不重启滑行并立即切换页面', (tester) async {
     final changes = <int>[];
     await _pumpBar(tester, selectedIndex: 0, onTabChange: changes.add);
 
     final gesture = await tester.startGesture(Offset(_slotCenterX(3), _barY));
     await tester.pump();
-    final steps = <double>[];
-    var previous = _pillCenterX(tester);
+    expect(_pillCenterX(tester), closeTo(_slotCenterX(3), 0.5));
     for (var i = 0; i < 4; i++) {
       await tester.pump(const Duration(milliseconds: 16));
-      final current = _pillCenterX(tester);
-      steps.add(current - previous);
-      previous = current;
+      expect(
+        _pillCenterX(tester),
+        closeTo(_slotCenterX(3), 0.5),
+        reason: 'down $i',
+      );
     }
     await gesture.up();
     for (var i = 0; i < 3; i++) {
       await tester.pump(const Duration(milliseconds: 16));
-      final current = _pillCenterX(tester);
-      steps.add(current - previous);
-      previous = current;
+      expect(
+        _pillCenterX(tester),
+        closeTo(_slotCenterX(3), 0.5),
+        reason: 'up $i',
+      );
     }
 
     expect(changes, [3]);
-    for (var i = 1; i < steps.length; i++) {
-      expect(steps[i], greaterThan(0), reason: 'step $i');
-      expect(steps[i], lessThan(steps[i - 1]), reason: 'step $i');
-    }
 
     await tester.pumpAndSettle();
     expect(changes, [3]);

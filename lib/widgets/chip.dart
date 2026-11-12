@@ -1,5 +1,6 @@
 import 'package:gobox/common/common.dart';
 import 'package:gobox/enum/enum.dart';
+import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -157,9 +158,7 @@ class _ActionChipState extends State<_ActionChip> {
     final density = theme.visualDensity.baseSizeAdjustment.dy / 4;
     final label = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Center(
-        widthFactor: 1,
-        heightFactor: 1,
+      child: _UnclampedHeightCenter(
         child: DefaultTextStyle(
           overflow: TextOverflow.fade,
           textAlign: TextAlign.start,
@@ -254,6 +253,45 @@ class _ActionChipState extends State<_ActionChip> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _UnclampedHeightCenter extends SingleChildRenderObjectWidget {
+  const _UnclampedHeightCenter({required super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderUnclampedHeight();
+}
+
+class _RenderUnclampedHeight extends RenderShiftedBox {
+  _RenderUnclampedHeight() : super(null);
+
+  BoxConstraints _unclampHeight(BoxConstraints constraints) =>
+      constraints.copyWith(minHeight: 0, maxHeight: double.infinity);
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final child = this.child;
+    if (child == null) return constraints.smallest;
+    return constraints.constrain(
+      child.getDryLayout(_unclampHeight(constraints)),
+    );
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    child.layout(_unclampHeight(constraints), parentUsesSize: true);
+    size = constraints.constrain(child.size);
+    (child.parentData! as BoxParentData).offset = Offset(
+      (size.width - child.size.width) / 2,
+      (size.height - child.size.height) / 2,
     );
   }
 }

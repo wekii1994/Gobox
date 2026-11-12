@@ -47,9 +47,23 @@ class AppPath {
         tempDir.complete(value);
       });
     }
-    getDownloadsDirectory().then((value) {
-      downloadDir.complete(value);
-    });
+    void completeDownloadDir(Directory? value) {
+      if (downloadDir.isCompleted) return;
+      if (value != null) {
+        downloadDir.complete(value);
+        return;
+      }
+      dataDir.future.then((dir) {
+        if (!downloadDir.isCompleted) {
+          downloadDir.complete(dir);
+        }
+      });
+    }
+
+    getDownloadsDirectory().then<void>(
+      completeDownloadDir,
+      onError: (Object _, StackTrace _) => completeDownloadDir(null),
+    );
   }
 
   factory AppPath() {

@@ -1855,10 +1855,10 @@ class AppLocalizations {
     return Intl.message('Slow', name: 'slow', desc: '', args: []);
   }
 
-  /// `Bettbox is deeply crafted on the powerful and flexible Mihomo kernel, dedicated to a superior client experience. Our vision: Connecting Open Source and AI, Accelerating Innovation`
+  /// `Gobox is deeply crafted on the powerful and flexible Mihomo kernel, dedicated to a superior client experience. Our vision: Connecting Open Source and AI, Accelerating Innovation`
   String get desc {
     return Intl.message(
-      'Bettbox is deeply crafted on the powerful and flexible Mihomo kernel, dedicated to a superior client experience. Our vision: Connecting Open Source and AI, Accelerating Innovation',
+      'Gobox is deeply crafted on the powerful and flexible Mihomo kernel, dedicated to a superior client experience. Our vision: Connecting Open Source and AI, Accelerating Innovation',
       name: 'desc',
       desc: '',
       args: [],
@@ -6620,10 +6620,10 @@ class AppLocalizations {
     return Intl.message('Collapse', name: 'collapse', desc: '', args: []);
   }
 
-  /// `Analyze Bettbox (Mihomo) log: {log}`
+  /// `Analyze Gobox (Mihomo) log: {log}`
   String analyzeLogPrompt(Object log) {
     return Intl.message(
-      'Analyze Bettbox (Mihomo) log: $log',
+      'Analyze Gobox (Mihomo) log: $log',
       name: 'analyzeLogPrompt',
       desc: '',
       args: [log],
@@ -8660,10 +8660,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Scan with Bettbox on another device to connect in one tap`
+  /// `Scan with Gobox on another device to connect in one tap`
   String get iperfScanHint {
     return Intl.message(
-      'Scan with Bettbox on another device to connect in one tap',
+      'Scan with Gobox on another device to connect in one tap',
       name: 'iperfScanHint',
       desc: '',
       args: [],
@@ -8725,10 +8725,10 @@ class AppLocalizations {
     );
   }
 
-  /// `If other devices can't connect, allow incoming connections for the Bettbox core in your system firewall.`
+  /// `If other devices can't connect, allow incoming connections for the Gobox core in your system firewall.`
   String get iperfFirewallTip {
     return Intl.message(
-      'If other devices can\'t connect, allow incoming connections for the Bettbox core in your system firewall.',
+      'If other devices can\'t connect, allow incoming connections for the Gobox core in your system firewall.',
       name: 'iperfFirewallTip',
       desc: '',
       args: [],
