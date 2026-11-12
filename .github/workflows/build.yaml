@@ -9,8 +9,8 @@ on:
       - 'v*'
 
 env:
-  IS_STABLE: ${{ !contains(github.ref, '-') }}
-  IS_PRERELEASE: ${{ contains(github.ref_name, 'pre') }}
+  IS_STABLE: ${{ !contains(github.ref_name, '-pre') && !contains(github.ref_name, '-test') }}
+  IS_PRERELEASE: ${{ contains(github.ref_name, '-pre') || contains(github.ref_name, '-test') }}
   GRADLE_OPTS: -Dorg.gradle.vfs.watch=false
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   SENTRY_BACKEND: none
