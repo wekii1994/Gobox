@@ -572,8 +572,7 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 val context = GoboxApplication.getAppContext()
                 val notificationManager = context.getSystemService(android.app.NotificationManager::class.java)
                 notificationManager?.cancel(GlobalState.NOTIFICATION_ID)
-                (goBoxService as? GoboxService)?.resetNotificationBuilder()
-                (goBoxService as? GoboxVpnService)?.resetNotificationBuilder()
+                goBoxService?.resetNotificationBuilder()
                 goBoxService?.startForeground()
             }.onFailure {
                 android.util.Log.e("VpnPlugin", "updateNotificationIcon error: ${it.message}")
@@ -619,6 +618,9 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                         break
                     }
                     val speedInfo = Core.trafficJson()?.let(::trafficSpeedInfo) ?: continue
+                    if (!GlobalState.isSpeedNotificationEnabled || !isActive) {
+                        break
+                    }
                     updateNotificationSpeed(GlobalState.currentProfileName, speedInfo)
                 }
             }
@@ -632,54 +634,44 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         }
     }
 
-    fun updateNotificationTitle(profileName: String) {
-        scope.launch {
+    private fun dispatchNotificationUpdate(
+        label: String,
+        block: suspend (BaseServiceInterface) -> Unit
+    ) {
+        // Dispatchers.Main.immediate enters Mutex queues synchronously on the platform thread so
+        // rapid toggle transitions preserve FIFO call order.
+        scope.launch(Dispatchers.Main.immediate) {
             runCatching {
-                when (val service = goBoxService) {
-                    is GoboxVpnService -> service.updateNotificationTitle(profileName)
-                    is GoboxService -> service.updateNotificationTitle(profileName)
-                    else -> Unit
-                }
+                goBoxService?.let { block(it) }
             }.onFailure {
-                android.util.Log.e("VpnPlugin", "updateNotificationTitle error: ${it.message}")
+                android.util.Log.e("VpnPlugin", "$label error: ${it.message}")
             }
         }
     }
 
+    fun updateNotificationTitle(profileName: String) {
+        dispatchNotificationUpdate("updateNotificationTitle") {
+            it.updateNotificationTitle(profileName)
+        }
+    }
+
     fun updateNotificationSpeed(profileName: String, speedInfo: String) {
-        scope.launch {
-            runCatching {
-                when (val service = goBoxService) {
-                    is GoboxVpnService -> service.updateNotificationSpeed(profileName, speedInfo)
-                    is GoboxService -> service.updateNotificationSpeed(profileName, speedInfo)
-                    else -> Unit
-                }
-            }.onFailure {
-                android.util.Log.e("VpnPlugin", "updateNotificationSpeed error: ${it.message}")
-            }
+        dispatchNotificationUpdate("updateNotificationSpeed") {
+            it.updateNotificationSpeed(profileName, speedInfo)
         }
     }
 
     fun restoreNotification() {
         GlobalState.isSpeedNotificationEnabled = false
         stopSpeedTicker()
-        scope.launch {
-            runCatching {
-                when (val service = goBoxService) {
-                    is GoboxVpnService -> service.restoreNotification()
-                    is GoboxService -> service.restoreNotification()
-                    else -> Unit
-                }
-            }.onFailure {
-                android.util.Log.e("VpnPlugin", "restoreNotification error: ${it.message}")
-            }
+        dispatchNotificationUpdate("restoreNotification") {
+            it.restoreNotification()
         }
     }
 
     fun setHighPriorityNotification(enabled: Boolean) {
         GlobalState.isNotificationHighPriority = enabled
-        (goBoxService as? GoboxService)?.resetNotificationBuilder()
-        (goBoxService as? GoboxVpnService)?.resetNotificationBuilder()
+        goBoxService?.resetNotificationBuilder()
         if (GlobalState.currentRunState == RunState.START) {
             scope.launch {
                 startForeground()
@@ -954,8 +946,7 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         suspendModule = null
         Core.stopTun()
         Core.suspended(true)
-        (goBoxService as? GoboxService)?.resetNotificationBuilder()
-        (goBoxService as? GoboxVpnService)?.resetNotificationBuilder()
+        goBoxService?.resetNotificationBuilder()
         scope.launch {
             startForeground()
         }
@@ -983,8 +974,7 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             }
             if (!startAllowed) return@launch
 
-            (goBoxService as? GoboxService)?.resetNotificationBuilder()
-            (goBoxService as? GoboxVpnService)?.resetNotificationBuilder()
+            goBoxService?.resetNotificationBuilder()
             performStartCore(options, retry = false, notifyOnFailure = false)
             withContext(Dispatchers.Main) {
                 Toast.makeText(GoboxApplication.getAppContext(), "Gobox Connected", Toast.LENGTH_SHORT).show()

@@ -1,6 +1,5 @@
 package com.wekii.gobox.services
 
-import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -11,9 +10,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.Parcel
-import android.os.PowerManager
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import com.wekii.gobox.GlobalState
 import com.wekii.gobox.core.Core
 import com.wekii.gobox.extensions.getIpv4RouteAddress
@@ -22,7 +19,6 @@ import com.wekii.gobox.extensions.toCIDR
 import com.wekii.gobox.models.AccessControlMode
 import com.wekii.gobox.models.VpnOptions
 import com.wekii.gobox.plugins.VpnPlugin
-import com.wekii.gobox.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,23 +30,9 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             Regex("[a-zA-Z0-9*]+(-[a-zA-Z0-9*]+)*(\\.[a-zA-Z0-9*]+(-[a-zA-Z0-9*]+)*)*")
     }
 
-    @Volatile
-    private var isStopped = false
-
-    @Volatile
-    private var hasStartedForeground = false
-
     private var unlockReceiver: BroadcastReceiver? = null
     private val fairMemoryHelper = FairMemoryHelper(TAG)
-
-    @Volatile
-    private var lastNotificationText: String? = null
-
-    @Volatile
-    private var pendingSpeedProfile: String? = null
-
-    @Volatile
-    private var pendingSpeedInfo: String? = null
+    private val notificationHelper = ServiceNotificationHelper(this, TAG)
 
     override fun onCreate() {
         super.onCreate()
@@ -67,8 +49,7 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
                         GlobalState.getCurrentVPNPlugin()?.notifyScreenStateChanged(true)
                     }
                 }
-                lastNotificationText = null
-                resetNotificationBuilder()
+                notificationHelper.resetNotificationBuilder(clearLastText = true)
                 CoroutineScope(Dispatchers.Main).launch {
                     startForeground()
                 }
@@ -172,7 +153,7 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             val speedInfo = intent.getStringExtra("speedInfo") ?: ""
             GlobalState.currentProfileName = profileName
             GlobalState.isSpeedNotificationEnabled = true
-            if (!GlobalState.isSmartStopped && hasStartedForeground) {
+            if (!GlobalState.isSmartStopped && notificationHelper.hasStartedForeground) {
                 CoroutineScope(Dispatchers.Main).launch {
                     updateNotificationSpeed(profileName, speedInfo)
                 }
@@ -181,149 +162,29 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
         return START_STICKY
     }
 
-    internal suspend fun restoreNotification() {
-        GlobalState.isSpeedNotificationEnabled = false
-        pendingSpeedInfo = null
-        if (hasStartedForeground) {
-            startForeground()
-        }
+    override suspend fun restoreNotification() {
+        notificationHelper.restoreNotification()
     }
 
     override fun stop() {
-        if (isStopped) return
-        isStopped = true
-        hasStartedForeground = false
-        lastNotificationText = null
-        pendingSpeedProfile = null
-        pendingSpeedInfo = null
-
-        runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                stopForeground(STOP_FOREGROUND_REMOVE)
-            } else {
-                stopForeground(true)
-            }
-        }.onFailure { Log.e(TAG, "Failed to stop foreground: ${it.message}") }
-
-        runCatching {
-            getSystemService(android.app.NotificationManager::class.java)
-                ?.cancel(GlobalState.NOTIFICATION_ID)
-        }.onFailure { Log.e(TAG, "Failed to cancel notification: ${it.message}") }
-
+        if (!notificationHelper.stop()) return
         stopSelf()
     }
 
-    @Volatile
-    private var cachedBuilder: NotificationCompat.Builder? = null
-
-    fun resetNotificationBuilder() {
-        cachedBuilder = null
+    override fun resetNotificationBuilder() {
+        notificationHelper.resetNotificationBuilder()
     }
 
-    private suspend fun notificationBuilder(): NotificationCompat.Builder {
-        if (cachedBuilder == null) {
-            cachedBuilder = createGoboxNotificationBuilder()
-        }
-        return cachedBuilder!!
-    }
-
-    @SuppressLint("ForegroundServiceType")
     override suspend fun startForeground() {
-        val isSuspended = GlobalState.isSmartStopped
-        val isHighPriority = GlobalState.isNotificationHighPriority
-        ensureNotificationChannel(isSuspended, isHighPriority)
-        val title: String
-        val content: String
-        if (isSuspended) {
-            title = getString(R.string.core_suspended)
-            content = getString(R.string.smart_auto_stop_service_running)
-        } else {
-            title = pendingSpeedProfile?.takeIf { it.isNotBlank() }
-                ?: GlobalState.currentProfileName.takeIf { it.isNotBlank() }
-                ?: getString(R.string.core_connected)
-            content = getString(R.string.service_running)
-        }
-
-        lastNotificationText = null
-        val builder = createGoboxNotificationBuilder(isSuspended, isHighPriority)
-        val notification = builder
-            .setContentTitle(title)
-            .setContentText(content)
-            .setStyle(null)
-            .build()
-
-        val pendingProfile = pendingSpeedProfile
-        val pendingSpeed = pendingSpeedInfo
-        if (!isSuspended && GlobalState.isSpeedNotificationEnabled && pendingProfile != null && pendingSpeed != null) {
-            updateNotificationSpeed(pendingProfile, pendingSpeed)
-            return
-        }
-
-        runCatching {
-            this.startForeground(notification, useSpecialType = !isSuspended)
-            hasStartedForeground = true
-        }.onFailure {
-            Log.e(TAG, "startForeground error: ${it.message}")
-        }
+        notificationHelper.startForeground()
     }
 
-    @SuppressLint("ForegroundServiceType")
-    internal suspend fun updateNotificationTitle(profileName: String) {
-        GlobalState.isSpeedNotificationEnabled = false
-        pendingSpeedProfile = profileName
-        pendingSpeedInfo = null
-        val content = getString(R.string.service_running)
-        postNotificationContent(profileName, content)
+    override suspend fun updateNotificationTitle(profileName: String) {
+        notificationHelper.updateNotificationTitle(profileName)
     }
 
-    @SuppressLint("ForegroundServiceType")
-    internal suspend fun updateNotificationSpeed(profileName: String, speedInfo: String) {
-        pendingSpeedProfile = profileName
-        pendingSpeedInfo = speedInfo
-        postNotificationContent(profileName, speedInfo)
-    }
-
-    @SuppressLint("ForegroundServiceType")
-    private suspend fun postNotificationContent(title: String, content: String) {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
-        if (powerManager?.isInteractive == false) {
-            return
-        }
-
-        if (GlobalState.isSmartStopped) {
-            return
-        }
-
-        val combinedText = "$title\n$content"
-        if (combinedText == lastNotificationText) {
-            return
-        }
-        lastNotificationText = combinedText
-
-        val builder = notificationBuilder()
-        val notification = builder
-            .setContentTitle(title)
-            .setContentText(content)
-            .setStyle(null)
-            .build()
-
-        if (!hasStartedForeground) {
-            runCatching {
-                this.startForeground(notification, useSpecialType = !GlobalState.isSmartStopped)
-                hasStartedForeground = true
-            }.onFailure {
-                Log.e(TAG, "postNotificationContent startForeground error: ${it.message}")
-                runCatching {
-                    getSystemService(android.app.NotificationManager::class.java)
-                        ?.notify(GlobalState.NOTIFICATION_ID, notification)
-                }
-            }
-        } else {
-            runCatching {
-                getSystemService(android.app.NotificationManager::class.java)
-                    ?.notify(GlobalState.NOTIFICATION_ID, notification)
-            }.onFailure { Log.e(TAG, "postNotificationContent notify error: ${it.message}") }
-        }
+    override suspend fun updateNotificationSpeed(profileName: String, speedInfo: String) {
+        notificationHelper.updateNotificationSpeed(profileName, speedInfo)
     }
 
     override fun onTrimMemory(level: Int) {

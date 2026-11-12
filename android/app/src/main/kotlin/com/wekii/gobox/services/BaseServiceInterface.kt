@@ -27,6 +27,10 @@ interface BaseServiceInterface {
     suspend fun start(options: VpnOptions): Int
     fun stop()
     suspend fun startForeground()
+    fun resetNotificationBuilder()
+    suspend fun restoreNotification()
+    suspend fun updateNotificationTitle(profileName: String)
+    suspend fun updateNotificationSpeed(profileName: String, speedInfo: String)
 }
 
 suspend fun Service.createGoboxNotificationBuilder(
@@ -129,7 +133,7 @@ fun Service.ensureNotificationChannel(
 }
 
 @SuppressLint("ForegroundServiceType")
-fun Service.startForeground(notification: Notification, useSpecialType: Boolean = true) {
+fun Service.startForeground(notification: Notification, useSpecialType: Boolean = true): Boolean {
     ensureNotificationChannel(GlobalState.isSmartStopped, GlobalState.isNotificationHighPriority)
 
     val type = if (Build.VERSION.SDK_INT >= 34 && useSpecialType && !GlobalState.isSmartStopped) {
@@ -138,18 +142,21 @@ fun Service.startForeground(notification: Notification, useSpecialType: Boolean 
         0
     }
 
-    runCatching {
+    val primaryResult = runCatching {
         if (type != 0) {
             startForeground(GlobalState.NOTIFICATION_ID, notification, type)
         } else {
             startForeground(GlobalState.NOTIFICATION_ID, notification)
         }
-    }.onFailure {
-        android.util.Log.e("BaseServiceInterface", "startForeground failed: ${it.message}")
-        runCatching {
-            startForeground(GlobalState.NOTIFICATION_ID, notification)
-        }.onFailure { fallbackErr ->
-            android.util.Log.e("BaseServiceInterface", "startForeground fallback failed: ${fallbackErr.message}")
-        }
     }
+    if (primaryResult.isSuccess) return true
+
+    android.util.Log.e("BaseServiceInterface", "startForeground failed: ${primaryResult.exceptionOrNull()?.message}")
+    val fallbackResult = runCatching {
+        startForeground(GlobalState.NOTIFICATION_ID, notification)
+    }
+    if (fallbackResult.isSuccess) return true
+
+    android.util.Log.e("BaseServiceInterface", "startForeground fallback failed: ${fallbackResult.exceptionOrNull()?.message}")
+    return false
 }

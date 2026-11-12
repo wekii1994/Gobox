@@ -236,7 +236,7 @@ jobs:
           base_version=$(echo "$VERSION" | sed 's/-pre[0-9]*.*//')
           
           if [ -f "RELEASE_NOTES.md" ]; then
-            awk '/^---/ || /^## .*历史版本/ {exit} {print}' RELEASE_NOTES.md > release.md
+            awk '/^## .*历史版本/ {exit} {lines[++n]=$0} END {while (n>0 && lines[n]~/^[[:space:]]*(---)?[[:space:]]*$/) n--; for (i=1;i<=n;i++) print lines[i]}' RELEASE_NOTES.md > release.md
           else
             printf '%s\n' "- Fixes and improvements" "- Recommended version update" > release.md
           fi

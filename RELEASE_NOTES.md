@@ -1,4 +1,20 @@
-## 🚀 Gobox v1.19.8-pre1-11 更新说明
+## 🚀 Gobox v1.19.8-pre1-12 更新说明
+
+本版本围绕 Android 前台服务通知可靠性与构建发布链路继续加固：
+
+### 🛠️ 核心修复与优化
+1. **统一通知管理与 `startForeground()` 真实状态校验**
+   - 提取共享 `ServiceNotificationHelper`，将 `GoboxService` 与 `GoboxVpnService` 的通知栏状态、构建器及前后台切换逻辑收口统一。
+   - 修复 `BaseServiceInterface.kt` 中 `Service.startForeground()` 吞掉异常导致 `hasStartedForeground` 误置位的问题，改为真实返回 `Boolean` 状态；同时修复 VPN 服务在“未启动前台 + 息屏 + 存在缓存网速”场景下可能跳过系统 `startForeground()` 的隐患。
+2. **串行化通知栏更新，消除开关瞬间的协程竞态**
+   - 使用 `Mutex` 串行化前台通知的启动、标题更新、网速更新与恢复动作，并在 `VpnPlugin` 中采用 `Dispatchers.Main.immediate` 按 FIFO 顺序派发；在关闭网速通知瞬间，后台滞后 ticker 与陈旧更新不再回写覆盖通知栏，同时避免快速反切时误清启用状态。
+3. **清理 Dart 侧冗余遗留状态与优化 CI Release 提取逻辑**
+   - 移除 `lib/plugins/service.dart` 中已无调用方的 `_speedNotificationProfile`、`hasSpeedNotificationProfile` 与 `needsSpeedNotificationSync`。
+   - 优化 `.github/workflows/build.yaml` 的发布说明截取规则：改为按 `## .*历史版本` 分界并裁剪尾部分隔符，避免当前版本更新说明中出现 `---` 时被误截断。
+
+---
+
+## 📦 历史版本（v1.19.8-pre1-11）
 
 本版本针对 Android 通知栏网速动态切换场景进行深度闭环优化：
 

@@ -41,7 +41,6 @@ class Service {
   Future<bool?> destroy() => methodChannel.invokeMethod<bool>('destroy');
 
   Future<bool?> startVpn() async {
-    _speedNotificationProfile = null;
     _notificationTitle = null;
     final options = await clashLib?.getAndroidVpnOptions();
     return await methodChannel.invokeMethod<bool>('startVpn', {
@@ -50,7 +49,6 @@ class Service {
   }
 
   Future<bool?> stopVpn() async {
-    _speedNotificationProfile = null;
     _notificationTitle = null;
     return await methodChannel.invokeMethod<bool>('stopVpn');
   }
@@ -74,13 +72,7 @@ class Service {
     return await methodChannel.invokeMethod<bool>('status') ?? false;
   }
 
-  String? _speedNotificationProfile;
   String? _notificationTitle;
-
-  bool get hasSpeedNotificationProfile => _speedNotificationProfile != null;
-
-  bool needsSpeedNotificationSync(String profileName) =>
-      _speedNotificationProfile != profileName;
 
   bool needsNotificationTitleSync(String profileName) =>
       _notificationTitle != profileName;
@@ -90,9 +82,6 @@ class Service {
       'profileName': profileName,
     });
     _notificationTitle = profileName;
-    if (_speedNotificationProfile != null) {
-      _speedNotificationProfile = profileName;
-    }
   }
 
   Future<void> updateNotificationSpeed(
@@ -103,12 +92,10 @@ class Service {
       'profileName': profileName,
       'speedInfo': speedInfo,
     });
-    _speedNotificationProfile = profileName;
     _notificationTitle = profileName;
   }
 
   Future<void> restoreNotification() async {
-    _speedNotificationProfile = null;
     await methodChannel.invokeMethod<void>('restoreNotification');
   }
 
