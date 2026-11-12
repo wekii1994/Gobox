@@ -22,7 +22,8 @@ type Selector struct {
 
 // DialContext implements C.ProxyAdapter
 func (s *Selector) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
-	c, err := s.selectedProxy(true).DialContext(ctx, metadata)
+	dialCtx := WithTrafficSelectorContext(ctx, s)
+	c, err := s.selectedProxy(true).DialContext(dialCtx, metadata)
 	if err == nil {
 		c.AppendToChains(s)
 	}
@@ -31,7 +32,8 @@ func (s *Selector) DialContext(ctx context.Context, metadata *C.Metadata) (C.Con
 
 // ListenPacketContext implements C.ProxyAdapter
 func (s *Selector) ListenPacketContext(ctx context.Context, metadata *C.Metadata) (C.PacketConn, error) {
-	pc, err := s.selectedProxy(true).ListenPacketContext(ctx, metadata)
+	dialCtx := WithTrafficSelectorContext(ctx, s)
+	pc, err := s.selectedProxy(true).ListenPacketContext(dialCtx, metadata)
 	if err == nil {
 		pc.AppendToChains(s)
 	}
@@ -84,41 +86,51 @@ func (s *Selector) TestURL() string {
 	return s.testUrl
 }
 
-func resetDeselectedChainTraffic(proxy C.Proxy) {
+func resetDeselectedChainTraffic(proxy C.Proxy, source *Selector) {
 	visited := make(map[string]struct{})
-	curr := proxy
-	for curr != nil {
+	var walk func(curr C.Proxy)
+	walk = func(curr C.Proxy) {
+		if curr == nil {
+			return
+		}
 		name := curr.Name()
 		if name != "" {
 			if _, seen := visited[name]; seen {
-				break
+				return
 			}
 			visited[name] = struct{}{}
 		}
 		wrapper, ok := curr.(interface{ Adapter() C.ProxyAdapter })
 		if !ok {
-			break
+			return
 		}
 		inner := wrapper.Adapter()
 		if inner == nil {
-			break
+			return
 		}
-		if resetter, ok := inner.(interface{ ResetTrafficActivity() }); ok {
+		if resetter, ok := inner.(interface{ resetTrafficActivityForSelector(*Selector) }); ok {
+			resetter.resetTrafficActivityForSelector(source)
+		} else if resetter, ok := inner.(interface{ ResetTrafficActivity() }); ok {
 			resetter.ResetTrafficActivity()
 		}
-		sel, ok := inner.(*Selector)
-		if !ok {
-			break
+		if sel, ok := inner.(*Selector); ok {
+			walk(sel.selectedProxy(false))
+			return
 		}
-		curr = sel.selectedProxy(false)
+		if gp, ok := inner.(interface{ GetProxies(bool) []C.Proxy }); ok {
+			for _, child := range gp.GetProxies(false) {
+				walk(child)
+			}
+		}
 	}
+	walk(proxy)
 }
 
 func (s *Selector) switchSelection(name string) {
 	prev := s.selectedProxy(false)
 	s.selected = name
 	if prev != nil && prev.Name() != name {
-		resetDeselectedChainTraffic(prev)
+		resetDeselectedChainTraffic(prev, s)
 	}
 }
 

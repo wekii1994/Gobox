@@ -21,10 +21,18 @@ import (
 )
 
 const (
-	failSlidingWindow   = 5 * time.Second
-	failoverCooldown    = 10 * time.Second
-	maxFailedTargetsCap = 16
+	failSlidingWindow    = 5 * time.Second
+	failoverCooldown     = 10 * time.Second
+	maxFailedTargetsCap  = 16
+	maxTrafficSourcesCap = 64
 )
+
+type trafficSourceKey struct{}
+
+type trafficSourceActivity struct {
+	selectors []*Selector
+	lastAt    int64
+}
 
 type failedTarget struct {
 	host string
@@ -42,12 +50,12 @@ var ErrHealthCheckInFlight = errors.New("health check already in progress")
 
 type GroupBase struct {
 	*outbound.Base
-	hidden            bool
-	icon              string
-	filterRegs        []*regexp2.Regexp
-	excludeFilterRegs []*regexp2.Regexp
-	excludeTypeArray  []string
-	providers         []P.ProxyProvider
+	hidden                 bool
+	icon                   string
+	filterRegs             []*regexp2.Regexp
+	excludeFilterRegs      []*regexp2.Regexp
+	excludeTypeArray       []string
+	providers              []P.ProxyProvider
 	failedTestMux          sync.Mutex
 	failedTargets          []failedTarget
 	probing                atomic.Bool
@@ -57,6 +65,8 @@ type GroupBase struct {
 	maxFailedTimes         int
 	consecutiveAllFailures int
 	lastTrafficAt          atomic.Int64
+	trafficMux             sync.Mutex
+	trafficSources         []trafficSourceActivity
 	emptyFallback          C.Proxy
 
 	// for GetProxies
@@ -141,12 +151,86 @@ func (gb *GroupBase) TestTimeout() time.Duration {
 	return time.Duration(gb.testTimeout) * time.Millisecond
 }
 
+// WithTrafficSelectorContext records a Selector hop along the forwarding chain so
+// deselection by one entry selector only clears traffic activity attributed to it.
+func WithTrafficSelectorContext(ctx context.Context, selector *Selector) context.Context {
+	if selector == nil {
+		return ctx
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	prev := trafficSelectorsFromContext(ctx)
+	if slices.Contains(prev, selector) {
+		return ctx
+	}
+	next := make([]*Selector, len(prev)+1)
+	copy(next, prev)
+	next[len(prev)] = selector
+	return context.WithValue(ctx, trafficSourceKey{}, next)
+}
+
+func trafficSelectorsFromContext(ctx context.Context) []*Selector {
+	if ctx == nil {
+		return nil
+	}
+	selectors, _ := ctx.Value(trafficSourceKey{}).([]*Selector)
+	return selectors
+}
+
 // markTrafficUsed records real forwarding activity unless ctx belongs to a synthetic latency probe.
 func (gb *GroupBase) markTrafficUsed(ctx context.Context) {
 	if gb == nil || C.IsLatencyTestContext(ctx) {
 		return
 	}
-	gb.lastTrafficAt.Store(time.Now().UnixNano())
+	nowNs := time.Now().UnixNano()
+	selectors := trafficSelectorsFromContext(ctx)
+
+	gb.trafficMux.Lock()
+	updated := false
+	for i := range gb.trafficSources {
+		if slices.Equal(gb.trafficSources[i].selectors, selectors) {
+			gb.trafficSources[i].lastAt = nowNs
+			updated = true
+			break
+		}
+	}
+	if !updated {
+		var chain []*Selector
+		if len(selectors) > 0 {
+			chain = make([]*Selector, len(selectors))
+			copy(chain, selectors)
+		}
+		if len(gb.trafficSources) >= maxTrafficSourcesCap {
+			oldestIdx := 0
+			for i := 1; i < len(gb.trafficSources); i++ {
+				if gb.trafficSources[i].lastAt < gb.trafficSources[oldestIdx].lastAt {
+					oldestIdx = i
+				}
+			}
+			gb.trafficSources[oldestIdx] = trafficSourceActivity{
+				selectors: chain,
+				lastAt:    nowNs,
+			}
+		} else {
+			gb.trafficSources = append(gb.trafficSources, trafficSourceActivity{
+				selectors: chain,
+				lastAt:    nowNs,
+			})
+		}
+	}
+	gb.syncLastTrafficAtLocked()
+	gb.trafficMux.Unlock()
+}
+
+func (gb *GroupBase) syncLastTrafficAtLocked() {
+	var latest int64
+	for _, entry := range gb.trafficSources {
+		if entry.lastAt > latest {
+			latest = entry.lastAt
+		}
+	}
+	gb.lastTrafficAt.Store(latest)
 }
 
 // LastTrafficAt returns the latest timestamp when real traffic entered this group.
@@ -161,12 +245,42 @@ func (gb *GroupBase) LastTrafficAt() time.Time {
 	return time.Unix(0, ns)
 }
 
-// ResetTrafficActivity clears recorded forwarding activity, e.g. when a selector switches away.
+// ResetTrafficActivity clears all recorded forwarding activity on this group.
 func (gb *GroupBase) ResetTrafficActivity() {
 	if gb == nil {
 		return
 	}
+	gb.trafficMux.Lock()
+	gb.trafficSources = nil
 	gb.lastTrafficAt.Store(0)
+	gb.trafficMux.Unlock()
+}
+
+// resetTrafficActivityForSelector clears forwarding activity attributed to selector while
+// preserving activity from unrelated selectors or direct rule entries.
+func (gb *GroupBase) resetTrafficActivityForSelector(selector *Selector) {
+	if gb == nil {
+		return
+	}
+	if selector == nil {
+		gb.ResetTrafficActivity()
+		return
+	}
+	gb.trafficMux.Lock()
+	n := 0
+	for _, entry := range gb.trafficSources {
+		if slices.Contains(entry.selectors, selector) {
+			continue
+		}
+		gb.trafficSources[n] = entry
+		n++
+	}
+	for i := n; i < len(gb.trafficSources); i++ {
+		gb.trafficSources[i] = trafficSourceActivity{}
+	}
+	gb.trafficSources = gb.trafficSources[:n]
+	gb.syncLastTrafficAtLocked()
+	gb.trafficMux.Unlock()
 }
 
 func (gb *GroupBase) EmptyFallback() C.Proxy {

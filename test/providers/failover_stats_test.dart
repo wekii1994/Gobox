@@ -121,4 +121,96 @@ void main() {
       expect(container.read(failoverStatsProvider).requireValue.total, 0);
     },
   );
+
+  test(
+    'reset queued behind slow refresh executes before a reopened page loads',
+    () async {
+      final slowRefresh = Completer<FailoverStats>();
+      var backendTotal = 9;
+      var reads = 0;
+      var resets = 0;
+      final container = containerFor(
+        load: () async {
+          reads++;
+          if (reads == 2) {
+            return slowRefresh.future;
+          }
+          return FailoverStats(total: backendTotal);
+        },
+        reset: () async {
+          resets++;
+          backendTotal = 0;
+          return const FailoverStats();
+        },
+      );
+
+      // First page mount loads initial count (9), starts slow refresh, queues reset, and closes.
+      final sub1 = container.listen(failoverStatsProvider, (_, _) {});
+      expect((await container.read(failoverStatsProvider.future)).total, 9);
+      final refreshFuture = container
+          .read(failoverStatsProvider.notifier)
+          .refresh();
+      final resetFuture = container
+          .read(failoverStatsProvider.notifier)
+          .reset();
+      await Future<void>.delayed(Duration.zero);
+      expect(resets, 0);
+
+      sub1.close();
+      await container.pump();
+
+      // Immediately reopen page before slow refresh finishes: reopened page must wait for reset.
+      final sub2 = container.listen(failoverStatsProvider, (_, _) {});
+      addTearDown(sub2.close);
+      await Future<void>.delayed(Duration.zero);
+      expect(reads, 2);
+
+      slowRefresh.complete(const FailoverStats(total: 9));
+      await Future.wait([refreshFuture, resetFuture]);
+      final reopened = await container.read(failoverStatsProvider.future);
+
+      expect(resets, 1);
+      expect(reads, 3);
+      expect(reopened.total, 0);
+      expect(container.read(failoverStatsProvider).requireValue.total, 0);
+    },
+  );
+
+  test('reopening page while reset IPC is in flight waits for reset before loading', () async {
+    final resetInFlight = Completer<FailoverStats>();
+    var backendTotal = 7;
+    var reads = 0;
+    final container = containerFor(
+      load: () async {
+        reads++;
+        return FailoverStats(total: backendTotal);
+      },
+      reset: () async {
+        final result = await resetInFlight.future;
+        backendTotal = 0;
+        return result;
+      },
+    );
+
+    final sub1 = container.listen(failoverStatsProvider, (_, _) {});
+    expect((await container.read(failoverStatsProvider.future)).total, 7);
+    final resetFuture = container.read(failoverStatsProvider.notifier).reset();
+    await Future<void>.delayed(Duration.zero);
+
+    sub1.close();
+    await container.pump();
+
+    final sub2 = container.listen(failoverStatsProvider, (_, _) {});
+    addTearDown(sub2.close);
+    await Future<void>.delayed(Duration.zero);
+    expect(reads, 1);
+
+    resetInFlight.complete(const FailoverStats());
+    await resetFuture;
+    final reopened = await container.read(failoverStatsProvider.future);
+
+    expect(reads, 2);
+    expect(reopened.total, 0);
+    expect(container.read(failoverStatsProvider).requireValue.total, 0);
+  });
 }

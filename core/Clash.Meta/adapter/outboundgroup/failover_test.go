@@ -13,9 +13,9 @@ import (
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outbound"
+	"github.com/metacubex/mihomo/common/utils"
 	C "github.com/metacubex/mihomo/constant"
 	P "github.com/metacubex/mihomo/constant/provider"
-	"github.com/metacubex/mihomo/common/utils"
 
 	"github.com/stretchr/testify/require"
 )
@@ -182,9 +182,9 @@ func (b *blockingMockProvider) HealthCheck() {
 	<-b.block
 }
 
-func (b *blockingMockProvider) Touch() {}
+func (b *blockingMockProvider) Touch()                                             {}
 func (b *blockingMockProvider) HealthCheckExpectedStatus() utils.IntRanges[uint16] { return nil }
-func (b *blockingMockProvider) HealthCheckTimeout() time.Duration { return 5 * time.Second }
+func (b *blockingMockProvider) HealthCheckTimeout() time.Duration                  { return 5 * time.Second }
 
 func TestProviderTestingMutualExclusionWithBlockingProvider(t *testing.T) {
 	bp := &blockingMockProvider{
@@ -393,10 +393,10 @@ func (c *canceledMockAdapter) ListenPacketContext(ctx context.Context, metadata 
 	return nil, fmt.Errorf("proxy connect error: %s", context.Canceled.Error())
 }
 
-func (c *canceledMockAdapter) SupportUDP() bool { return false }
-func (c *canceledMockAdapter) MarshalJSON() ([]byte, error) { return nil, nil }
+func (c *canceledMockAdapter) SupportUDP() bool                                { return false }
+func (c *canceledMockAdapter) MarshalJSON() ([]byte, error)                    { return nil, nil }
 func (c *canceledMockAdapter) Unwrap(metadata *C.Metadata, touch bool) C.Proxy { return nil }
-func (c *canceledMockAdapter) Close() error { return nil }
+func (c *canceledMockAdapter) Close() error                                    { return nil }
 
 func TestProxyURLTestPreservesHealthStateOnStringifiedCancellation(t *testing.T) {
 	// Verify that when context is canceled, even if adapter severing error chain with %s,
@@ -429,7 +429,6 @@ func TestProxyURLTestPreservesHealthStateOnStringifiedCancellation(t *testing.T)
 	}
 }
 
-
 type concurrencyMockAdapter struct {
 	*outbound.Base
 	active *atomic.Int32
@@ -453,10 +452,10 @@ func (c *concurrencyMockAdapter) ListenPacketContext(ctx context.Context, metada
 	return nil, errors.New("not implemented")
 }
 
-func (c *concurrencyMockAdapter) SupportUDP() bool { return false }
-func (c *concurrencyMockAdapter) MarshalJSON() ([]byte, error) { return nil, nil }
+func (c *concurrencyMockAdapter) SupportUDP() bool                                { return false }
+func (c *concurrencyMockAdapter) MarshalJSON() ([]byte, error)                    { return nil, nil }
 func (c *concurrencyMockAdapter) Unwrap(metadata *C.Metadata, touch bool) C.Proxy { return nil }
-func (c *concurrencyMockAdapter) Close() error { return nil }
+func (c *concurrencyMockAdapter) Close() error                                    { return nil }
 
 type concurrencyMockProvider struct {
 	P.ProxyProvider
@@ -467,11 +466,11 @@ func (p *concurrencyMockProvider) Proxies() []C.Proxy {
 	return p.proxies
 }
 
-func (p *concurrencyMockProvider) Touch() {}
-func (p *concurrencyMockProvider) Version() uint32 { return 1 }
-func (p *concurrencyMockProvider) HealthCheck() {}
+func (p *concurrencyMockProvider) Touch()                                             {}
+func (p *concurrencyMockProvider) Version() uint32                                    { return 1 }
+func (p *concurrencyMockProvider) HealthCheck()                                       {}
 func (p *concurrencyMockProvider) HealthCheckExpectedStatus() utils.IntRanges[uint16] { return nil }
-func (p *concurrencyMockProvider) HealthCheckTimeout() time.Duration { return 5 * time.Second }
+func (p *concurrencyMockProvider) HealthCheckTimeout() time.Duration                  { return 5 * time.Second }
 
 func TestGroupBaseURLTestConcurrencyBudget(t *testing.T) {
 	var active atomic.Int32
@@ -515,7 +514,7 @@ type controllableMockAdapter struct {
 	callCount atomic.Int32
 }
 
-func (c *controllableMockAdapter) Name() string { return c.name }
+func (c *controllableMockAdapter) Name() string        { return c.name }
 func (c *controllableMockAdapter) Type() C.AdapterType { return C.Vmess }
 
 func (c *controllableMockAdapter) URLTest(ctx context.Context, url string, expectedStatus utils.IntRanges[uint16]) (uint16, error) {
@@ -636,7 +635,6 @@ func TestGroupBaseURLTestCallerCancelDoesNotBlock(t *testing.T) {
 	<-done1
 }
 
-
 func TestGroupBaseURLTestAllCallersCancelAbortsWorkAndAllowsNextRound(t *testing.T) {
 	slowGate := make(chan struct{})
 	probeStarted := make(chan struct{})
@@ -737,7 +735,6 @@ func TestGroupBaseURLTestQueuedNodesDoNotExecuteWhenCancelled(t *testing.T) {
 	require.Equal(t, int32(0), node11Called.Load(), "queued node must not execute after caller cancelled")
 	_ = occupySlots
 }
-
 
 func TestCancellableProbePoolJoinRetiringRaceStress(t *testing.T) {
 	pool := &cancellableProbePool{tasks: make(map[string]*probeTask)}
@@ -931,9 +928,9 @@ type review3HealthyProxy struct {
 	successful *atomic.Int32
 }
 
-func (p *review3HealthyProxy) Name() string                     { return p.name }
-func (p *review3HealthyProxy) Type() C.AdapterType              { return C.Vmess }
-func (p *review3HealthyProxy) AliveForTestUrl(string) bool      { return true }
+func (p *review3HealthyProxy) Name() string                      { return p.name }
+func (p *review3HealthyProxy) Type() C.AdapterType               { return C.Vmess }
+func (p *review3HealthyProxy) AliveForTestUrl(string) bool       { return true }
 func (p *review3HealthyProxy) LastDelayForTestUrl(string) uint16 { return 200 }
 func (p *review3HealthyProxy) URLTest(ctx context.Context, url string, status utils.IntRanges[uint16]) (uint16, error) {
 	select {
@@ -1115,9 +1112,9 @@ type r2MockProxy struct {
 	alive bool
 }
 
-func (p *r2MockProxy) Name() string                     { return p.name }
-func (p *r2MockProxy) Type() C.AdapterType              { return C.Vmess }
-func (p *r2MockProxy) AliveForTestUrl(string) bool      { return p.alive }
+func (p *r2MockProxy) Name() string                      { return p.name }
+func (p *r2MockProxy) Type() C.AdapterType               { return C.Vmess }
+func (p *r2MockProxy) AliveForTestUrl(string) bool       { return p.alive }
 func (p *r2MockProxy) LastDelayForTestUrl(string) uint16 { return 100 }
 func (p *r2MockProxy) URLTest(ctx context.Context, url string, status utils.IntRanges[uint16]) (uint16, error) {
 	if p.delay > 0 {
@@ -1317,11 +1314,8 @@ func TestTrafficActivityAndSelectorReset(t *testing.T) {
 	_, _ = jpAuto.DialContext(C.WithLatencyTestContext(context.Background()), &C.Metadata{Host: "example.test"})
 	require.True(t, jpAuto.LastTrafficAt().IsZero(), "synthetic latency test must not mark LastTrafficAt")
 
-	// 2. Real traffic dial MUST mark group traffic-active
-	_, _ = jpAuto.DialContext(context.Background(), &C.Metadata{Host: "example.com"})
-	require.False(t, jpAuto.LastTrafficAt().IsZero(), "real DialContext must mark LastTrafficAt")
-
-	// 3. Switching a parent Selector away from JP-Auto must immediately clear its traffic activity
+	// 2. Real traffic dial through nested Selector -> URLTest MUST mark group traffic-active,
+	//    and switching that Selector away MUST clear its own traffic activity.
 	jpProxy := adapter.NewProxy(jpAuto)
 	manualLeaf := adapter.NewProxy(&trafficTestAdapter{
 		Base: outbound.NewBase(outbound.BaseOption{Name: "manual-leaf", Type: C.Shadowsocks}),
@@ -1342,6 +1336,95 @@ func TestTrafficActivityAndSelectorReset(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	_, _ = rootSel.DialContext(context.Background(), &C.Metadata{Host: "example.com"})
+	require.False(t, jpAuto.LastTrafficAt().IsZero(), "real DialContext must mark LastTrafficAt")
+
 	require.NoError(t, rootSel.Set("manual-leaf"))
 	require.True(t, jpAuto.LastTrafficAt().IsZero(), "switching selector away must clear deselected child traffic activity")
+}
+
+func TestTrafficActivityPreservedAcrossSharedSelectorsAndDirectRules(t *testing.T) {
+	leafA := adapter.NewProxy(&trafficTestAdapter{
+		Base: outbound.NewBase(outbound.BaseOption{Name: "leaf-a", Type: C.Vmess}),
+	})
+	leafB := adapter.NewProxy(&trafficTestAdapter{
+		Base: outbound.NewBase(outbound.BaseOption{Name: "leaf-b", Type: C.Vmess}),
+	})
+	jpAuto, err := NewURLTest(
+		GroupCommonOption{Name: "JP-Auto", URL: "http://example.test", TestTimeout: 300},
+		URLTestOption{Tolerance: 50},
+		leafA,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{leafA, leafB}}},
+	)
+	require.NoError(t, err)
+
+	jpProxy := adapter.NewProxy(jpAuto)
+	manualLeaf := adapter.NewProxy(&trafficTestAdapter{
+		Base: outbound.NewBase(outbound.BaseOption{Name: "manual-leaf", Type: C.Shadowsocks}),
+	})
+	proxySel, err := NewSelector(
+		GroupCommonOption{Name: "Proxy"},
+		SelectorOption{DefaultSelected: "JP-Auto"},
+		manualLeaf,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{jpProxy, manualLeaf}}},
+	)
+	require.NoError(t, err)
+	streamingSel, err := NewSelector(
+		GroupCommonOption{Name: "Streaming"},
+		SelectorOption{DefaultSelected: "JP-Auto"},
+		manualLeaf,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{jpProxy, manualLeaf}}},
+	)
+	require.NoError(t, err)
+
+	// Both selectors forward real traffic through shared JP-Auto.
+	_, _ = proxySel.DialContext(context.Background(), &C.Metadata{Host: "proxy.example.com"})
+	_, _ = streamingSel.DialContext(context.Background(), &C.Metadata{Host: "stream.example.com"})
+	require.False(t, jpAuto.LastTrafficAt().IsZero())
+
+	// Switching Streaming away must NOT clear Proxy's active traffic on JP-Auto.
+	require.NoError(t, streamingSel.Set("manual-leaf"))
+	require.False(t, jpAuto.LastTrafficAt().IsZero(), "deselecting one shared selector must preserve active traffic from another selector")
+
+	// Switching the last active selector away clears JP-Auto's traffic activity.
+	require.NoError(t, proxySel.Set("manual-leaf"))
+	require.True(t, jpAuto.LastTrafficAt().IsZero(), "switching the final active selector away must clear JP-Auto activity")
+
+	// Direct rule traffic (no upstream Selector) must survive another selector switching away.
+	require.NoError(t, streamingSel.Set("JP-Auto"))
+	_, _ = streamingSel.DialContext(context.Background(), &C.Metadata{Host: "stream2.example.com"})
+	_, _ = jpAuto.DialContext(context.Background(), &C.Metadata{Host: "direct-rule.example.com"})
+	require.NoError(t, streamingSel.Set("manual-leaf"))
+	require.False(t, jpAuto.LastTrafficAt().IsZero(), "switching a selector away must preserve direct-rule traffic activity")
+
+	// Nested shared region selector across two root selectors.
+	jpAuto.ResetTrafficActivity()
+	regionSel, err := NewSelector(
+		GroupCommonOption{Name: "Japan"},
+		SelectorOption{DefaultSelected: "JP-Auto"},
+		manualLeaf,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{jpProxy, manualLeaf}}},
+	)
+	require.NoError(t, err)
+	rootA, err := NewSelector(
+		GroupCommonOption{Name: "RootA"},
+		SelectorOption{DefaultSelected: "Japan"},
+		manualLeaf,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{adapter.NewProxy(regionSel), manualLeaf}}},
+	)
+	require.NoError(t, err)
+	rootB, err := NewSelector(
+		GroupCommonOption{Name: "RootB"},
+		SelectorOption{DefaultSelected: "Japan"},
+		manualLeaf,
+		[]P.ProxyProvider{&concurrencyMockProvider{proxies: []C.Proxy{adapter.NewProxy(regionSel), manualLeaf}}},
+	)
+	require.NoError(t, err)
+
+	_, _ = rootA.DialContext(context.Background(), &C.Metadata{Host: "a.example.com"})
+	_, _ = rootB.DialContext(context.Background(), &C.Metadata{Host: "b.example.com"})
+	require.NoError(t, rootA.Set("manual-leaf"))
+	require.False(t, jpAuto.LastTrafficAt().IsZero(), "deselecting RootA must preserve RootB -> Japan -> JP-Auto traffic")
+	require.NoError(t, regionSel.Set("manual-leaf"))
+	require.True(t, jpAuto.LastTrafficAt().IsZero(), "deselecting Japan itself must clear all paths through Japan")
 }

@@ -884,12 +884,12 @@ type mockFailoverProvider struct {
 	proxies []constant.Proxy
 }
 
-func (p *mockFailoverProvider) Proxies() []constant.Proxy                        { return p.proxies }
-func (p *mockFailoverProvider) Touch()                                           {}
+func (p *mockFailoverProvider) Proxies() []constant.Proxy                          { return p.proxies }
+func (p *mockFailoverProvider) Touch()                                             {}
 func (p *mockFailoverProvider) Version() uint32                                    { return 1 }
-func (p *mockFailoverProvider) HealthCheck()                                     {}
+func (p *mockFailoverProvider) HealthCheck()                                       {}
 func (p *mockFailoverProvider) HealthCheckExpectedStatus() utils.IntRanges[uint16] { return nil }
-func (p *mockFailoverProvider) HealthCheckTimeout() time.Duration                { return 5 * time.Second }
+func (p *mockFailoverProvider) HealthCheckTimeout() time.Duration                  { return 5 * time.Second }
 
 func TestFailoverStatsIgnoresIdleGroupsAndRecordsTrafficActiveGroup(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "idle_vs_active_*")
@@ -967,7 +967,9 @@ func TestFailoverStatsIgnoresIdleGroupsAndRecordsTrafficActiveGroup(t *testing.T
 		t.Fatalf("expected idle HK-Auto fallback to be ignored (Total=0), got %d", stats.Total)
 	}
 
-	// 3. Active URLTest ("JP-Auto"): once real traffic dials through it, failover MUST record.
+	// 3. Active URLTest ("JP-Auto"): once real traffic dials through shared Selectors,
+	//    deselecting one selector preserves the other active entry; deselecting all
+	//    selectors ignores subsequent idle checks.
 	jp1 := makeNode("JP-1", false)
 	jp2 := makeNode("JP-2", false)
 	jpAuto, err := outboundgroup.NewURLTest(
@@ -979,28 +981,44 @@ func TestFailoverStatsIgnoresIdleGroupsAndRecordsTrafficActiveGroup(t *testing.T
 	if err != nil {
 		t.Fatal(err)
 	}
+	otherNode := makeNode("Other", false)
+	jpProxy := adapter.NewProxy(jpAuto)
+	selA, err := outboundgroup.NewSelector(
+		outboundgroup.GroupCommonOption{Name: "Proxy"},
+		outboundgroup.SelectorOption{DefaultSelected: "JP-Auto"},
+		otherNode,
+		[]cp.ProxyProvider{&mockFailoverProvider{proxies: []constant.Proxy{jpProxy, otherNode}}},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	selB, err := outboundgroup.NewSelector(
+		outboundgroup.GroupCommonOption{Name: "Streaming"},
+		outboundgroup.SelectorOption{DefaultSelected: "JP-Auto"},
+		otherNode,
+		[]cp.ProxyProvider{&mockFailoverProvider{proxies: []constant.Proxy{jpProxy, otherNode}}},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
 	_, _ = jpAuto.HealthCheckContext(context.Background()) // picks JP-1
-	_, _ = jpAuto.DialContext(context.Background(), &constant.Metadata{Host: "example.com"})
+	_, _ = selA.DialContext(context.Background(), &constant.Metadata{Host: "a.example.com"})
+	_, _ = selB.DialContext(context.Background(), &constant.Metadata{Host: "b.example.com"})
+
+	// Deselecting selB leaves selA still active on JP-Auto, so failover records.
+	if err := selB.Set("Other"); err != nil {
+		t.Fatal(err)
+	}
 	jp1.adapter.failURLTest.Store(true)
 	_, _ = jpAuto.HealthCheckContext(context.Background()) // fails over JP-1 -> JP-2
 
 	stats = mustGetFailoverStats(t)
 	if stats.Total != 1 || len(stats.Records) != 1 || stats.Records[0].GroupName != "JP-Auto" {
-		t.Fatalf("expected active JP-Auto failover recorded (Total=1), got Total=%d Records=%+v", stats.Total, stats.Records)
+		t.Fatalf("expected active JP-Auto failover recorded while selA active (Total=1), got Total=%d Records=%+v", stats.Total, stats.Records)
 	}
 
-	// 4. Deselecting JP-Auto via Selector.Set clears activity so later idle check is ignored.
-	otherNode := makeNode("Other", false)
-	sel, err := outboundgroup.NewSelector(
-		outboundgroup.GroupCommonOption{Name: "Proxy"},
-		outboundgroup.SelectorOption{DefaultSelected: "JP-Auto"},
-		otherNode,
-		[]cp.ProxyProvider{&mockFailoverProvider{proxies: []constant.Proxy{adapter.NewProxy(jpAuto), otherNode}}},
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := sel.Set("Other"); err != nil {
+	// 4. Deselecting selA as well clears remaining activity so later idle check is ignored.
+	if err := selA.Set("Other"); err != nil {
 		t.Fatal(err)
 	}
 	jp2.adapter.failURLTest.Store(true)
