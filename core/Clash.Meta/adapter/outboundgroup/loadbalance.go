@@ -120,20 +120,24 @@ func jumpHash(key uint64, buckets int32) int32 {
 
 // DialContext implements C.ProxyAdapter
 func (lb *LoadBalance) DialContext(ctx context.Context, metadata *C.Metadata) (c C.Conn, err error) {
+	isLatencyProbe := C.IsLatencyTestContext(ctx)
 	proxy := lb.Unwrap(metadata, true)
 	c, err = proxy.DialContext(ctx, metadata)
 
 	if err == nil {
 		c.AppendToChains(lb)
-		if !N.NeedHandshake(c) {
+		if !isLatencyProbe && !N.NeedHandshake(c) {
 			lb.onDialSuccess()
 		}
-	} else {
+	} else if !isLatencyProbe {
 		lb.onDialFailed(proxy.Type(), metadata, err, lb.healthCheck)
 	}
 
 	if N.NeedHandshake(c) {
 		c = callback.NewFirstWriteCallBackConn(c, func(err error) {
+			if isLatencyProbe {
+				return
+			}
 			if err == nil {
 				lb.onDialSuccess()
 			} else {

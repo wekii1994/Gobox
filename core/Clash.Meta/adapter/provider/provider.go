@@ -96,6 +96,21 @@ func (bp *baseProvider) HealthCheckURL() string {
 	return bp.healthCheck.url
 }
 
+// HealthCheckExpectedStatus exposes the configured policy to network-change probes.
+func (bp *baseProvider) HealthCheckExpectedStatus() utils.IntRanges[uint16] {
+	if bp == nil || bp.healthCheck == nil {
+		return nil
+	}
+	return append(utils.IntRanges[uint16](nil), bp.healthCheck.expectedStatus...)
+}
+
+func (bp *baseProvider) HealthCheckTimeout() time.Duration {
+	if bp == nil || bp.healthCheck == nil {
+		return 0
+	}
+	return bp.healthCheck.timeout
+}
+
 func (bp *baseProvider) RegisterHealthCheckTask(url string, expectedStatus utils.IntRanges[uint16], filter string, interval uint) {
 	bp.healthCheck.registerHealthCheckTask(url, expectedStatus, filter, interval)
 }

@@ -467,6 +467,20 @@ func normalizeHealthCheckInterval(target map[string]any, fallbackInterval int) {
 	target["interval"] = intervalVal
 }
 
+// Only supply a default when the policy is absent or blank. The downstream
+// decoder accepts numeric YAML status codes; keep explicit values for its
+// normal conversion and validation instead of silently replacing them.
+func defaultHealthCheckExpectedStatus(target map[string]any, fallback string) {
+	value, exists := target["expected-status"]
+	if !exists || value == nil {
+		target["expected-status"] = fallback
+		return
+	}
+	if status, ok := value.(string); ok && strings.TrimSpace(status) == "" {
+		target["expected-status"] = fallback
+	}
+}
+
 func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 	filter := params.NodeExcludeFilter
 	if raw.ProxyGroup != nil && (filter != "" || params.HealthCheckTimeout != defaultHealthCheckTimeout) {
@@ -578,9 +592,7 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 		if groupType == "url-test" || groupType == "fallback" || groupType == "load-balance" {
 			normalizeHealthCheckInterval(group, optimalHealthCheckInterval)
 
-			if status, ok := group["expected-status"].(string); !ok || strings.TrimSpace(status) == "" {
-				group["expected-status"] = defaultExpectedStatus
-			}
+			defaultHealthCheckExpectedStatus(group, defaultExpectedStatus)
 
 			maxFailedVal, ok := parsePositiveInt(group["max-failed-times"])
 			if !ok || maxFailedVal > maxAllowedMaxFailedTimes {
@@ -596,9 +608,7 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 			continue
 		}
 		if hc, ok := provider["health-check"].(map[string]any); ok && hc != nil {
-			if status, ok := hc["expected-status"].(string); !ok || strings.TrimSpace(status) == "" {
-				hc["expected-status"] = defaultExpectedStatus
-			}
+			defaultHealthCheckExpectedStatus(hc, defaultExpectedStatus)
 			normalizeHealthCheckInterval(hc, optimalHealthCheckInterval)
 			if params.HealthCheckTimeout != defaultHealthCheckTimeout {
 				if timeout, exist := hc["timeout"]; !exist || timeout == nil {

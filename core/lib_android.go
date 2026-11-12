@@ -112,6 +112,7 @@ func init() {
 func handleStopTun() {
 	tunLock.Lock()
 	defer tunLock.Unlock()
+	setNetworkProbeSession(false)
 	runTime = nil
 	handler := tunHandler.Swap(nil)
 	if handler != nil {
@@ -152,6 +153,7 @@ func handleStartTun(fd int, callback unsafe.Pointer) bool {
 		closeIdleOutbounds(tunnel.Proxies(), tunnel.Providers())
 		resolver.ResetConnection()
 	}
+	setNetworkProbeSession(true)
 	return true
 }
 

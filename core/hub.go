@@ -133,6 +133,7 @@ func handleForceGc(forceFreeOSMemory, purge bool) {
 }
 
 func handleShutdown() bool {
+	setNetworkProbeSession(false)
 	toolbox.FlushTrafficStats()
 	toolbox.FlushKvStore()
 	stopListeners()
@@ -1226,6 +1227,7 @@ func handleSetupConfig(bytes []byte) *SetupResult {
 	clearSuspendedWireGuard()
 	suspendModeLock.Lock()
 	currentSuspendMode = 0
+	setNetworkProbeSuspended(false)
 	toolbox.SuspendTrafficStats(false)
 	suspendModeLock.Unlock()
 	global, err := setupConfig(params)
@@ -1249,6 +1251,7 @@ func handleSuspend(mode int) bool {
 
 	switch mode {
 	case 1:
+		setNetworkProbeSuspended(true)
 		if currentSuspendMode == 1 {
 			return true
 		}
@@ -1270,6 +1273,7 @@ func handleSuspend(mode int) bool {
 		currentSuspendMode = 1
 
 	case 2:
+		setNetworkProbeSuspended(true)
 		if currentSuspendMode == 1 || currentSuspendMode == 2 {
 			return true
 		}
@@ -1283,6 +1287,7 @@ func handleSuspend(mode int) bool {
 
 	case 0:
 		if currentSuspendMode == 0 {
+			setNetworkProbeSuspended(false)
 			return true
 		}
 		log.Infoln("[APP] Resume from suspend")
@@ -1311,6 +1316,7 @@ func handleSuspend(mode int) bool {
 		} else if prevMode == 2 {
 			resumeHealthChecks()
 		}
+		setNetworkProbeSuspended(false)
 
 	default:
 		return false

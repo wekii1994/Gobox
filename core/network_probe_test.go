@@ -22,14 +22,14 @@ type mockSelectorAdapter struct {
 	now  string
 }
 
-func (m *mockSelectorAdapter) Name() string                     { return m.name }
-func (m *mockSelectorAdapter) Type() constant.AdapterType       { return constant.Selector }
-func (m *mockSelectorAdapter) Now() string                      { return m.now }
-func (m *mockSelectorAdapter) Touch()                           {}
-func (m *mockSelectorAdapter) Hidden() bool                     { return false }
-func (m *mockSelectorAdapter) Icon() string                     { return "" }
-func (m *mockSelectorAdapter) Providers() []cp.ProxyProvider    { return nil }
-func (m *mockSelectorAdapter) Proxies() []constant.Proxy        { return nil }
+func (m *mockSelectorAdapter) Name() string                  { return m.name }
+func (m *mockSelectorAdapter) Type() constant.AdapterType    { return constant.Selector }
+func (m *mockSelectorAdapter) Now() string                   { return m.now }
+func (m *mockSelectorAdapter) Touch()                        {}
+func (m *mockSelectorAdapter) Hidden() bool                  { return false }
+func (m *mockSelectorAdapter) Icon() string                  { return "" }
+func (m *mockSelectorAdapter) Providers() []cp.ProxyProvider { return nil }
+func (m *mockSelectorAdapter) Proxies() []constant.Proxy     { return nil }
 func (m *mockSelectorAdapter) URLTest(ctx context.Context, url string, expectedStatus utils.IntRanges[uint16]) (map[string]uint16, error) {
 	return nil, nil
 }
@@ -54,7 +54,7 @@ func (m *mockAutoGroupAdapter) Providers() []cp.ProxyProvider    { return nil }
 func (m *mockAutoGroupAdapter) Proxies() []constant.Proxy        { return m.proxies }
 func (m *mockAutoGroupAdapter) GetProxies(bool) []constant.Proxy { return m.proxies }
 func (m *mockAutoGroupAdapter) TestTimeout() time.Duration       { return m.testTimeout }
-func (m *mockAutoGroupAdapter) ResetConsecutiveFailures()         { m.consecutiveResets.Add(1) }
+func (m *mockAutoGroupAdapter) ResetConsecutiveFailures()        { m.consecutiveResets.Add(1) }
 func (m *mockAutoGroupAdapter) HealthCheckContext(ctx context.Context) (map[string]uint16, error) {
 	if m.healthCheckContextFunc != nil {
 		return m.healthCheckContextFunc(ctx)
@@ -196,7 +196,7 @@ func TestProbeGroupsConcurrentlyCompletionContract(t *testing.T) {
 		t.Fatalf("expected true when all group checks succeed, got false")
 	}
 
-	// 5. Group with ErrHealthCheckInFlight -> counts as satisfied (returns true) without error retry
+	// 5. An unfinished check does not verify the current network.
 	gInFlight := adapter.NewProxy(&mockAutoGroupAdapter{
 		name:      "gInFlight",
 		groupType: constant.URLTest,
@@ -205,8 +205,10 @@ func TestProbeGroupsConcurrentlyCompletionContract(t *testing.T) {
 			return nil, outboundgroup.ErrHealthCheckInFlight
 		},
 	})
-	if ok := probeGroupsConcurrently(context.Background(), []*adapter.Proxy{gInFlight}); !ok {
-		t.Fatalf("expected true when group check returns ErrHealthCheckInFlight, got false")
+	busyCtx, busyCancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer busyCancel()
+	if ok := probeGroupsConcurrently(busyCtx, []*adapter.Proxy{gInFlight}); ok {
+		t.Fatalf("expected false when the group stays busy until the deadline")
 	}
 
 	// Wrapped ErrHealthCheckInFlight is also recognized via errors.Is
@@ -218,8 +220,10 @@ func TestProbeGroupsConcurrentlyCompletionContract(t *testing.T) {
 			return nil, fmt.Errorf("wrapped: %w", outboundgroup.ErrHealthCheckInFlight)
 		},
 	})
-	if ok := probeGroupsConcurrently(context.Background(), []*adapter.Proxy{gSuccess, gWrappedInFlight}); !ok {
-		t.Fatalf("expected true with wrapped ErrHealthCheckInFlight, got false")
+	wrappedCtx, wrappedCancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer wrappedCancel()
+	if ok := probeGroupsConcurrently(wrappedCtx, []*adapter.Proxy{gSuccess, gWrappedInFlight}); ok {
+		t.Fatalf("expected false when a wrapped busy error persists until the deadline")
 	}
 	if !errors.Is(fmt.Errorf("wrapped: %w", outboundgroup.ErrHealthCheckInFlight), outboundgroup.ErrHealthCheckInFlight) {
 		t.Fatal("sanity check failed")

@@ -12,10 +12,10 @@ import (
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/constant"
 	P "github.com/metacubex/mihomo/constant/provider"
-	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -23,12 +23,15 @@ const (
 	networkSettleDelay      = 300 * time.Millisecond
 	networkRetryBackoff     = 1200 * time.Millisecond
 	primaryProbeConcurrency = 3
+	probeBusyRetryDelay     = 50 * time.Millisecond
 )
 
 var (
-	resetNetworkMu     sync.Mutex
-	resetNetworkCancel context.CancelFunc
-	networkProbeRound  atomic.Uint64
+	resetNetworkMu        sync.Mutex
+	resetNetworkCancel    context.CancelFunc
+	resetNetworkActive    bool
+	resetNetworkSuspended bool
+	networkProbeRound     atomic.Uint64
 )
 
 // runBoundedProbes owns both the semaphore token and WaitGroup registration.
@@ -235,6 +238,23 @@ type contextHealthCheckedGroup interface {
 	HealthCheckContext(context.Context) (map[string]uint16, error)
 }
 
+// A probe from an earlier network may still hold the group while its canceled
+// dials unwind. Wait within this round's budget, then test the current network.
+func healthCheckWhenAvailable(ctx context.Context, checker contextHealthCheckedGroup) (map[string]uint16, error) {
+	for {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		results, err := checker.HealthCheckContext(ctx)
+		if !errors.Is(err, outboundgroup.ErrHealthCheckInFlight) {
+			return results, err
+		}
+		if !waitOrCancel(ctx, probeBusyRetryDelay) {
+			return nil, ctx.Err()
+		}
+	}
+}
+
 func probeGroupsConcurrently(ctx context.Context, groups []*adapter.Proxy) bool {
 	if len(groups) == 0 {
 		return false
@@ -264,14 +284,8 @@ func probeGroupsConcurrently(ctx context.Context, groups []*adapter.Proxy) bool 
 			budget := calculateGroupProbeBudget(g, competingCandidates)
 			testCtx, cancel := context.WithTimeout(probeCtx, budget)
 			defer cancel()
-			results, err := checker.HealthCheckContext(testCtx)
-
-			if errors.Is(err, outboundgroup.ErrHealthCheckInFlight) {
-				log.Debugln("[NetworkProbe] Group %s health check already in progress, skipping duplicate retry", g.Name())
-				completedGroups.Add(1)
-				return true
-			}
-			if err == nil && len(results) > 0 {
+			results, err := healthCheckWhenAvailable(testCtx, checker)
+			if err == nil && testCtx.Err() == nil && len(results) > 0 {
 				completedGroups.Add(1)
 				return true
 			}
@@ -294,11 +308,50 @@ func waitOrCancel(ctx context.Context, d time.Duration) bool {
 
 func cancelResetNetwork() {
 	resetNetworkMu.Lock()
+	defer resetNetworkMu.Unlock()
+	cancelResetNetworkLocked()
+}
+
+func cancelResetNetworkLocked() {
 	if resetNetworkCancel != nil {
 		resetNetworkCancel()
 		resetNetworkCancel = nil
 	}
-	resetNetworkMu.Unlock()
+}
+
+// A stopped session cannot be restarted by a delayed network-change callback.
+// Both this flag and the probe context are changed under the same lock.
+func setNetworkProbeSession(active bool) {
+	resetNetworkMu.Lock()
+	defer resetNetworkMu.Unlock()
+	resetNetworkActive = active
+	cancelResetNetworkLocked()
+}
+
+// Resuming only removes the suspension gate; it never starts a stopped session.
+func setNetworkProbeSuspended(suspended bool) {
+	resetNetworkMu.Lock()
+	defer resetNetworkMu.Unlock()
+	resetNetworkSuspended = suspended
+	if suspended {
+		cancelResetNetworkLocked()
+	}
+}
+
+func beginResetNetwork(reset func()) (context.Context, context.CancelFunc) {
+	resetNetworkMu.Lock()
+	defer resetNetworkMu.Unlock()
+	if !resetNetworkActive || resetNetworkSuspended {
+		return nil, nil
+	}
+	cancelResetNetworkLocked()
+	ctx, cancel := context.WithCancel(context.Background())
+	resetNetworkCancel = cancel
+	// Keep synchronous cleanup inside the lifecycle boundary. Otherwise a reset
+	// accepted just before stop could close a newly started session's sockets.
+	// HTTP probes run after this lock is released and use the cancelable context.
+	reset()
+	return ctx, cancel
 }
 
 func snapshotGroupSelections(groups []*adapter.Proxy) map[string]string {
@@ -313,9 +366,10 @@ func snapshotGroupSelections(groups []*adapter.Proxy) map[string]string {
 
 func probeProvidersFallback(ctx context.Context, providerMap map[string]P.ProxyProvider) {
 	type providerProbeItem struct {
-		proxy   constant.Proxy
-		url     string
-		timeout time.Duration
+		proxy          constant.Proxy
+		url            string
+		timeout        time.Duration
+		expectedStatus utils.IntRanges[uint16]
 	}
 	var items []providerProbeItem
 	seen := make(map[string]bool)
@@ -331,18 +385,30 @@ func probeProvidersFallback(ctx context.Context, providerMap map[string]P.ProxyP
 			url = defaultTestURL
 		}
 		timeout := 5 * time.Second
+		var expectedStatus utils.IntRanges[uint16]
+		if configured, ok := p.(interface {
+			HealthCheckExpectedStatus() utils.IntRanges[uint16]
+		}); ok {
+			expectedStatus = configured.HealthCheckExpectedStatus()
+		}
+		if configured, ok := p.(interface{ HealthCheckTimeout() time.Duration }); ok {
+			if value := configured.HealthCheckTimeout(); value > 0 {
+				timeout = value
+			}
+		}
 
 		for _, proxy := range p.Proxies() {
 			if proxy == nil {
 				continue
 			}
-			dedupKey := fmt.Sprintf("%p|%s", proxy, url)
+			dedupKey := fmt.Sprintf("%p|%s|%s|%s", proxy, url, expectedStatus.String(), timeout)
 			if !seen[dedupKey] {
 				seen[dedupKey] = true
 				items = append(items, providerProbeItem{
-					proxy:   proxy,
-					url:     url,
-					timeout: timeout,
+					proxy:          proxy,
+					url:            url,
+					timeout:        timeout,
+					expectedStatus: expectedStatus,
 				})
 			}
 		}
@@ -355,25 +421,22 @@ func probeProvidersFallback(ctx context.Context, providerMap map[string]P.ProxyP
 		item := items[idx]
 		nodeCtx, nodeCancel := context.WithTimeout(probeCtx, item.timeout)
 		defer nodeCancel()
-		_, _ = item.proxy.URLTest(nodeCtx, item.url, nil)
-		return true
+		_, err := item.proxy.URLTest(nodeCtx, item.url, item.expectedStatus)
+		return err == nil
 	})
 }
 
 func handleResetNetwork() {
-	closeConnections()
-	closeIdleOutbounds(tunnel.Proxies(), tunnel.Providers())
-	resolver.ResetConnection()
-	handleFlushDnsCache()
-	resetAllGroupsConsecutiveFailures()
-
-	resetNetworkMu.Lock()
-	if resetNetworkCancel != nil {
-		resetNetworkCancel()
+	ctx, cancel := beginResetNetwork(func() {
+		closeConnections()
+		closeIdleOutbounds(tunnel.Proxies(), tunnel.Providers())
+		resolver.ResetConnection()
+		handleFlushDnsCache()
+		resetAllGroupsConsecutiveFailures()
+	})
+	if ctx == nil {
+		return
 	}
-	ctx, cancel := context.WithCancel(context.Background())
-	resetNetworkCancel = cancel
-	resetNetworkMu.Unlock()
 
 	probeRound := networkProbeRound.Add(1)
 	resetCtx := outboundgroup.WithProbeRound(ctx, probeRound)

@@ -42,7 +42,7 @@ func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata) (C.Con
 	c, err := proxy.DialContext(ctx, metadata)
 	if err == nil {
 		c.AppendToChains(f)
-		if !N.NeedHandshake(c) {
+		if !isLatencyProbe && !N.NeedHandshake(c) {
 			f.onDialSuccess()
 		}
 	} else if !isLatencyProbe {
@@ -51,9 +51,12 @@ func (f *Fallback) DialContext(ctx context.Context, metadata *C.Metadata) (C.Con
 
 	if N.NeedHandshake(c) {
 		c = callback.NewFirstWriteCallBackConn(c, func(err error) {
+			if isLatencyProbe {
+				return
+			}
 			if err == nil {
 				f.onDialSuccess()
-			} else if !isLatencyProbe {
+			} else {
 				f.onDialFailed(proxy.Type(), metadata, err, f.healthCheck)
 			}
 		})
@@ -228,11 +231,7 @@ func (f *Fallback) HealthCheckContext(ctx context.Context) (map[string]uint16, e
 		if len(result) > 0 {
 			f.GroupBase.UpdateConsecutiveFailures(false)
 			after := f.Now()
-			if _, verifiedAlive := result[after]; verifiedAlive {
-				if before != "" && after != "" && before != after && OnGroupNowChanged != nil {
-					OnGroupNowChanged(f, f.Name(), before, after)
-				}
-			}
+			f.notifyHealthCheckSelection(f, f.testUrl, before, after, result)
 		}
 		// In both partial success and zero success, the probe was truncated by parent deadline.
 		// Return result along with ctx.Err() (context.DeadlineExceeded) so callers can distinguish
@@ -247,11 +246,7 @@ func (f *Fallback) HealthCheckContext(ctx context.Context) (map[string]uint16, e
 	// If at least one candidate succeeded, evaluate valid switch
 	if len(result) > 0 {
 		after := f.Now()
-		if _, verifiedAlive := result[after]; verifiedAlive {
-			if before != "" && after != "" && before != after && OnGroupNowChanged != nil {
-				OnGroupNowChanged(f, f.Name(), before, after)
-			}
-		}
+		f.notifyHealthCheckSelection(f, f.testUrl, before, after, result)
 	}
 
 	return result, err
