@@ -9,6 +9,8 @@ Proxy _proxy(String name, {String? now}) =>
     Proxy(name: name, type: 'Shadowsocks', now: now);
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('resolvePhysicalOutboundTitle', () {
     const fallback = 'Gobox';
 
@@ -153,12 +155,12 @@ void main() {
       expect(title, '🇸🇬 新加坡·移联02');
     });
 
-    test('策略组未匹配或为空时回退至 fallbackLabel', () {
+    test('无主策略组且策略组为空时回退至 fallbackLabel', () {
       final title = resolvePhysicalOutboundTitle(
         mode: Mode.rule,
         groups: [],
         selectedMap: const {},
-        mainGroupName: 'NON_EXISTENT',
+        mainGroupName: null,
         fallbackLabel: 'MyCustomFallback',
       );
       expect(title, 'MyCustomFallback');
