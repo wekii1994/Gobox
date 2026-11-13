@@ -335,6 +335,9 @@ class GlobalState {
 
   Future<void> handleScreenStateChanged(bool isOn) async {
     isScreenOn = isOn;
+    if (isOn && system.isAndroid && isStart) {
+      unawaited(appController.syncNotificationOnScreenWake());
+    }
     if (!backgroundMode.value) return;
     if (!_keepBackgroundTrafficUpdates) {
       stopUpdateTasks();

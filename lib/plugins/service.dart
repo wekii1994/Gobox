@@ -3,12 +3,15 @@ import 'dart:convert';
 
 import 'package:gobox/common/system.dart';
 import 'package:gobox/state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../clash/lib.dart';
 
-typedef NativeEventCallback =
-    Future<void> Function(String method, dynamic arguments);
+typedef NativeEventCallback = Future<void> Function(
+  String method,
+  dynamic arguments,
+);
 
 class Service {
   static final Service _instance = Service._internal();
@@ -77,6 +80,12 @@ class Service {
   bool needsNotificationTitleSync(String profileName) =>
       _notificationTitle != profileName;
 
+  @visibleForTesting
+  String? get notificationTitle => _notificationTitle;
+
+  @visibleForTesting
+  set notificationTitle(String? value) => _notificationTitle = value;
+
   Future<void> updateNotificationTitle(String profileName) async {
     await methodChannel.invokeMethod<void>('updateNotificationTitle', {
       'profileName': profileName,
@@ -96,6 +105,7 @@ class Service {
   }
 
   Future<void> restoreNotification() async {
+    _notificationTitle = null;
     await methodChannel.invokeMethod<void>('restoreNotification');
   }
 

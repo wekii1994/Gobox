@@ -497,15 +497,39 @@ class AppController {
     }
   }
 
-  Future<void> syncNotificationTitleNow() async {
-    if (!system.isAndroid || !globalState.isScreenOn) return;
+  Future<void> syncNotificationTitleNow({bool force = false}) async {
+    if (!system.isAndroid) return;
+    final service = vpn_service.service;
+    if (service == null) return;
+    final title = getPhysicalOutboundTitle();
+    if (!force && !service.needsNotificationTitleSync(title)) {
+      return;
+    }
     try {
       await _pushNotificationUpdate(
-        getPhysicalOutboundTitle(),
+        title,
         _lastTraffic ?? Traffic(),
       );
     } catch (e) {
       commonPrint.warn('Failed to sync notification title: $e');
+    }
+  }
+
+  bool _isSyncingNotificationOnWake = false;
+
+  Future<void> syncNotificationOnScreenWake() async {
+    if (!system.isAndroid || !globalState.isStart) return;
+    if (_isSyncingNotificationOnWake) return;
+    _isSyncingNotificationOnWake = true;
+    try {
+      final isInit = await clashCore.isInit;
+      if (!isInit) return;
+      await updateGroups();
+      await syncNotificationTitleNow(force: true);
+    } catch (e) {
+      commonPrint.warn('Failed to sync notification on screen wake: $e');
+    } finally {
+      _isSyncingNotificationOnWake = false;
     }
   }
 
