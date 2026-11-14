@@ -190,6 +190,16 @@ void main() {
       s.notificationTitle = null;
       expect(s.needsNotificationTitleSync('🇸🇬 新加坡·移联02'), isTrue);
     });
+
+    test('updateNotificationNode 保持 notificationTitle 同步并阻止冗余触发', () {
+      final s = Service();
+      s.notificationTitle = '🇩🇪 德国·移联01';
+
+      s.notificationTitle = '🇸🇬 新加坡·移联02';
+      expect(s.notificationTitle, '🇸🇬 新加坡·移联02');
+      expect(s.needsNotificationTitleSync('🇸🇬 新加坡·移联02'), isFalse);
+      expect(s.needsNotificationTitleSync('🇯🇵 日本·移联03'), isTrue);
+    });
   });
 
   group('GlobalState isScreenOn 状态流转与后台休眠保护', () {

@@ -466,11 +466,10 @@ class AppController {
     return dashboardRefreshManager.isActive();
   }
 
-  Traffic? _lastTraffic;
-
   String getPhysicalOutboundTitle({String? fallbackLabel}) {
-    final mode =
-        _ref.read(patchClashConfigProvider.select((state) => state.mode));
+    final mode = _ref.read(
+      patchClashConfigProvider.select((state) => state.mode),
+    );
     final currentProfileId = _ref.read(currentProfileIdProvider);
     final profiles = _ref.read(profilesProvider);
     final profile = profiles.where((e) => e.id == currentProfileId).firstOrNull;
@@ -506,10 +505,7 @@ class AppController {
       return;
     }
     try {
-      await _pushNotificationUpdate(
-        title,
-        _lastTraffic ?? Traffic(),
-      );
+      await service.updateNotificationNode(title);
     } catch (e) {
       commonPrint.warn('Failed to sync notification title: $e');
     }
@@ -564,7 +560,6 @@ class AppController {
     _ref.read(totalTrafficProvider.notifier).value = snapshot.total;
 
     final traffic = snapshot.now;
-    _lastTraffic = traffic;
 
     if (shouldUpdateDashboard) {
       _ref.read(trafficsProvider.notifier).addTraffic(traffic);
@@ -1803,11 +1798,10 @@ class AppController {
     await _handlerDisclaimer();
     if (system.isWindows) {
       unawaited(
-        setProcessPriority(
-          _ref.read(appSettingProvider).enableHighPriority,
-        ).catchError((e) {
-          commonPrint.warn('Failed to set initial process priority: $e');
-        }),
+        setProcessPriority(_ref.read(appSettingProvider).enableHighPriority)
+            .catchError((e) {
+              commonPrint.warn('Failed to set initial process priority: $e');
+            }),
       );
     }
     _ref.read(initProvider.notifier).value = true;
@@ -2004,9 +1998,9 @@ class AppController {
 
   Future<void> _handlerDisclaimer() async {
     if (!_ref.read(appSettingProvider).disclaimerAccepted) {
-      _ref.read(appSettingProvider.notifier).updateState(
-            (state) => state.copyWith(disclaimerAccepted: true),
-          );
+      _ref
+          .read(appSettingProvider.notifier)
+          .updateState((state) => state.copyWith(disclaimerAccepted: true));
     }
     return;
   }
@@ -2064,9 +2058,8 @@ class AppController {
         try {
           final bytes = await platformFile.readAsBytes();
           if (bytes.isEmpty) continue;
-          final profile = await Profile.normal(
-            label: platformFile.name,
-          ).saveFile(bytes);
+          final profile = await Profile.normal(label: platformFile.name)
+              .saveFile(bytes);
           await addProfile(profile);
           successCount++;
         } on Object catch (e) {
@@ -2302,13 +2295,9 @@ class AppController {
         (script) async => script.copyWith(content: await script.readContent()),
       ),
     );
-    final configJson =
-        json.decode(
-              json.encode(
-                globalState.config.copyWith.scriptProps(scripts: scripts),
-              ),
-            )
-            as Map<String, dynamic>;
+    final configJson = json.decode(
+      json.encode(globalState.config.copyWith.scriptProps(scripts: scripts)),
+    ) as Map<String, dynamic>;
     if (configJson['dav'] is Map) {
       final davMap = Map<String, dynamic>.from(configJson['dav'] as Map);
       if (davMap['user'] is String) {
@@ -2694,11 +2683,14 @@ class AppController {
     final configs = archive.files
         .where(
           (item) =>
-              item.name.endsWith('.json') && (item.name != '.gobox_marker' && item.name != '.bettbox_marker'),
+              item.name.endsWith('.json') &&
+              (item.name != '.gobox_marker' && item.name != '.bettbox_marker'),
         )
         .toList();
     final profiles = archive.files.where(
-      (item) => !item.name.endsWith('.json') && (item.name != '.gobox_marker' && item.name != '.bettbox_marker'),
+      (item) =>
+          !item.name.endsWith('.json') &&
+          (item.name != '.gobox_marker' && item.name != '.bettbox_marker'),
     );
 
     // Find config.json

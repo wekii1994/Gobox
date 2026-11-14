@@ -117,6 +117,12 @@ class Vpn {
     });
   }
 
+  Future<void> updateNotificationNode(String nodeName) async {
+    await methodChannel.invokeMethod<void>('updateNotificationNode', {
+      'nodeName': nodeName,
+    });
+  }
+
   Future<void> updateNotificationSpeed(
     String profileName,
     String speedInfo,

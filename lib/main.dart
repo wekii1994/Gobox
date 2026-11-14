@@ -26,6 +26,74 @@ import 'models/models.dart';
 
 ReceivePort? _serviceReceiverPort;
 ReceivePort? _messageReceiverPort;
+Timer? _serviceSyncDebounceTimer;
+bool _isServiceSyncingOutbound = false;
+
+Future<void> _syncOutboundTitleFromService(
+  ClashLibHandler clashLibHandler,
+) async {
+  if (_isServiceSyncingOutbound) return;
+  _isServiceSyncingOutbound = true;
+  try {
+    if (clashLibHandler.getRunTime() == null) return;
+
+    final configFile = File(await appPath.appConfigPath);
+    Config config = globalState.config;
+    if (await configFile.exists()) {
+      try {
+        final content = await configFile.readAsString();
+        config = Config.compatibleFromJson(json.decode(content));
+        globalState.config = config;
+      } catch (_) {}
+    }
+
+    final proxiesRaw = await clashLibHandler.getProxiesRaw();
+    if (proxiesRaw.isEmpty) return;
+    final groups = buildGroups(proxiesRaw);
+    if (groups.isEmpty) return;
+
+    final profileId = config.currentProfileId;
+    final profile = config.profiles.where((e) => e.id == profileId).firstOrNull;
+    final fallbackName = profile?.label ?? AppIdentity.displayName;
+
+    final title = resolvePhysicalOutboundTitle(
+      mode: config.patchClashConfig.mode,
+      groups: groups,
+      selectedMap: profile?.selectedMap ?? const {},
+      fallbackLabel: fallbackName,
+    );
+
+    if (title.isNotEmpty) {
+      await vpn?.updateNotificationNode(title);
+    }
+  } catch (e) {
+    commonPrint.warn('Service: sync outbound title failed: $e');
+  } finally {
+    _isServiceSyncingOutbound = false;
+  }
+}
+
+void _scheduleServiceSyncOutboundTitle(ClashLibHandler clashLibHandler) {
+  _serviceSyncDebounceTimer?.cancel();
+  _serviceSyncDebounceTimer = Timer(const Duration(milliseconds: 200), () {
+    unawaited(_syncOutboundTitleFromService(clashLibHandler));
+  });
+}
+
+void _setupServiceMessagePort(ClashLibHandler clashLibHandler) {
+  if (_messageReceiverPort != null) return;
+  _messageReceiverPort = ReceivePort();
+  clashLibHandler.attachMessagePort(_messageReceiverPort!.sendPort.nativePort);
+  _messageReceiverPort!.listen((message) {
+    final sendPort = IsolateNameServer.lookupPortByName(mainIsolate);
+    if (sendPort != null) {
+      _safeSend(sendPort, message);
+    }
+    if (message is String && message.contains('groupsChanged')) {
+      _scheduleServiceSyncOutboundTitle(clashLibHandler);
+    }
+  });
+}
 
 Future<void> main(List<String> args) async {
   globalState.isService = false;
@@ -112,6 +180,7 @@ Future<void> _service(List<String> flags) async {
     final quickStart = flags.contains('quick');
     final bootStart = flags.contains('boot');
     final clashLibHandler = ClashLibHandler();
+    _setupServiceMessagePort(clashLibHandler);
     final smartAutoStopLock = Lock();
     String? overrideNetwork;
 
@@ -239,11 +308,7 @@ Future<void> _service(List<String> flags) async {
               'Service: resolve initial outbound title failed: $e',
             );
           }
-          if (globalState.config.vpnProps.networkSpeedNotification) {
-            await vpn?.updateNotificationSpeed(profileName, '↑0B/s ↓0B/s');
-          } else {
-            await vpn?.updateNotificationTitle(profileName);
-          }
+          await vpn?.updateNotificationNode(profileName);
 
           clashLibHandler.startListener();
         } catch (e) {
@@ -275,7 +340,15 @@ Future<void> _service(List<String> flags) async {
         onDnsChanged: (String dns) {
           clashLibHandler.updateDns(dns);
         },
-        onNetworkChanged: checkSmartAutoStop,
+        onNetworkChanged: (bool defaultChanged) {
+          checkSmartAutoStop(defaultChanged);
+          _scheduleServiceSyncOutboundTitle(clashLibHandler);
+        },
+        onScreenStateChanged: (bool isOn) {
+          if (isOn) {
+            _scheduleServiceSyncOutboundTitle(clashLibHandler);
+          }
+        },
       ),
     );
 
@@ -298,6 +371,7 @@ Future<void> _service(List<String> flags) async {
 }
 
 void _handleMainIpc(ClashLibHandler clashLibHandler) {
+  _setupServiceMessagePort(clashLibHandler);
   final sendPort = IsolateNameServer.lookupPortByName(mainIsolate);
   if (sendPort == null) {
     commonPrint.warn(
@@ -307,7 +381,6 @@ void _handleMainIpc(ClashLibHandler clashLibHandler) {
   }
 
   _serviceReceiverPort?.close();
-  _messageReceiverPort?.close();
 
   _serviceReceiverPort = ReceivePort();
   _serviceReceiverPort!.listen((message) async {
@@ -315,12 +388,6 @@ void _handleMainIpc(ClashLibHandler clashLibHandler) {
     _safeSend(sendPort, res);
   });
   _safeSend(sendPort, _serviceReceiverPort!.sendPort);
-
-  _messageReceiverPort = ReceivePort();
-  clashLibHandler.attachMessagePort(_messageReceiverPort!.sendPort.nativePort);
-  _messageReceiverPort!.listen((message) {
-    _safeSend(sendPort, message);
-  });
 
   if (clashLibHandler.getRunTime() != null) {
     clashLibHandler.startListener();
@@ -369,12 +436,15 @@ class _TileListenerWithService with TileListener {
 class _VpnListenerWithService with VpnListener {
   final Function(String dns) _onDnsChanged;
   final Function(bool defaultChanged) _onNetworkChanged;
+  final Function(bool isOn)? _onScreenStateChanged;
 
   const _VpnListenerWithService({
     required Function(String dns) onDnsChanged,
     required Function(bool defaultChanged) onNetworkChanged,
+    Function(bool isOn)? onScreenStateChanged,
   }) : _onDnsChanged = onDnsChanged,
-       _onNetworkChanged = onNetworkChanged;
+       _onNetworkChanged = onNetworkChanged,
+       _onScreenStateChanged = onScreenStateChanged;
 
   @override
   void onDnsChanged(String dns) {
@@ -386,5 +456,11 @@ class _VpnListenerWithService with VpnListener {
   void onNetworkChanged(bool defaultChanged) {
     super.onNetworkChanged(defaultChanged);
     _onNetworkChanged(defaultChanged);
+  }
+
+  @override
+  void onScreenStateChanged(bool isOn) {
+    super.onScreenStateChanged(isOn);
+    _onScreenStateChanged?.call(isOn);
   }
 }

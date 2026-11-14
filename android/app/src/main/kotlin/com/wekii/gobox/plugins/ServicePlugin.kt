@@ -99,6 +99,12 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 )
                 result.success(true)
             }
+            "updateNotificationNode" -> {
+                VpnPlugin.handleUpdateNotificationNode(
+                    call.argument<String>("nodeName") ?: ""
+                )
+                result.success(true)
+            }
             "updateNotificationSpeed" -> {
                 VpnPlugin.handleUpdateNotificationSpeed(
                     call.argument<String>("profileName") ?: "",

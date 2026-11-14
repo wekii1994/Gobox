@@ -93,6 +93,13 @@ class Service {
     _notificationTitle = profileName;
   }
 
+  Future<void> updateNotificationNode(String nodeName) async {
+    await methodChannel.invokeMethod<void>('updateNotificationNode', {
+      'nodeName': nodeName,
+    });
+    _notificationTitle = nodeName;
+  }
+
   Future<void> updateNotificationSpeed(
     String profileName,
     String speedInfo,

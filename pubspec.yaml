@@ -1,7 +1,7 @@
 name: gobox
 description: A multi-platform proxy client based on Mihomo, simple and easy to use, open-source and ad-free.
 publish_to: 'none'
-version: 1.19.8-4+2026111301
+version: 1.19.8-5+2026111401
 environment:
   sdk: '>=3.9.0 <4.0.0'
 

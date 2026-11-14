@@ -248,6 +248,13 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 result.success(true)
             }
 
+            "updateNotificationNode" -> {
+                handleUpdateNotificationNode(
+                    call.argument<String>("nodeName") ?: ""
+                )
+                result.success(true)
+            }
+
             "updateNotificationSpeed" -> {
                 handleUpdateNotificationSpeed(
                     call.argument<String>("profileName") ?: "",
@@ -587,6 +594,22 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             GlobalState.currentProfileName = profileName
         }
         updateNotificationTitle(profileName)
+    }
+
+    fun handleUpdateNotificationNode(nodeName: String) {
+        if (nodeName.isBlank()) return
+        GlobalState.currentProfileName = nodeName
+        if (GlobalState.isSpeedNotificationEnabled) {
+            val speedInfo = Core.trafficJson()?.let(::trafficSpeedInfo)
+            if (speedInfo != null) {
+                updateNotificationSpeed(nodeName, speedInfo)
+            } else {
+                updateNotificationTitle(nodeName)
+            }
+            ensureSpeedTicker()
+        } else {
+            updateNotificationTitle(nodeName)
+        }
     }
 
     fun handleUpdateNotificationSpeed(profileName: String, speedInfo: String) {
