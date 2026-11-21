@@ -1,4 +1,4 @@
-﻿import 'package:gobox/common/common.dart';
+import 'package:gobox/common/common.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/models.dart';
 import 'package:gobox/state.dart';
@@ -1137,7 +1137,6 @@ needSetup(Ref ref) {
     e: interfaceName,
     f: nodes,
     g: hosts,
-  );
   );
 }
 
