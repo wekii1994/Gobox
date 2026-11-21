@@ -1,4 +1,4 @@
-import 'package:gobox/common/common.dart';
+﻿import 'package:gobox/common/common.dart';
 import 'package:gobox/common/network_matcher.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/models.dart';
@@ -7,6 +7,7 @@ import 'package:gobox/plugins/service.dart';
 import 'package:gobox/providers/providers.dart';
 import 'package:gobox/state.dart';
 import 'package:gobox/widgets/widgets.dart';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -375,9 +376,7 @@ class DisableQuicSection extends ConsumerWidget {
       managedSettingProvider.select((state) => state.options),
     );
     final managedQuic =
-        managedOptions['禁用内核QUIC流量'] ??
-        managedOptions['屏蔽内核QUIC流量'] ??
-        true;
+        managedOptions['禁用内核QUIC流量'] ?? managedOptions['屏蔽内核QUIC流量'] ?? true;
     final enabled = isManaged ? managedQuic : disableQuic;
 
     return ListItem.switchItem(
@@ -392,10 +391,7 @@ class DisableQuicSection extends ConsumerWidget {
           if (isManaged) {
             globalState.appController.updateManagedSetting(
               (state) => state.copyWith(
-                options: {
-                  ...state.options,
-                  '禁用内核QUIC流量': value,
-                }..remove('屏蔽内核QUIC流量'),
+                options: {...state.options, '禁用内核QUIC流量': value}..remove('屏蔽内核QUIC流量'),
               ),
             );
           }
@@ -631,12 +627,12 @@ class _TrayClickBehaviorDialogState extends State<_TrayClickBehaviorDialog> {
   List<SegmentOption<TrayClickBehavior>> get _options => [
     SegmentOption(
       value: TrayClickBehavior.showPanel,
-      icon: const Icon(Icons.dashboard_outlined),
+      icon: const AppIcon(Icons.dashboard_outlined),
       label: appLocalizations.showPanel,
     ),
     SegmentOption(
       value: TrayClickBehavior.showMenu,
-      icon: const Icon(Icons.menu),
+      icon: const AppIcon(Icons.menu),
       label: appLocalizations.showMenu,
     ),
   ];

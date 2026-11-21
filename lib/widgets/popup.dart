@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:gobox/common/common.dart';
 import 'package:gobox/models/common.dart';
@@ -140,10 +140,6 @@ class _PopupTransitionState extends State<_PopupTransition>
   }
 }
 
-/// Shows a cascading context menu in the root overlay.
-///
-/// [position] expects global logical coordinates (e.g. `TapUpDetails.globalPosition`);
-/// [anchor] expects a rect already in the root overlay's coordinate space.
 Future<void> showContextMenu(
   BuildContext context, {
   Offset? position,
@@ -152,15 +148,8 @@ Future<void> showContextMenu(
   Widget? header,
   double maxWidth = 300,
 }) {
-  final navigator = Navigator.of(context, rootNavigator: true);
-  final overlayBox =
-      navigator.overlay?.context.findRenderObject() ??
-      Overlay.maybeOf(context, rootOverlay: true)?.context.findRenderObject();
-  final resolvedPosition = position != null && overlayBox is RenderBox
-      ? overlayBox.globalToLocal(position)
-      : position;
-  final rect = anchor ?? (resolvedPosition ?? Offset.zero) & Size.zero;
-  return navigator.push(
+  final rect = anchor ?? (position ?? Offset.zero) & Size.zero;
+  return Navigator.of(context, rootNavigator: true).push(
     _ContextMenuRoute(
       barrierLabel: utils.id,
       anchor: rect,
@@ -237,14 +226,21 @@ class _CascadeMenu extends StatefulWidget {
 
 class _CascadeMenuState extends State<_CascadeMenu> {
   final _placement = _MenuPlacement();
+  final _menuKey = GlobalKey();
   PopupMenuItemData? _submenu;
   Rect? _submenuAnchor;
+
+  Rect? _settledRect(Rect? rect) {
+    final box = _menuKey.currentContext?.findRenderObject();
+    if (rect == null || box is! RenderBox || !box.hasSize) return rect;
+    return box.globalToLocal(rect.topLeft) + _placement.offset & rect.size;
+  }
 
   void _handleSubmenu(PopupMenuItemData? item, Rect? anchor) {
     if (identical(item, _submenu)) return;
     setState(() {
       _submenu = item;
-      _submenuAnchor = item == null ? null : anchor;
+      _submenuAnchor = item == null ? null : _settledRect(anchor);
     });
   }
 
@@ -259,7 +255,7 @@ class _CascadeMenuState extends State<_CascadeMenu> {
         padding: const EdgeInsets.fromLTRB(8, 10, 22, 10),
         child: Row(
           children: [
-            Icon(
+            AppIcon(
               Icons.chevron_left_rounded,
               size: 24,
               color: colorScheme.onSurfaceVariant,
@@ -323,6 +319,7 @@ class _CascadeMenuState extends State<_CascadeMenu> {
               duration: widget.duration,
               resolveAlignment: () => _placement.alignment,
               child: CommonPopupMenu.surface(
+                key: _menuKey,
                 context,
                 AnimatedSize(
                   duration: const Duration(milliseconds: 180),
@@ -380,6 +377,7 @@ class _CascadeMenuState extends State<_CascadeMenu> {
 
 class _MenuPlacement {
   Alignment alignment = Alignment.topLeft;
+  Offset offset = Offset.zero;
 }
 
 const _menuMargin = 8.0;
@@ -441,7 +439,7 @@ class _ContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
       (true, false) => Alignment.bottomLeft,
       (true, true) => Alignment.bottomRight,
     };
-    return Offset(
+    return placement.offset = Offset(
       x.clamp(area.left, math.max(area.left, area.right - childSize.width)),
       y.clamp(area.top, math.max(area.top, area.bottom - childSize.height)),
     );
@@ -537,7 +535,7 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
   bool _isOpen = false;
   final _targetOffsetValueNotifier = ValueNotifier<Offset>(Offset.zero);
   Offset _offset = Offset.zero;
-  CommonPopupRoute? _route;
+  CommonPopupRoute<dynamic>? _route;
 
   Future<void> _open({Offset offset = Offset.zero}) {
     _offset = offset;
@@ -571,12 +569,10 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     if (renderBox == null) {
       return;
     }
-    final overlayBox = Overlay.maybeOf(context)?.context.findRenderObject();
     final viewPadding = MediaQuery.viewPaddingOf(context);
     _targetOffsetValueNotifier.value = renderBox
         .localToGlobal(
           Offset.zero.translate(viewPadding.right, viewPadding.top),
-          ancestor: overlayBox is RenderBox ? overlayBox : null,
         )
         .translate(_offset.dx, _offset.dy);
   }
@@ -702,14 +698,7 @@ class CommonPopupMenu extends StatelessWidget {
         Rect? rectOf() {
           final box = itemContext.findRenderObject();
           if (box is! RenderBox || !box.hasSize) return null;
-          final overlayBox = Overlay.maybeOf(
-            itemContext,
-          )?.context.findRenderObject();
-          return box.localToGlobal(
-                Offset.zero,
-                ancestor: overlayBox is RenderBox ? overlayBox : null,
-              ) &
-              box.size;
+          return box.localToGlobal(Offset.zero) & box.size;
         }
 
         return InkWell(
@@ -752,7 +741,11 @@ class CommonPopupMenu extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               children: [
                 if (item.icon != null) ...[
-                  Icon(item.icon, size: fontSize + 5, color: iconColor),
+                  Icon(
+                    context.resolveIcon(item.icon!),
+                    size: fontSize + 5,
+                    color: iconColor,
+                  ),
                   const SizedBox(width: 14),
                 ],
                 if (submenu)
@@ -780,7 +773,7 @@ class CommonPopupMenu extends StatelessWidget {
                   Flexible(child: label),
                 if (submenu) ...[
                   const SizedBox(width: 4),
-                  Icon(
+                  AppIcon(
                     Icons.chevron_right_rounded,
                     size: fontSize + 5,
                     color: colorScheme.onSurfaceVariant,
@@ -828,10 +821,11 @@ class CommonPopupMenu extends StatelessWidget {
     return IntrinsicHeight(child: menu);
   }
 
-  static Widget surface(BuildContext context, Widget child) {
+  static Widget surface(BuildContext context, Widget child, {Key? key}) {
     final colorScheme = context.colorScheme;
     final isLight = colorScheme.brightness == Brightness.light;
     return Material(
+      key: key,
       elevation: 8,
       shadowColor: Colors.black.withValues(alpha: isLight ? 0.5 : 0.8),
       color: isLight

@@ -1,5 +1,6 @@
 import 'package:gobox/enum/enum.dart';
 import 'package:material_ui/material_ui.dart';
+
 import 'color.dart';
 
 extension TextStyleExtension on TextStyle {

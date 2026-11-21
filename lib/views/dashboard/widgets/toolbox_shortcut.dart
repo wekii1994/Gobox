@@ -1,4 +1,4 @@
-import 'package:gobox/common/common.dart';
+﻿import 'package:gobox/common/common.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/providers/providers.dart';
 import 'package:gobox/views/toolbox.dart';
@@ -96,7 +96,7 @@ class _ToolEntryState extends State<_ToolEntry> {
       tween: ColorTween(
         end: active ? item.color : colorScheme.onSurfaceVariant,
       ),
-      builder: (_, color, _) => Icon(item.icon, size: 20, color: color),
+      builder: (_, color, _) => AppIcon(item.icon, size: 20, color: color),
     );
     final child = AnimatedContainer(
       duration: _duration,

@@ -1,10 +1,11 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:gobox/common/common.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/providers/app.dart';
 import 'package:gobox/providers/state.dart';
 import 'package:gobox/state.dart';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,8 +1,9 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/models.dart';
+
 
 final _commentReg = RegExp(r'<!--[\s\S]*?-->');
 final _scoreReg = RegExp(r'Fraud Score:\s*(\d+)');
@@ -64,9 +65,8 @@ IpRiskLevel? _levelWord(String? word) => switch (word?.trim().toLowerCase()) {
 IpRiskNote? _note(String body) {
   final panel = _panelReg.firstMatch(body)?.group(1);
   if (panel == null) return null;
-  final text = _unescape(
-    panel.replaceAll(_noteTagReg, ' '),
-  ).replaceAll(_spaceReg, ' ');
+  final text = _unescape(panel.replaceAll(_noteTagReg, ' '))
+      .replaceAll(_spaceReg, ' ');
   final indirect = _indirectReg.firstMatch(text);
   final operator = _operatorReg.firstMatch(text);
   final owner = _ownerReg.firstMatch(text);

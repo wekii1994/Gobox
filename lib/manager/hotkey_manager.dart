@@ -1,8 +1,9 @@
-import 'package:gobox/common/common.dart';
+﻿import 'package:gobox/common/common.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/common.dart';
 import 'package:gobox/providers/config.dart';
 import 'package:gobox/state.dart';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +36,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
       case HotAction.start:
         globalState.appController.updateStart();
       case HotAction.view:
-        globalState.appController.updateVisible();
+        unawaited(globalState.appController.updateVisible());
       case HotAction.proxy:
         globalState.appController.updateSystemProxy();
       case HotAction.tun:
@@ -51,7 +52,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
         .where((hotKeyAction) {
           return hotKeyAction.key != null && hotKeyAction.modifiers.isNotEmpty;
         })
-        .map<Future>((hotKeyAction) async {
+        .map<Future<void>>((hotKeyAction) async {
           final modifiers = hotKeyAction.modifiers
               .map((item) => item.toHotKeyModifier())
               .toList();

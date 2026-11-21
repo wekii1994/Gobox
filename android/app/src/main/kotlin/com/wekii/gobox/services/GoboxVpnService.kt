@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Parcel
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.wekii.gobox.GlobalState
 import com.wekii.gobox.core.Core
 import com.wekii.gobox.extensions.getIpv4RouteAddress
@@ -19,6 +20,7 @@ import com.wekii.gobox.extensions.toCIDR
 import com.wekii.gobox.models.AccessControlMode
 import com.wekii.gobox.models.VpnOptions
 import com.wekii.gobox.plugins.VpnPlugin
+import com.wekii.gobox.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,7 +62,11 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
         }
-        registerReceiver(unlockReceiver, filter, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Context.RECEIVER_NOT_EXPORTED else 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(unlockReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(unlockReceiver, filter)
+        }
 
         fairMemoryHelper.register(
             context = this,
@@ -131,7 +137,7 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
         if (Build.VERSION.SDK_INT >= 29) setMetered(false)
         if (options.allowBypass) allowBypass()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && options.systemProxy) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && options.systemProxy && options.port > 0) {
             val exclusionList = options.bypassDomain.filter { proxyExclusionPattern.matches(it) }
             setHttpProxy(ProxyInfo.buildDirectProxy("127.0.0.1", options.port, exclusionList))
         }

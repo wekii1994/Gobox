@@ -1,5 +1,6 @@
-import 'package:gobox/plugins/tile.dart';
+﻿import 'package:gobox/plugins/tile.dart';
 import 'package:gobox/state.dart';
+
 import 'package:material_ui/material_ui.dart';
 
 class TileManager extends StatefulWidget {
@@ -25,7 +26,7 @@ class _TileContainerState extends State<TileManager> with TileListener {
 
   @override
   Future<void> onStop() async {
-    globalState.appController.updateStatus(false);
+    unawaited(globalState.appController.updateStatus(false));
     super.onStop();
   }
 

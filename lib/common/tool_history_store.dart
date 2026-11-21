@@ -1,9 +1,10 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 
 import 'package:gobox/clash/clash.dart';
 import 'package:gobox/common/path.dart';
 import 'package:gobox/enum/enum.dart';
+
 import 'package:synchronized/synchronized.dart';
 
 class ToolHistoryStore {

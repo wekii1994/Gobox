@@ -155,8 +155,6 @@ Future<void> _sendControlCommand(String command) async {
 }
 
 Future<void> _runApp() async {
-  await ensureRustLib();
-
   if (system.isAndroid) {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
@@ -189,7 +187,7 @@ Future<void> _service(List<String> flags) async {
         final configFile = File(await appPath.appConfigPath);
         if (!await configFile.exists()) return;
         final latestConfig = Config.compatibleFromJson(
-          json.decode(await configFile.readAsString()),
+          json.decode(await configFile.readAsString()) as Map<String, Object?>,
         );
         globalState.config = globalState.config.copyWith(
           vpnProps: latestConfig.vpnProps,
@@ -256,66 +254,74 @@ Future<void> _service(List<String> flags) async {
 
     Future<void> startCore() async {
       await ClashCore.initGeo();
-      app.tip(appLocalizations.startVpn);
+      unawaited(app.tip(appLocalizations.startVpn));
       final homeDirPath = await appPath.homeDirPath;
       final version = await system.version;
       final clashConfig = globalState.config.patchClashConfig.copyWith.tun(
         enable: false,
       );
 
-      Future(() async {
-        try {
-          final profileId = globalState.config.currentProfileId;
-          if (profileId == null) {
-            return;
-          }
-          final params = await globalState.getSetupParams(
-            pathConfig: clashConfig,
-          );
-          final res = await clashLibHandler.quickStart(
-            InitParams(homeDir: homeDirPath, version: version),
-            params,
-            globalState.getCoreState(),
-          );
-          final message = res.message;
-          debugPrint(message);
-          if (message.isNotEmpty) {
-            commonPrint.error('QuickStart failed with error: $message');
-            await vpn?.stop();
-            return;
-          }
-          await vpn?.start(clashLibHandler.getAndroidVpnOptions());
-          Future.delayed(const Duration(seconds: 2), checkSmartAutoStop);
-
-          final profile = globalState.config.profiles
-              .where((e) => e.id == profileId)
-              .firstOrNull;
-          final fallbackName = profile?.label ?? AppIdentity.displayName;
-          var profileName = fallbackName;
+      unawaited(
+        Future(() async {
           try {
-            final proxiesRaw = await clashLibHandler.getProxiesRaw();
-            final groups = proxiesRaw.isNotEmpty
-                ? buildGroups(proxiesRaw)
-                : const <Group>[];
-            profileName = resolvePhysicalOutboundTitle(
-              mode: globalState.config.patchClashConfig.mode,
-              groups: groups,
-              selectedMap: profile?.selectedMap ?? const {},
-              fallbackLabel: fallbackName,
+            final profileId = globalState.config.currentProfileId;
+            if (profileId == null) {
+              return;
+            }
+            final params = await globalState.getSetupParams(
+              pathConfig: clashConfig,
             );
-          } catch (e) {
-            commonPrint.warn(
-              'Service: resolve initial outbound title failed: $e',
+            final res = await clashLibHandler.quickStart(
+              InitParams(homeDir: homeDirPath, version: version),
+              params,
+              globalState.getCoreState(),
             );
-          }
-          await vpn?.updateNotificationNode(profileName);
+            final message = res.message;
+            debugPrint(message);
+            if (message.isNotEmpty) {
+              commonPrint.error('QuickStart failed with error: $message');
+              await vpn?.stop();
+              return;
+            }
+            await vpn?.start(clashLibHandler.getAndroidVpnOptions());
+            Future.delayed(const Duration(seconds: 2), checkSmartAutoStop);
 
-          clashLibHandler.startListener();
-        } catch (e) {
-          commonPrint.error('Fatal error during service background start: $e');
-          await vpn?.stop();
-        }
-      });
+            final profile = globalState.config.profiles
+                .where((e) => e.id == profileId)
+                .firstOrNull;
+            final fallbackName = profile?.label ?? AppIdentity.displayName;
+            var profileName = fallbackName;
+            try {
+              final proxiesRaw = await clashLibHandler.getProxiesRaw();
+              final groups = proxiesRaw.isNotEmpty
+                  ? buildGroups(proxiesRaw)
+                  : const <Group>[];
+              profileName = resolvePhysicalOutboundTitle(
+                mode: globalState.config.patchClashConfig.mode,
+                groups: groups,
+                selectedMap: profile?.selectedMap ?? const {},
+                fallbackLabel: fallbackName,
+              );
+            } catch (e) {
+              commonPrint.warn(
+                'Service: resolve initial outbound title failed: $e',
+              );
+            }
+            await vpn?.updateNotificationNode(profileName);
+
+            if (globalState.config.vpnProps.networkSpeedNotification) {
+              await vpn?.updateNotificationSpeed(profileName, '↑0B/s ↓0B/s');
+            }
+
+            unawaited(clashLibHandler.startListener());
+          } catch (e) {
+            commonPrint.error(
+              'Fatal error during service background start: $e',
+            );
+            await vpn?.stop();
+          }
+        }),
+      );
     }
 
     tile?.addListener(
@@ -323,7 +329,7 @@ Future<void> _service(List<String> flags) async {
         onStart: startCore,
         onStop: () async {
           await app.tip(appLocalizations.stopVpn);
-          clashLibHandler.stopListener();
+          unawaited(clashLibHandler.stopListener());
           await vpn?.stop();
         },
         onReconnectIpc: () {
@@ -384,7 +390,7 @@ void _handleMainIpc(ClashLibHandler clashLibHandler) {
 
   _serviceReceiverPort = ReceivePort();
   _serviceReceiverPort!.listen((message) async {
-    final res = await clashLibHandler.invokeAction(message);
+    final res = await clashLibHandler.invokeAction(message as String);
     _safeSend(sendPort, res);
   });
   _safeSend(sendPort, _serviceReceiverPort!.sendPort);
@@ -415,12 +421,10 @@ class _TileListenerWithService with TileListener {
   final Function() _onReconnectIpc;
 
   const _TileListenerWithService({
-    required Function() onStart,
-    required Function() onStop,
-    required Function() onReconnectIpc,
-  }) : _onStart = onStart,
-       _onStop = onStop,
-       _onReconnectIpc = onReconnectIpc;
+    required this._onStart,
+    required this._onStop,
+    required this._onReconnectIpc,
+  });
 
   @override
   void onStart() => _onStart();

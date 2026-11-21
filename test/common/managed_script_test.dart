@@ -68,7 +68,7 @@ void main() {
   });
 
   test('route catalog entries point to the bundled rule sets', () async {
-    final index = await ManagedScript.catalog(const ManagedProps());
+    final index = await ManagedScript.catalog();
     final catalog = index.catalog;
     final icons = catalog.icons.toSet();
     expect(catalog.sets, isNotEmpty);
@@ -96,7 +96,7 @@ void main() {
   });
 
   test('icon set picks map back to catalog names', () async {
-    final index = await ManagedScript.catalog(const ManagedProps());
+    final index = await ManagedScript.catalog();
     final iconSet = routeIconSet(index.catalog);
     expect(iconSet.icons.length, index.catalog.icons.length);
     for (final icon in iconSet.icons.take(50)) {
@@ -191,7 +191,7 @@ void main() {
       0,
       routed.content.length - plain.content.length,
     );
-    expect(prelude.startsWith('const bettboxRoutes = '), isTrue);
+    expect(prelude.startsWith('const GoboxRoutes = '), isTrue);
     final routes =
         jsonDecode(prelude.substring(22, prelude.length - 2)) as List;
     expect(routes.length, 2);
@@ -276,14 +276,14 @@ void main() {
   test('group order is injected only when saved', () async {
     const props = ManagedProps();
     final plain = await ManagedScript.script(props);
-    expect(plain.content.contains('const bettboxOrder'), isFalse);
+    expect(plain.content.contains('const GoboxOrder'), isFalse);
     final ordered = await ManagedScript.script(
       props.copyWith(order: const ['AdBlock', 'FCM']),
     );
     expect(ordered.content.endsWith(plain.content), isTrue);
     expect(ordered.digest, isNot(plain.digest));
     expect(
-      ordered.content.startsWith('const bettboxOrder = ["AdBlock","FCM"];\n'),
+      ordered.content.startsWith('const GoboxOrder = ["AdBlock","FCM"];\n'),
       isTrue,
     );
   });
@@ -291,17 +291,13 @@ void main() {
   test(
     'regions default to the preset ones and are injected when chosen',
     () async {
-      final catalog = (await ManagedScript.catalog(
-        const ManagedProps(),
-      )).catalog;
+      final catalog = (await ManagedScript.catalog()).catalog;
       expect(managedRegions(catalog, null), ['香港', '日本', '美国', '新加坡', '台湾']);
       expect(managedRegions(catalog, const ['日本', '韩国', 'Gone']), ['日本', '韩国']);
       expect(
-        managedRegions(
-          catalog,
-          null,
-          const [CustomRegion(name: '德国', regex: '德国|DE')],
-        ),
+        managedRegions(catalog, null, const [
+          CustomRegion(name: '德国', regex: '德国|DE'),
+        ]),
         ['香港', '日本', '美国', '新加坡', '台湾', '德国'],
       );
       expect(
@@ -323,14 +319,14 @@ void main() {
 
       const props = ManagedProps();
       final plain = await ManagedScript.script(props);
-      expect(plain.content.contains('const bettboxRegions'), isFalse);
-      expect(plain.content.contains('const bettboxCustomRegions'), isFalse);
+      expect(plain.content.contains('const GoboxRegions'), isFalse);
+      expect(plain.content.contains('const GoboxCustomRegions'), isFalse);
       final chosen = await ManagedScript.script(
         props.copyWith(regions: const ['香港', '韩国']),
       );
       expect(chosen.content.endsWith(plain.content), isTrue);
       expect(
-        chosen.content.startsWith('const bettboxRegions = ["香港","韩国"];\n'),
+        chosen.content.startsWith('const GoboxRegions = ["香港","韩国"];\n'),
         isTrue,
       );
       final withCustom = await ManagedScript.script(
@@ -338,7 +334,7 @@ void main() {
           customRegions: const [CustomRegion(name: '德国', regex: '德国|DE')],
         ),
       );
-      expect(withCustom.content.contains('const bettboxCustomRegions'), isTrue);
+      expect(withCustom.content.contains('const GoboxCustomRegions'), isTrue);
     },
   );
 
@@ -414,18 +410,13 @@ void main() {
     );
     expect(
       rawScript.content,
-      'const bettboxOrder = ["AdBlock","FCM"];\nfunction main(config) { return config; }',
+      'const GoboxOrder = ["AdBlock","FCM"];\nfunction main(config) { return config; }',
     );
   });
 
-  test('version comparison compares numerically when numbers', () {
-    expect(ManagedScript.compareVersions('99', '100'), lessThan(0));
-    expect(ManagedScript.compareVersions('100', '99'), greaterThan(0));
-    expect(ManagedScript.compareVersions('20241012', '2026111105'), lessThan(0));
-    expect(ManagedScript.compareVersions('2026111105', '2026111105'), 0);
-    expect(ManagedScript.compareVersions('beta', 'alpha'), greaterThan(0));
-
-    const olderProps = ManagedProps(syncedVersion: '99');
-    expect(ManagedScript.syncedVersion(olderProps), isNull);
+  test('legacy upstream version is ignored', () {
+    const legacyProps = ManagedProps(syncedVersion: '2026111105');
+    expect(ManagedScript.isCustom(legacyProps), isFalse);
+    expect(ManagedScript.syncedVersion(legacyProps), isNull);
   });
 }

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:gobox/clash/clash.dart';
 import 'package:gobox/common/common.dart';
@@ -9,6 +9,7 @@ import 'package:gobox/providers/config.dart';
 import 'package:gobox/providers/state.dart';
 import 'package:gobox/state.dart';
 import 'package:gobox/views/proxies/common.dart' show delayTestCoordinator;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,6 +26,8 @@ class _ClashContainerState extends ConsumerState<ClashManager>
     with AppMessageListener {
   final List<TrackerInfo> _pendingRequests = [];
   static const _flushDuration = Duration(milliseconds: 300);
+  static const _errorInterval = Duration(seconds: 10);
+  final Map<String, DateTime> _errorNotified = {};
 
   @override
   Widget build(BuildContext context) {
@@ -132,11 +135,21 @@ class _ClashContainerState extends ConsumerState<ClashManager>
     globalState.appController.updateGroupsDebounce();
   }
 
+  void _notifyError(String text) {
+    final now = DateTime.now();
+    _errorNotified.removeWhere(
+      (_, time) => now.difference(time) >= _errorInterval,
+    );
+    if (_errorNotified.containsKey(text)) return;
+    _errorNotified[text] = now;
+    globalState.showNotifier(text);
+  }
+
   @override
   void onLog(Log log) {
     globalState.appController.addLog(log);
     if (log.logLevel == LogLevel.error) {
-      globalState.showNotifier(log.payload);
+      _notifyError(log.payload);
     }
     super.onLog(log);
   }

@@ -1,6 +1,7 @@
-import 'package:gobox/common/proxy.dart';
+﻿import 'package:gobox/common/proxy.dart';
 import 'package:gobox/models/models.dart';
 import 'package:gobox/providers/state.dart';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,9 +20,9 @@ class _ProxyManagerState extends ConsumerState<ProxyManager> {
     final systemProxy = proxyState.systemProxy;
     final port = proxyState.port;
     if (isStart && systemProxy) {
-      proxy?.startProxy(port, proxyState.bypassDomain);
+      unawaited(proxy?.startProxy(port, proxyState.bypassDomain));
     } else {
-      proxy?.stopProxy();
+      unawaited(proxy?.stopProxy());
     }
   }
 

@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
@@ -29,7 +29,8 @@ final baseInfoEdgeInsets = EdgeInsets.symmetric(
 final defaultTextScaleFactor =
     WidgetsBinding.instance.platformDispatcher.textScaleFactor;
 const httpTimeoutDuration = Duration(milliseconds: 5000);
-const maxDelayTestConcurrency = 100;
+const defaultDelayTestConcurrency = 64;
+const maxDelayTestConcurrency = 128;
 const moreDuration = Duration(milliseconds: 100);
 const animateDuration = Duration(milliseconds: 100);
 const midDuration = Duration(milliseconds: 200);
@@ -49,10 +50,11 @@ const configKey = 'config';
 const customSidebarIconKey = 'custom_sidebar_icon';
 const customDashboardTitleKey = 'custom_dashboard_title';
 const lastManagedScriptVersionKey = 'last_managed_script_version';
+const restartAutoStartKey = 'restart_auto_start';
 const double dialogCommonWidth = 300;
 const repository = 'wekii1994/Gobox';
 const ipInfoToken = String.fromEnvironment('IPINFO_TOKEN', defaultValue: '');
-const defaultExternalController = '127.0.0.1:9090';
+const defaultExternalControllerPort = 9090;
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;
 double getFloatingBottomBarReserveHeight(BuildContext context) {

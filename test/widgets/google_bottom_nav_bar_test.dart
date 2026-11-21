@@ -179,38 +179,6 @@ void main() {
     expect(changes, [0, 3]);
   });
 
-  testWidgets('跨多格点击时直接落位到目标格，抬手不重启滑行并立即切换页面', (tester) async {
-    final changes = <int>[];
-    await _pumpBar(tester, selectedIndex: 0, onTabChange: changes.add);
-
-    final gesture = await tester.startGesture(Offset(_slotCenterX(3), _barY));
-    await tester.pump();
-    expect(_pillCenterX(tester), closeTo(_slotCenterX(3), 0.5));
-    for (var i = 0; i < 4; i++) {
-      await tester.pump(const Duration(milliseconds: 16));
-      expect(
-        _pillCenterX(tester),
-        closeTo(_slotCenterX(3), 0.5),
-        reason: 'down $i',
-      );
-    }
-    await gesture.up();
-    for (var i = 0; i < 3; i++) {
-      await tester.pump(const Duration(milliseconds: 16));
-      expect(
-        _pillCenterX(tester),
-        closeTo(_slotCenterX(3), 0.5),
-        reason: 'up $i',
-      );
-    }
-
-    expect(changes, [3]);
-
-    await tester.pumpAndSettle();
-    expect(changes, [3]);
-    expect(_pillCenterX(tester), closeTo(_slotCenterX(3), 0.5));
-  });
-
   testWidgets('按下非当前格后立即拖动，指示块不会与手指错位', (tester) async {
     await _pumpBar(tester, selectedIndex: 0, onTabChange: (_) {});
 

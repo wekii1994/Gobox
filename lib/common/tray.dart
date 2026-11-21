@@ -1,9 +1,10 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/models.dart';
 import 'package:gobox/state.dart';
 import 'package:gobox/views/proxies/common.dart';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -49,7 +50,7 @@ class Tray {
     _loadingTimer?.cancel();
   }
 
-  Future _updateSystemTray({
+  Future<void> _updateSystemTray({
     required Brightness? brightness,
     required bool isStart,
     bool force = false,

@@ -1,4 +1,4 @@
-// ignore_for_file: constant_identifier_names
+﻿// ignore_for_file: constant_identifier_names
 
 import 'dart:io';
 
@@ -146,7 +146,7 @@ enum AppMessageType {
 
 enum InvokeMessageType { protect, process }
 
-enum FindProcessMode { always, off }
+enum FindProcessMode { always, strict, off }
 
 enum RecoveryOption { all, onlyProfiles }
 
@@ -172,10 +172,6 @@ enum DnsMode {
   redirHost,
   hosts,
 }
-
-enum CacheAlgorithm { arc, lru }
-
-enum FilterMode { blacklist, whitelist, rule }
 
 enum ExternalControllerStatus {
   @JsonValue('')
@@ -238,9 +234,12 @@ enum ActionMethod {
   shutdown,
   validateConfig,
   importProfile,
+  downloadProfile,
   updateConfig,
   getConfig,
   getRuntimeConfig,
+  getProxyConfig,
+  updateExpandedProvider,
   exportConfig,
   mergeProfiles,
   getProxies,
@@ -257,6 +256,8 @@ enum ActionMethod {
   resetConnections,
   closeConnection,
   closeGroupConnections,
+  getDialerDependents,
+  checkDialerUdp,
   getExternalProviders,
   getExternalProvider,
   updateGeoData,
@@ -314,6 +315,9 @@ enum ActionMethod {
   cancelLocalPing,
   getFailoverStats,
   resetFailoverStats,
+  parseNodes,
+  registerWarp,
+  testNode,
 
   ///Android,
   setState,
@@ -613,6 +617,8 @@ enum RuleTarget { DIRECT, REJECT }
 
 enum RecoveryStrategy { compatible, override }
 
+enum AppUpdateStatus { available, downloading, ready }
+
 enum StartSwitchStyle { tonal, outlined }
 
 enum ProfileUsageStyle { bar, ring, concentric }
@@ -669,6 +675,8 @@ enum SidebarFlyoutDelay {
 enum CacheTag { logs, rules, requests, proxiesList }
 
 enum Language { yaml, javaScript }
+
+enum NodeRole { landing, regular }
 
 enum ImportOption { code, url, file }
 

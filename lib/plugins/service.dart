@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:gobox/common/system.dart';
@@ -55,6 +55,7 @@ class Service {
     _notificationTitle = null;
     return await methodChannel.invokeMethod<bool>('stopVpn');
   }
+
 
   Future<bool> isSmartStopped() async {
     return await methodChannel.invokeMethod<bool>('isSmartStopped') ?? false;

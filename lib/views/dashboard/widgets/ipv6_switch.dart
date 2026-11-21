@@ -1,4 +1,4 @@
-import 'package:gobox/common/common.dart';
+﻿import 'package:gobox/common/common.dart';
 import 'package:gobox/providers/config.dart';
 import 'package:gobox/views/config/network.dart';
 import 'package:gobox/widgets/widgets.dart';
@@ -38,9 +38,9 @@ class Ipv6Switch extends ConsumerWidget {
                     appLocalizations.switchLabel,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleSmall?.adjustSize(-2).toLight,
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.adjustSize(-2)
+                        .toLight,
                   ),
                 ),
               ),

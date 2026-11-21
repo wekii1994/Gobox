@@ -1,4 +1,4 @@
-import 'package:gobox/common/common.dart';
+﻿import 'package:gobox/common/common.dart';
 import 'package:gobox/views/resources.dart';
 import 'package:gobox/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';

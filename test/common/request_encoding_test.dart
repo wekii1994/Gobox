@@ -63,11 +63,11 @@ void main() {
   setUpAll(() async {
     globalState.packageInfo = PackageInfo(
       appName: 'Gobox',
-      packageName: 'com.wekii.gobox',
+      packageName: 'com.appshub.Gobox',
       version: '1.0.0',
       buildNumber: '1',
     );
-    home = await Directory.systemTemp.createTemp('gobox_request_');
+    home = await Directory.systemTemp.createTemp('Gobox_request_');
     server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     server.listen(serve);
     url = 'http://127.0.0.1:${server.port}/clash.yaml';

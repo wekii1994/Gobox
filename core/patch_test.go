@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/log"
@@ -193,6 +194,59 @@ rules:
 	}
 }
 
+func TestApplyPatchNodeExcludeIncludeAll(t *testing.T) {
+	rawCfg := parsePatchProfile(t, `
+proxies:
+  - {name: A, type: trojan, server: a.example.com, port: 443, password: p}
+  - {name: B, type: trojan, server: b.example.com, port: 443, password: p}
+proxy-groups:
+  - {name: List, type: select, proxies: [A, B]}
+  - {name: All, type: select, include-all: true}
+  - {name: Mixed, type: select, proxies: [A], include-all-proxies: true, exclude-filter: C}
+  - {name: Providers, type: select, include-all-providers: true}
+rules:
+  - MATCH,List
+`)
+	if _, err := applyPatch(rawCfg, patchParams(t, `{"node-exclude-filter":"^A$"}`)); err != nil {
+		t.Fatal(err)
+	}
+	groups := map[string]map[string]any{}
+	for _, group := range rawCfg.ProxyGroup {
+		name, _ := groupName(group)
+		groups[name] = group
+	}
+	if got := groups["List"]["proxies"]; !reflect.DeepEqual(got, []any{"B"}) {
+		t.Errorf("list proxies = %v", got)
+	}
+	if _, exist := groups["List"]["exclude-filter"]; exist {
+		t.Errorf("list group should not get exclude-filter")
+	}
+	if got := groups["All"]["exclude-filter"]; got != "^A$" {
+		t.Errorf("include-all exclude-filter = %v", got)
+	}
+	if got := groups["Mixed"]["exclude-filter"]; got != "C|^A$" {
+		t.Errorf("include-all-proxies exclude-filter = %v", got)
+	}
+	if got := groups["Mixed"]["proxies"]; !reflect.DeepEqual(got, []any{}) {
+		t.Errorf("mixed proxies = %v", got)
+	}
+	if _, exist := groups["Providers"]["exclude-filter"]; exist {
+		t.Errorf("include-all-providers group should not get exclude-filter")
+	}
+	rawCfg.ProxyGroup = rawCfg.ProxyGroup[:3]
+	cfg, err := config.ParseRawConfig(rawCfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, proxy := range cfg.Proxies["All"].Adapter().(outboundgroup.ProxyGroup).Proxies() {
+		names = append(names, proxy.Name())
+	}
+	if !reflect.DeepEqual(names, []string{"B"}) {
+		t.Errorf("include-all members = %v", names)
+	}
+}
+
 func TestApplyPatchAndroidDns(t *testing.T) {
 	previous := patchForAndroid
 	patchForAndroid = true
@@ -275,50 +329,48 @@ dns: {enable: true, listen: 0.0.0.0:1053, nameserver: [223.5.5.5]}
 	}
 }
 
-func TestApplyPatchDnsInjection(t *testing.T) {
+func TestApplyPatchDnsDisabledKept(t *testing.T) {
 	rawCfg := parsePatchProfile(t, "dns: {enable: false, nameserver: ['10.0.0.1']}\n")
-	dns, _ := json.Marshal(map[string]any{
-		"enable":            true,
-		"nameserver":        []string{"1.1.1.1"},
-		"nameserver-policy": map[string]any{"+.a.com": []string{"8.8.8.8", "8.8.4.4"}},
-	})
-	params := patchParams(t, `{}`)
-	params.Dns = dns
-	if _, err := applyPatch(rawCfg, params); err != nil {
+	if _, err := applyPatch(rawCfg, patchParams(t, `{}`)); err != nil {
 		t.Fatal(err)
 	}
-	if !rawCfg.DNS.Enable || !reflect.DeepEqual(rawCfg.DNS.NameServer, []string{"1.1.1.1", "system://"}) {
-		t.Errorf("dns = %+v", rawCfg.DNS.NameServer)
+	if rawCfg.DNS.Enable || !reflect.DeepEqual(rawCfg.DNS.NameServer, []string{"10.0.0.1"}) {
+		t.Errorf("disabled dns should be kept: enable = %t, nameserver = %v", rawCfg.DNS.Enable, rawCfg.DNS.NameServer)
 	}
-	if len(rawCfg.DNS.ProxyServerNameserver) != 0 {
-		t.Errorf("original dns should not leak into proxy-server-nameserver: %v", rawCfg.DNS.ProxyServerNameserver)
-	}
+}
 
+func TestApplyPatchDnsIPv6(t *testing.T) {
 	for _, item := range []struct {
-		allowLan bool
-		listen   string
+		general string
+		want    bool
 	}{
-		{false, "127.0.0.1:10053"},
-		{true, "0.0.0.0:10053"},
+		{`{"ipv6": false}`, false},
+		{`{"ipv6": true}`, true},
 	} {
-		injected := parsePatchProfile(t, "dns: {enable: false}\n")
-		dns, _ := json.Marshal(map[string]any{"enable": true, "listen": "0.0.0.0:10053"})
-		params := patchParams(t, `{"general":{"allow-lan":`+strconv.FormatBool(item.allowLan)+`}}`)
-		params.Dns = dns
-		if _, err := applyPatch(injected, params); err != nil {
+		rawCfg := parsePatchProfile(t, "dns: {enable: true, ipv6: true, nameserver: ['10.0.0.1']}\n")
+		params := patchParams(t, `{}`)
+		params.General = json.RawMessage(item.general)
+		if _, err := applyPatch(rawCfg, params); err != nil {
 			t.Fatal(err)
 		}
-		if injected.DNS.Listen != item.listen {
-			t.Errorf("allow-lan=%t: injected dns listen = %q, want %q", item.allowLan, injected.DNS.Listen, item.listen)
+		if rawCfg.DNS.IPv6 != item.want {
+			t.Errorf("general %s: dns.ipv6 = %t, want %t", item.general, rawCfg.DNS.IPv6, item.want)
 		}
 	}
+}
 
-	enabled := parsePatchProfile(t, "dns: {enable: true, nameserver: ['10.0.0.1']}\n")
-	if _, err := applyPatch(enabled, params); err != nil {
+func TestApplyPatchDnsFallbackFilter(t *testing.T) {
+	rawCfg := parsePatchProfile(t, "dns: {enable: true, nameserver: ['10.0.0.1'], fallback: ['1.1.1.1'], fallback-filter: {geoip: true, ipcidr: ['240.0.0.0/4'], domain: ['+.google.com'], geosite: ['gfw']}}\n")
+	if _, err := applyPatch(rawCfg, patchParams(t, `{}`)); err != nil {
+>>>>>>> 1f5318f7
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(enabled.DNS.NameServer, []string{"10.0.0.1"}) {
-		t.Errorf("enabled dns without override should be kept: %v", enabled.DNS.NameServer)
+	filter := rawCfg.DNS.FallbackFilter
+	if len(filter.Domain) != 0 || len(filter.GeoSite) != 0 {
+		t.Errorf("fallback-filter domain = %v, geosite = %v, want empty", filter.Domain, filter.GeoSite)
+	}
+	if !filter.GeoIP || len(filter.IPCIDR) != 1 {
+		t.Errorf("fallback-filter geoip = %t, ipcidr = %v, want kept", filter.GeoIP, filter.IPCIDR)
 	}
 }
 
@@ -790,5 +842,68 @@ rules:
 	hc3 := rawCfg.ProxyProvider["subTooLarge"]["health-check"].(map[string]any)
 	if got := hc3["interval"]; got != 300 {
 		t.Errorf("subTooLarge interval = %v, want 300", got)
+	}
+}
+
+func TestApplyPatchSharedRules(t *testing.T) {
+	rawCfg := parsePatchProfile(t, `
+proxies:
+  - {name: Node, type: ss, server: a.com, port: 1, cipher: aes-128-gcm, password: p}
+proxy-groups:
+  - {name: 默认代理, type: select, proxies: [Node]}
+  - {name: 香港, type: select, proxies: [Node]}
+rule-providers:
+  ads: {type: http, behavior: domain, url: "https://example.com/ads.mrs", format: mrs}
+rules:
+  - MATCH,默认代理
+`)
+	params := patchParams(t, `{
+		"general": {"mode": "rule"},
+		"prepend-rules": ["DOMAIN,first.com,DIRECT"],
+		"override-rules": {"rules": ["DOMAIN,own.com,香港"]},
+		"shared-rules": {"fallback": "默认代理", "rules": [
+			"PROCESS-NAME,com.twitter.android,香港",
+			"DOMAIN-SUFFIX,jp.com,日本",
+			"IP-CIDR,1.1.1.1/32,日本,no-resolve",
+			"DOMAIN,direct.com,DIRECT",
+			"RULE-SET,ads,REJECT",
+			"RULE-SET,missing,REJECT",
+			"SUB-RULE,(NETWORK,tcp),missing"
+		]}
+	}`)
+	if _, err := applyPatch(rawCfg, params); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{
+		"DOMAIN,first.com,DIRECT",
+		"DOMAIN,own.com,香港",
+		"PROCESS-NAME,com.twitter.android,香港",
+		"DOMAIN-SUFFIX,jp.com,默认代理",
+		"IP-CIDR,1.1.1.1/32,默认代理,no-resolve",
+		"DOMAIN,direct.com,DIRECT",
+		"RULE-SET,ads,REJECT",
+		"MATCH,默认代理",
+	}
+	if !reflect.DeepEqual(rawCfg.Rule, want) {
+		t.Fatalf("rules = %v", rawCfg.Rule)
+	}
+
+	rawCfg = parsePatchProfile(t, `
+proxies:
+  - {name: Node, type: ss, server: a.com, port: 1, cipher: aes-128-gcm, password: p}
+rules:
+  - MATCH,DIRECT
+`)
+	if _, err := applyPatch(rawCfg, params); err != nil {
+		t.Fatal(err)
+	}
+	want = []string{
+		"DOMAIN,first.com,DIRECT",
+		"DOMAIN,own.com,香港",
+		"DOMAIN,direct.com,DIRECT",
+		"MATCH,DIRECT",
+	}
+	if !reflect.DeepEqual(rawCfg.Rule, want) {
+		t.Fatalf("rules without fallback = %v", rawCfg.Rule)
 	}
 }

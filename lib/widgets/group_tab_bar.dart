@@ -1,4 +1,4 @@
-import 'package:gobox/common/common.dart';
+﻿import 'package:gobox/common/common.dart';
 import 'package:gobox/providers/providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -267,7 +267,7 @@ class _GroupTabBarState extends ConsumerState<GroupTabBar> {
                         duration: const Duration(milliseconds: 320),
                       ),
                     )
-                  : Icon(
+                  : AppIcon(
                       isMobileView ? Icons.expand_more : Icons.chevron_right,
                     ),
             ),

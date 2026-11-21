@@ -14,6 +14,7 @@ import (
 
 	"github.com/dlclark/regexp2"
 	"github.com/metacubex/mihomo/common/orderedmap"
+	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/common/yaml"
 	"github.com/metacubex/mihomo/config"
 	LC "github.com/metacubex/mihomo/listener/config"
@@ -28,22 +29,30 @@ type PatchRules struct {
 	Rules []string `json:"rules"`
 }
 
+type PatchSharedRules struct {
+	Rules    []string `json:"rules"`
+	Fallback string   `json:"fallback"`
+}
+
 type PatchParams struct {
-	General            json.RawMessage `json:"general"`
-	GeoXUrl            json.RawMessage `json:"geox-url"`
-	Hosts              []PatchHost     `json:"hosts"`
-	Dns                json.RawMessage `json:"dns"`
-	Ntp                json.RawMessage `json:"ntp"`
-	Sniffer            json.RawMessage `json:"sniffer"`
-	Experimental       json.RawMessage `json:"experimental"`
-	Tunnels            json.RawMessage `json:"tunnels"`
-	ProvidersPath      string          `json:"providers-path"`
-	NodeExcludeFilter  string          `json:"node-exclude-filter"`
-	HealthCheckTimeout int             `json:"health-check-timeout"`
-	OverrideRules      *PatchRules     `json:"override-rules"`
-	PrependRules       []string        `json:"prepend-rules"`
-	DisabledGroups     []string        `json:"disabled-groups"`
-	SelectGlobal       bool            `json:"select-global"`
+	General            json.RawMessage   `json:"general"`
+	GeoXUrl            json.RawMessage   `json:"geox-url"`
+	Hosts              []PatchHost       `json:"hosts"`
+	Dns                json.RawMessage   `json:"dns"`
+	Ntp                json.RawMessage   `json:"ntp"`
+	Sniffer            json.RawMessage   `json:"sniffer"`
+	Experimental       json.RawMessage   `json:"experimental"`
+	Tunnels            json.RawMessage   `json:"tunnels"`
+	ProvidersPath      string            `json:"providers-path"`
+	NodeExcludeFilter  string            `json:"node-exclude-filter"`
+	HealthCheckTimeout int               `json:"health-check-timeout"`
+	OverrideRules      *PatchRules       `json:"override-rules"`
+	SharedRules        *PatchSharedRules `json:"shared-rules"`
+	PrependRules       []string          `json:"prepend-rules"`
+	DisabledGroups     []string          `json:"disabled-groups"`
+	SelectGlobal       bool              `json:"select-global"`
+	Nodes              []PatchNode       `json:"nodes"`
+}
 }
 
 const defaultHealthCheckTimeout = 5000
@@ -100,9 +109,7 @@ func applyPatch(raw *config.RawConfig, params *PatchParams) (string, error) {
 	patchProviderPaths(raw.ProxyProvider, params.ProvidersPath, "proxies")
 	patchProviderPaths(raw.RuleProvider, params.ProvidersPath, "rules")
 	patchHosts(raw, params.Hosts)
-	if err := patchDns(raw, params, defaults); err != nil {
-		return "", err
-	}
+	patchDns(raw)
 	if !raw.AllowLan {
 		raw.DNS.Listen = loopbackAddress(raw.DNS.Listen)
 	}
@@ -135,21 +142,24 @@ func applyPatch(raw *config.RawConfig, params *PatchParams) (string, error) {
 		}
 	}
 	patchProxyGroups(raw, params)
+	patchNodes(raw, params.Nodes)
+
+	patchProxies(raw)
 
 	rules := raw.Rule
 	var overrideSlice []string
 	if params.OverrideRules != nil {
 		overrideSlice = params.OverrideRules.Rules
 	}
-	if len(params.PrependRules) > 0 || len(overrideSlice) > 0 {
-		merged := make([]string, 0, len(params.PrependRules)+len(overrideSlice)+len(rules))
+	sharedSlice := resolveSharedRules(raw, params.SharedRules)
+	if len(params.PrependRules) > 0 || len(overrideSlice) > 0 || len(sharedSlice) > 0 {
+		merged := make([]string, 0, len(params.PrependRules)+len(overrideSlice)+len(sharedSlice)+len(rules))
 		merged = append(merged, params.PrependRules...)
 		merged = append(merged, overrideSlice...)
+		merged = append(merged, sharedSlice...)
 		merged = append(merged, rules...)
 		rules = merged
 	}
-
-	patchProxies(raw)
 
 	if len(params.DisabledGroups) > 0 {
 		disabled := make(map[string]bool, len(params.DisabledGroups)*2)
@@ -305,20 +315,7 @@ func loopbackAddress(address string) string {
 	return net.JoinHostPort("127.0.0.1", port)
 }
 
-func patchDns(raw *config.RawConfig, params *PatchParams, defaults *config.RawConfig) error {
-	if !raw.DNS.Enable {
-		dns := defaults.DNS
-		if hasPatchValue(params.Dns) {
-			if err := yaml.Unmarshal(params.Dns, &dns); err != nil {
-				return fmt.Errorf("patch dns: %w", err)
-			}
-		}
-		ns := make([]string, len(dns.NameServer)+1)
-		copy(ns, dns.NameServer)
-		ns[len(dns.NameServer)] = "system://"
-		dns.NameServer = ns
-		raw.DNS = dns
-	}
+func patchDns(raw *config.RawConfig) {
 	raw.DNS.FallbackFilter.GeoSite = []string{}
 	raw.DNS.FallbackFilter.Domain = []string{}
 	if !raw.IPv6 {
@@ -326,7 +323,7 @@ func patchDns(raw *config.RawConfig, params *PatchParams, defaults *config.RawCo
 	}
 
 	if !patchForAndroid {
-		return nil
+		return
 	}
 	listen := raw.DNS.Listen
 	if strings.HasSuffix(listen, ":53") {
@@ -343,7 +340,6 @@ func patchDns(raw *config.RawConfig, params *PatchParams, defaults *config.RawCo
 	if noProviders && hasLocalNameserver && strings.HasPrefix(listen, "0.0.0.0") {
 		raw.DNS.Listen = "127.0.0.1" + strings.TrimPrefix(listen, "0.0.0.0")
 	}
-	return nil
 }
 
 func groupName(group map[string]any) (string, bool) {
@@ -420,6 +416,14 @@ func hasGroupSource(group map[string]any) bool {
 	return false
 }
 
+func includesAllProxies(group map[string]any) bool {
+	if value, ok := group["include-all"].(bool); ok && value {
+		return true
+	}
+	value, ok := group["include-all-proxies"].(bool)
+	return ok && value
+}
+
 func combineExcludeFilter(target map[string]any, filter string) {
 	if existing, ok := target["exclude-filter"].(string); ok && existing != "" {
 		target["exclude-filter"] = existing + "|" + filter
@@ -486,7 +490,7 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 	if raw.ProxyGroup != nil && (filter != "" || params.HealthCheckTimeout != defaultHealthCheckTimeout) {
 		var filterRegex *regexp2.Regexp
 		if filter != "" {
-			filterRegex, _ = regexp2.Compile(filter, regexp2.ECMAScript)
+			filterRegex, _ = utils.CompileRegexp(filter, regexp2.ECMAScript)
 		}
 		var protected map[string]bool
 		var excluded map[string]bool
@@ -516,7 +520,7 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 			}
 			use, hasUse := group["use"]
 			hasUse = hasUse && use != nil
-			if filterRegex != nil && hasUse {
+			if filterRegex != nil && (hasUse || includesAllProxies(group)) {
 				combineExcludeFilter(group, filter)
 			}
 			if proxies, ok := group["proxies"].([]any); ok && filterRegex != nil {
@@ -541,7 +545,7 @@ func patchProxyGroups(raw *config.RawConfig, params *PatchParams) {
 					}
 				}
 				useList, useIsList := use.([]any)
-				if len(filtered) == 0 && (!hasUse || (useIsList && len(useList) == 0)) {
+				if len(filtered) == 0 && (!hasUse || (useIsList && len(useList) == 0)) && !hasGroupSource(group) {
 					if filtered == nil || cap(filtered) == 0 {
 						filtered = []any{"DIRECT"}
 					} else {
@@ -695,6 +699,49 @@ func selectGlobalTarget(groups []map[string]any, rules []string) string {
 		}
 	}
 	return ""
+}
+
+func resolveSharedRules(raw *config.RawConfig, shared *PatchSharedRules) []string {
+	if shared == nil || len(shared.Rules) == 0 {
+		return nil
+	}
+	targets := make(map[string]bool, len(protectedProxyNames)+len(raw.Proxy)+len(raw.ProxyGroup))
+	for _, name := range protectedProxyNames {
+		targets[name] = true
+	}
+	for _, proxy := range raw.Proxy {
+		if name, ok := proxy["name"].(string); ok {
+			targets[name] = true
+		}
+	}
+	for _, group := range raw.ProxyGroup {
+		if name, ok := group["name"].(string); ok && name != "GLOBAL" {
+			targets[name] = true
+		}
+	}
+	rules := make([]string, 0, len(shared.Rules))
+	for _, value := range shared.Rules {
+		rule := parseRule(value)
+		switch rule.action {
+		case "SUB-RULE":
+			if _, ok := raw.SubRules[rule.subRule]; !ok {
+				continue
+			}
+		case "RULE-SET":
+			if _, ok := raw.RuleProvider[rule.content]; !ok {
+				continue
+			}
+		}
+		if rule.hasTarget && !targets[rule.target] {
+			if !targets[shared.Fallback] {
+				continue
+			}
+			rule.target = shared.Fallback
+			value = rule.String()
+		}
+		rules = append(rules, value)
+	}
+	return rules
 }
 
 type parsedRule struct {

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gobox/common/common.dart';
@@ -6,6 +6,7 @@ import 'package:gobox/common/network_matcher.dart';
 import 'package:gobox/plugins/service.dart';
 import 'package:gobox/providers/providers.dart';
 import 'package:gobox/state.dart';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:synchronized/synchronized.dart';

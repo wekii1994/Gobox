@@ -240,7 +240,6 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 val data = call.argument<String>("data")
                 result.success(handleSmartResume(Gson().fromJson(data, VpnOptions::class.java)))
             }
-
             "updateNotificationTitle" -> {
                 handleUpdateNotificationTitle(
                     call.argument<String>("profileName") ?: ""
@@ -501,7 +500,9 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                     cm.registerBestMatchingNetworkCallback(request, defaultNetworkCallback, handler)
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ->
                     cm.requestNetwork(request, defaultNetworkCallback, handler)
-                else -> cm.registerDefaultNetworkCallback(defaultNetworkCallback, handler)
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ->
+                    cm.registerDefaultNetworkCallback(defaultNetworkCallback, handler)
+                else -> cm.registerDefaultNetworkCallback(defaultNetworkCallback)
             }
         }.onFailure {
             android.util.Log.e("VpnPlugin", "Failed to register default network callback: ${it.message}")
@@ -611,7 +612,6 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             updateNotificationTitle(nodeName)
         }
     }
-
     fun handleUpdateNotificationSpeed(profileName: String, speedInfo: String) {
         if (profileName != GlobalState.currentProfileName ||
             !GlobalState.isSpeedNotificationEnabled
@@ -710,7 +710,18 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     private fun handleStartService() {
         if (GlobalState.isCurrentlyStopping()) {
-            android.util.Log.w("VpnPlugin", "VPN is in stopping state, ignore start request")
+            android.util.Log.w("VpnPlugin", "VPN is in stopping state, delay start request")
+            scope.launch {
+                repeat(10) {
+                    delay(100)
+                    if (!GlobalState.isCurrentlyStopping()) {
+                        handleStartService()
+                        return@launch
+                    }
+                }
+                GlobalState.updateRunState(RunState.STOP)
+                ServicePlugin.notifyVpnStartFailed()
+            }
             return
         }
         if (goBoxService == null) {

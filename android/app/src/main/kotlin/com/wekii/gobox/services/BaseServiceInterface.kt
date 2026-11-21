@@ -10,6 +10,8 @@ import android.app.Service
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.wekii.gobox.GlobalState
 import com.wekii.gobox.R
 import com.wekii.gobox.models.VpnOptions
@@ -21,7 +23,6 @@ import kotlinx.coroutines.withContext
 import android.content.ComponentName
 import android.content.Intent
 
-import android.graphics.BitmapFactory
 
 interface BaseServiceInterface {
     suspend fun start(options: VpnOptions): Int
@@ -38,18 +39,11 @@ suspend fun Service.createGoboxNotificationBuilder(
     isHighPriority: Boolean = GlobalState.isNotificationHighPriority
 ): NotificationCompat.Builder =
     withContext(Dispatchers.IO) {
-        val defaultComponent = ComponentName(packageName, "com.wekii.gobox.MainActivity")
-        val lightComponent = ComponentName(packageName, "com.wekii.gobox.MainActivityLight")
-        val darkComponent = ComponentName(packageName, "com.wekii.gobox.MainActivityDark")
-
-        val targetComponent = NotificationComponentCache.get(packageManager, defaultComponent, lightComponent, darkComponent)
-
-        android.util.Log.d("Notification", "Using ${targetComponent.className}")
-
-        val intent = Intent().apply {
-            component = targetComponent
+        val intent = (packageManager.getLaunchIntentForPackage(packageName) ?: Intent().apply {
+            component = ComponentName(packageName, "com.wekii.gobox.MainActivity")
             action = Intent.ACTION_MAIN
             addCategory(Intent.CATEGORY_LAUNCHER)
+        }).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
@@ -62,16 +56,13 @@ suspend fun Service.createGoboxNotificationBuilder(
             PendingIntent.getActivity(this@createGoboxNotificationBuilder, 0, intent, flags)
         }
 
-        val isDark = targetComponent == darkComponent
-        val largeIconRes = if (isDark) {
-            R.mipmap.ic_launcher
+        val largeIconBitmap = if (isSuspended) {
+            runCatching {
+                ContextCompat.getDrawable(this@createGoboxNotificationBuilder, R.mipmap.ic_launcher)?.toBitmap()
+            }.getOrNull()
         } else {
-            R.mipmap.ic_launcher_light
+            null
         }
-
-        val largeIconBitmap = runCatching {
-            BitmapFactory.decodeResource(resources, largeIconRes)
-        }.getOrNull()
 
         val channelId = when {
             isSuspended -> GlobalState.NOTIFICATION_CHANNEL_SUSPENDED
@@ -143,7 +134,7 @@ fun Service.startForeground(notification: Notification, useSpecialType: Boolean 
     }
 
     val primaryResult = runCatching {
-        if (type != 0) {
+        if (Build.VERSION.SDK_INT >= 34 && type != 0) {
             startForeground(GlobalState.NOTIFICATION_ID, notification, type)
         } else {
             startForeground(GlobalState.NOTIFICATION_ID, notification)

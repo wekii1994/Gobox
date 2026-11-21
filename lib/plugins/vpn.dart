@@ -1,8 +1,10 @@
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:gobox/clash/clash.dart';
 import 'package:gobox/models/models.dart';
 import 'package:gobox/state.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -25,7 +27,7 @@ class Vpn {
           await clashLibHandler?.freeOSMemory();
           break;
         case 'closeConnections':
-          clashCore.closeConnections();
+          unawaited(clashCore.closeConnections());
           break;
         case 'status':
           return clashLibHandler?.getRunTime() != null;

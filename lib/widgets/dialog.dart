@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 
 import 'package:gobox/common/common.dart';
 import 'package:gobox/providers/app.dart';
@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:gobox/state.dart';
+
 import 'sheet.dart';
 import 'text.dart';
 
