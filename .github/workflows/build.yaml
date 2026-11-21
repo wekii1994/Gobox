@@ -41,7 +41,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
           cache: 'gradle'
 
       - name: Setup Keystore (Android)
@@ -164,8 +164,8 @@ jobs:
         with:
           channel: 'stable'
           cache: true
-          cache-key: flutter-android-arm64-${{ hashFiles('**/pubspec.lock') }}
-          flutter-version: '3.47.7'
+          cache-key: flutter-3.50.1-android-arm64-${{ hashFiles('**/pubspec.lock') }}
+          flutter-version: '3.50.1'
 
       - name: Clear Pub Cache Credentials
         shell: bash
