@@ -3241,7 +3241,6 @@ class AppController {
         await profile.saveFile(file.content);
         break;
       }
-      }
     }
   }
 

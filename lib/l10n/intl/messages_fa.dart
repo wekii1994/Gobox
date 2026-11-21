@@ -195,8 +195,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m76(count) => "${Intl.plural(count, other: '# سال')}";
 
-  static String _goboxManagedBundled(version) => "داخلی \";
-  static String _goboxManagedSynced(version) => "بالادستی \";
+  static String _goboxManagedBundled(version) => "داخلی $version";
+  static String _goboxManagedSynced(version) => "بالادستی $version";
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "pageScale": MessageLookupByLibrary.simpleMessage(""),
