@@ -1,4 +1,6 @@
-﻿import 'package:gobox/common/proxy.dart';
+﻿import 'dart:async';
+
+import 'package:gobox/common/proxy.dart';
 import 'package:gobox/models/models.dart';
 import 'package:gobox/providers/state.dart';
 

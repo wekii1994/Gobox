@@ -111,8 +111,6 @@ class _ThemeModeItem extends ConsumerWidget {
         },
       ),
     );
-      ),
-    );
   }
 }
 

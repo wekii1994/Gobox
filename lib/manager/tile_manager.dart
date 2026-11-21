@@ -1,4 +1,6 @@
-﻿import 'package:gobox/plugins/tile.dart';
+﻿import 'dart:async';
+
+import 'package:gobox/plugins/tile.dart';
 import 'package:gobox/state.dart';
 
 import 'package:material_ui/material_ui.dart';

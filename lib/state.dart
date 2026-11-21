@@ -808,11 +808,11 @@ class GlobalState {
     final relayPath = await appPath.relayPath;
     final separator = Platform.pathSeparator;
     final cacheFile = File(
-      '$relayPath$separatorcache-${profile.id}-managed.json',
+      '$relayPath${separator}cache-${profile.id}-managed.json',
     );
     if (!await cacheFile.exists()) return '';
     final file = File(
-      '$relayPath$separatorscripted-${DateTime.now().microsecondsSinceEpoch}.json',
+      '$relayPath${separator}scripted-${DateTime.now().microsecondsSinceEpoch}.json',
     );
     await cacheFile.copy(file.path);
     return file.path;

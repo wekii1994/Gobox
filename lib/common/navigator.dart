@@ -2,6 +2,8 @@
 import 'package:gobox/models/app.dart';
 import 'package:gobox/state.dart';
 
+import 'frame_probe.dart';
+
 import 'dart:async';
 import 'dart:ui' show FlutterView;
 
