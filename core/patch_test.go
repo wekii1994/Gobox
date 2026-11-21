@@ -362,7 +362,6 @@ func TestApplyPatchDnsIPv6(t *testing.T) {
 func TestApplyPatchDnsFallbackFilter(t *testing.T) {
 	rawCfg := parsePatchProfile(t, "dns: {enable: true, nameserver: ['10.0.0.1'], fallback: ['1.1.1.1'], fallback-filter: {geoip: true, ipcidr: ['240.0.0.0/4'], domain: ['+.google.com'], geosite: ['gfw']}}\n")
 	if _, err := applyPatch(rawCfg, patchParams(t, `{}`)); err != nil {
->>>>>>> 1f5318f7
 		t.Fatal(err)
 	}
 	filter := rawCfg.DNS.FallbackFilter

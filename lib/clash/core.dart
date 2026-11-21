@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -291,7 +291,6 @@ class ClashCore {
       for (final MapEntry(:key, :value) in decoded.entries)
         key: (value as List).cast<String>(),
     };
->>>>>>> 1f5318f7
   }
 
   FutureOr<String> decryptAgeConfig(String data, String ageSecretKey) {

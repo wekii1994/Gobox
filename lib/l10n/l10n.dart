@@ -11319,7 +11319,6 @@ class AppLocalizations {
       args: [],
     );
   }
->>>>>>> 1f5318f7
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

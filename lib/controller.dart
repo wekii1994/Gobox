@@ -939,7 +939,6 @@ class AppController {
     return error.isEmpty && delay is num && delay > 0 ? delay.toInt() : null;
   }
 
->>>>>>> 1f5318f7
   void generateAllBundles() {
     scheduleBundles([
       for (final profile in _ref.read(profilesProvider))
@@ -2317,7 +2316,6 @@ class AppController {
       final profilesSlide = _ref.read(profilesSlideProvider.notifier);
       if (current == PageLabel.profiles) profilesSlide.leave();
       if (pageLabel == PageLabel.profiles) profilesSlide.enter();
->>>>>>> 1f5318f7
     }
     _ref.read(currentPageLabelProvider.notifier).value = pageLabel;
   }
