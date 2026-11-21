@@ -191,7 +191,7 @@ void main() {
       0,
       routed.content.length - plain.content.length,
     );
-    expect(prelude.startsWith('const GoboxRoutes = '), isTrue);
+    expect(prelude.startsWith('const bettboxRoutes = '), isTrue);
     final routes =
         jsonDecode(prelude.substring(22, prelude.length - 2)) as List;
     expect(routes.length, 2);
@@ -276,14 +276,14 @@ void main() {
   test('group order is injected only when saved', () async {
     const props = ManagedProps();
     final plain = await ManagedScript.script(props);
-    expect(plain.content.contains('const GoboxOrder'), isFalse);
+    expect(plain.content.contains('const bettboxOrder'), isFalse);
     final ordered = await ManagedScript.script(
       props.copyWith(order: const ['AdBlock', 'FCM']),
     );
     expect(ordered.content.endsWith(plain.content), isTrue);
     expect(ordered.digest, isNot(plain.digest));
     expect(
-      ordered.content.startsWith('const GoboxOrder = ["AdBlock","FCM"];\n'),
+      ordered.content.startsWith('const bettboxOrder = ["AdBlock","FCM"];\n'),
       isTrue,
     );
   });
@@ -319,14 +319,14 @@ void main() {
 
       const props = ManagedProps();
       final plain = await ManagedScript.script(props);
-      expect(plain.content.contains('const GoboxRegions'), isFalse);
-      expect(plain.content.contains('const GoboxCustomRegions'), isFalse);
+      expect(plain.content.contains('const bettboxRegions'), isFalse);
+      expect(plain.content.contains('const bettboxCustomRegions'), isFalse);
       final chosen = await ManagedScript.script(
         props.copyWith(regions: const ['香港', '韩国']),
       );
       expect(chosen.content.endsWith(plain.content), isTrue);
       expect(
-        chosen.content.startsWith('const GoboxRegions = ["香港","韩国"];\n'),
+        chosen.content.startsWith('const bettboxRegions = ["香港","韩国"];\n'),
         isTrue,
       );
       final withCustom = await ManagedScript.script(
@@ -334,7 +334,7 @@ void main() {
           customRegions: const [CustomRegion(name: '德国', regex: '德国|DE')],
         ),
       );
-      expect(withCustom.content.contains('const GoboxCustomRegions'), isTrue);
+      expect(withCustom.content.contains('const bettboxCustomRegions'), isTrue);
     },
   );
 
@@ -410,7 +410,7 @@ void main() {
     );
     expect(
       rawScript.content,
-      'const GoboxOrder = ["AdBlock","FCM"];\nfunction main(config) { return config; }',
+      'const bettboxOrder = ["AdBlock","FCM"];\nfunction main(config) { return config; }',
     );
   });
 
