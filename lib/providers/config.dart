@@ -362,23 +362,6 @@ class ManagedSetting extends _$ManagedSetting with AutoDisposeNotifierMixin {
 }
 
 @riverpod
-class ManagedSetting extends _$ManagedSetting with AutoDisposeNotifierMixin {
-  @override
-  ManagedProps build() {
-    return globalState.config.managedProps;
-  }
-
-  @override
-  onUpdate(value) {
-    globalState.config = globalState.config.copyWith(managedProps: value);
-  }
-
-  void updateState(ManagedProps Function(ManagedProps state) builder) {
-    state = builder(state);
-  }
-}
-
-@riverpod
 class PatchClashConfig extends _$PatchClashConfig
     with AutoDisposeNotifierMixin {
   @override

@@ -1,7 +1,8 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:gobox/common/common.dart';
+import 'package:gobox/controller.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/models.dart';
 import 'package:gobox/pages/editor.dart';

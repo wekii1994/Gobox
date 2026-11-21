@@ -1,7 +1,8 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:gobox/clash/clash.dart';
 import 'package:gobox/common/common.dart';
+import 'package:gobox/controller.dart';
 import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/models.dart';
 import 'package:gobox/pages/editor.dart';
@@ -302,7 +303,7 @@ class EditNodeViewState extends ConsumerState<EditNodeView> {
         : const <String>{};
     final services = minimal
         ? const <String>{}
-        : {
+        : <String>{
             for (final name in policyGroupOptions)
               if (options[name] == true &&
                   !props.removed.contains(name) &&
