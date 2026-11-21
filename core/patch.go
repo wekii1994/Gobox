@@ -53,7 +53,6 @@ type PatchParams struct {
 	SelectGlobal       bool              `json:"select-global"`
 	Nodes              []PatchNode       `json:"nodes"`
 }
-}
 
 const defaultHealthCheckTimeout = 5000
 
