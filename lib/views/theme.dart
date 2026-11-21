@@ -1,10 +1,9 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:gobox/common/common.dart';
 import 'package:gobox/enum/enum.dart';
-import 'package:gobox/plugins/app.dart';
 import 'package:gobox/providers/config.dart';
 import 'package:gobox/state.dart';
 import 'package:gobox/widgets/widgets.dart';

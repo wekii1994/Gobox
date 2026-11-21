@@ -42,7 +42,9 @@ Future<void> _syncOutboundTitleFromService(
     if (await configFile.exists()) {
       try {
         final content = await configFile.readAsString();
-        config = Config.compatibleFromJson(json.decode(content));
+        config = Config.compatibleFromJson(
+          json.decode(content) as Map<String, Object?>,
+        );
         globalState.config = config;
       } catch (_) {}
     }
