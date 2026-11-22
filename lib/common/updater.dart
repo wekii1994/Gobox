@@ -13,7 +13,7 @@ import 'package:path/path.dart' hide windows;
 class AppUpdater {
   static const _assetSuffix = String.fromEnvironment('APP_ASSET_SUFFIX');
   static const _checksumsName = 'sha256sums.txt';
-  static const _linuxInstallDir = '/usr/share/Bettbox';
+  static const _linuxInstallDir = '/usr/share/${AppIdentity.productName}';
   static const _macInstallScript = '''
 while kill -0 "\$1" 2>/dev/null; do sleep 0.2; done
 rm -rf "\$3.old"
@@ -154,10 +154,18 @@ open "\$3"
   }
 
   Future<String> _fetchChecksum(String tagName, String name) async {
-    final response = await _dio.get<String>(
-      _url(tagName, _checksumsName),
-      options: Options(responseType: ResponseType.plain),
-    );
+    Response<String> response;
+    try {
+      response = await _dio.get<String>(
+        _url(tagName, _checksumsName),
+        options: Options(responseType: ResponseType.plain),
+      );
+    } catch (_) {
+      response = await _dio.get<String>(
+        _url(tagName, 'sha256sum.txt'),
+        options: Options(responseType: ResponseType.plain),
+      );
+    }
     final checksum = parseChecksum(response.data ?? '', name);
     if (checksum == null) throw 'Update checksum not found: $name';
     return checksum;
@@ -167,10 +175,11 @@ open "\$3"
     for (final line in content.split('\n')) {
       final parts = line.trim().split(RegExp(r'\s+'));
       if (parts.length < 2) continue;
-      final file = parts.last.startsWith('*')
+      var file = parts.last.startsWith('*')
           ? parts.last.substring(1)
           : parts.last;
-      if (file == name) return parts.first.toLowerCase();
+      file = file.replaceFirst(RegExp(r'^\./'), '');
+      if (file == name || basename(file) == name) return parts.first.toLowerCase();
     }
     return null;
   }
@@ -211,7 +220,7 @@ open "\$3"
         await _isWritable(dirname(bundle));
     if (!replaceable) return _open('open', file.path);
 
-    final mount = await Directory.systemTemp.createTemp('bettbox_update');
+    final mount = await Directory.systemTemp.createTemp('gobox_update');
     final attach = await Process.run('hdiutil', [
       'attach',
       file.path,

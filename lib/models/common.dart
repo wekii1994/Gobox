@@ -1334,7 +1334,8 @@ extension ScriptExt on Script {
     return copyWith(
       content: '',
       digest: value.toMd5(),
-      compatible: head.contains('Compatible_With_Bettbox'),
+      compatible: head.contains('Compatible_With_Bettbox') ||
+          head.contains('Compatible_With_Gobox'),
       volatile: volatileScriptPattern.hasMatch(value),
     );
   }

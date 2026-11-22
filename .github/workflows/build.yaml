@@ -201,8 +201,9 @@ jobs:
           # Flatten any nested APKs into dist/
           find dist -mindepth 2 -name "*.apk" -exec mv -f {} dist/ \; 2>/dev/null || true
           cd dist
-          find . -name "*.apk" -type f -exec sha256sum {} + > sha256sum.txt
-          cat sha256sum.txt
+          sha256sum *.apk > sha256sums.txt
+          cp sha256sums.txt sha256sum.txt
+          cat sha256sums.txt
 
       - name: Upload Artifacts (Android arm64-v8a)
         uses: actions/upload-artifact@v4

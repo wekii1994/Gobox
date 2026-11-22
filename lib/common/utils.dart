@@ -772,25 +772,46 @@ class Utils {
   }
 
   int compareVersions(String version1, String version2) {
-    List<String> v1 = version1.split('+')[0].split('.');
-    List<String> v2 = version2.split('+')[0].split('.');
-    int major1 = int.parse(v1[0]);
-    int major2 = int.parse(v2[0]);
+    final clean1 = version1.startsWith('v') ? version1.substring(1) : version1;
+    final clean2 = version2.startsWith('v') ? version2.substring(1) : version2;
+
+    final noBuild1 = clean1.split('+')[0];
+    final noBuild2 = clean2.split('+')[0];
+
+    final v1 = noBuild1.split('.');
+    final v2 = noBuild2.split('.');
+
+    final major1 = v1.isNotEmpty ? (int.tryParse(v1[0]) ?? 0) : 0;
+    final major2 = v2.isNotEmpty ? (int.tryParse(v2[0]) ?? 0) : 0;
     if (major1 != major2) {
       return major1.compareTo(major2);
     }
-    int minor1 = v1.length > 1 ? int.parse(v1[1]) : 0;
-    int minor2 = v2.length > 1 ? int.parse(v2[1]) : 0;
+
+    final minor1 = v1.length > 1 ? (int.tryParse(v1[1]) ?? 0) : 0;
+    final minor2 = v2.length > 1 ? (int.tryParse(v2[1]) ?? 0) : 0;
     if (minor1 != minor2) {
       return minor1.compareTo(minor2);
     }
-    int patch1 = v1.length > 2 ? int.parse(v1[2]) : 0;
-    int patch2 = v2.length > 2 ? int.parse(v2[2]) : 0;
+
+    final p1 = v1.length > 2 ? v1[2].split('-') : const <String>[];
+    final p2 = v2.length > 2 ? v2[2].split('-') : const <String>[];
+
+    final patch1 = p1.isNotEmpty ? (int.tryParse(p1[0]) ?? 0) : 0;
+    final patch2 = p2.isNotEmpty ? (int.tryParse(p2[0]) ?? 0) : 0;
     if (patch1 != patch2) {
       return patch1.compareTo(patch2);
     }
-    int build1 = version1.contains('+') ? int.parse(version1.split('+')[1]) : 0;
-    int build2 = version2.contains('+') ? int.parse(version2.split('+')[1]) : 0;
+
+    final rev1 = p1.length > 1 ? (int.tryParse(p1[1]) ?? 0) : 0;
+    final rev2 = p2.length > 1 ? (int.tryParse(p2[1]) ?? 0) : 0;
+    if (rev1 != rev2) {
+      return rev1.compareTo(rev2);
+    }
+
+    final build1 =
+        clean1.contains('+') ? (int.tryParse(clean1.split('+')[1]) ?? 0) : 0;
+    final build2 =
+        clean2.contains('+') ? (int.tryParse(clean2.split('+')[1]) ?? 0) : 0;
     return build1.compareTo(build2);
   }
 
