@@ -204,21 +204,35 @@ class MessageLookup extends MessageLookupByLibrary {
   static String _goboxManagedSynced(version) => "Upstream $version";
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "pageScale": MessageLookupByLibrary.simpleMessage(""),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(""),
-    "darkIcon": MessageLookupByLibrary.simpleMessage(""),
-    "darkIconDesc": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRate": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(""),
-    "failoverStats": MessageLookupByLibrary.simpleMessage(""),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(""),
-    "managedVersion": MessageLookupByLibrary.simpleMessage(""),
+    "pageScale": MessageLookupByLibrary.simpleMessage("Page scaling"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "Scale overall interface elements (60% - 120%)",
+    ),
+    "darkIcon": MessageLookupByLibrary.simpleMessage("Dark Icon"),
+    "darkIconDesc": MessageLookupByLibrary.simpleMessage(
+      "Manually switch dark app icon",
+    ),
+    "highRefreshRate": MessageLookupByLibrary.simpleMessage(
+      "High Refresh Rate",
+    ),
+    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(
+      "Enable max refresh rate",
+    ),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("Failover Statistics"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
+      "Tracks automatic failovers from passive failure detection",
+    ),
+    "managedVersion": MessageLookupByLibrary.simpleMessage("Version"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,
-    "syncFromUpstream": MessageLookupByLibrary.simpleMessage(""),
-    "managedSyncTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedUpToDate": MessageLookupByLibrary.simpleMessage(""),
+    "syncFromUpstream": MessageLookupByLibrary.simpleMessage("Sync from upstream"),
+    "managedSyncTip": MessageLookupByLibrary.simpleMessage(
+      "Download the latest script from upstream and regenerate all merged subscriptions?",
+    ),
+    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(
+      "Restore the built-in script and regenerate all merged subscriptions?",
+    ),
+    "managedUpToDate": MessageLookupByLibrary.simpleMessage("Already up to date"),
 
     "about": MessageLookupByLibrary.simpleMessage("About"),
     "accessControl": MessageLookupByLibrary.simpleMessage("Access Control"),

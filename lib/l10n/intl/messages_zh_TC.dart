@@ -186,21 +186,29 @@ class MessageLookup extends MessageLookupByLibrary {
   static String _goboxManagedSynced(version) => "上游 $version";
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "pageScale": MessageLookupByLibrary.simpleMessage(""),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(""),
-    "darkIcon": MessageLookupByLibrary.simpleMessage(""),
-    "darkIconDesc": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRate": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(""),
-    "failoverStats": MessageLookupByLibrary.simpleMessage(""),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(""),
-    "managedVersion": MessageLookupByLibrary.simpleMessage(""),
+    "pageScale": MessageLookupByLibrary.simpleMessage("頁面縮放"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "整體介面元素縮放（60% - 120%）",
+    ),
+    "darkIcon": MessageLookupByLibrary.simpleMessage("深色圖示"),
+    "darkIconDesc": MessageLookupByLibrary.simpleMessage("手動切換深色系桌面應用程式圖示"),
+    "highRefreshRate": MessageLookupByLibrary.simpleMessage("高重新整理率"),
+    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage("啟用裝置最高重新整理率支援"),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("故障轉移統計"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
+      "記錄策略組被動故障感知與秒級無感故障轉移數據",
+    ),
+    "managedVersion": MessageLookupByLibrary.simpleMessage("版本資訊"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,
-    "syncFromUpstream": MessageLookupByLibrary.simpleMessage(""),
-    "managedSyncTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedUpToDate": MessageLookupByLibrary.simpleMessage(""),
+    "syncFromUpstream": MessageLookupByLibrary.simpleMessage("從上游同步"),
+    "managedSyncTip": MessageLookupByLibrary.simpleMessage(
+      "將從上游下載最新腳本，並重新生成所有合併訂閱",
+    ),
+    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(
+      "恢復內建版本，並重新生成所有合併訂閱",
+    ),
+    "managedUpToDate": MessageLookupByLibrary.simpleMessage("已是最新版本"),
 
     "about": MessageLookupByLibrary.simpleMessage("關於"),
     "accessControl": MessageLookupByLibrary.simpleMessage("分應用代理"),

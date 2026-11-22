@@ -191,21 +191,31 @@ class MessageLookup extends MessageLookupByLibrary {
   static String _goboxManagedSynced(version) => "アップストリーム $version";
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "pageScale": MessageLookupByLibrary.simpleMessage(""),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(""),
-    "darkIcon": MessageLookupByLibrary.simpleMessage(""),
-    "darkIconDesc": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRate": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(""),
-    "failoverStats": MessageLookupByLibrary.simpleMessage(""),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(""),
-    "managedVersion": MessageLookupByLibrary.simpleMessage(""),
+    "pageScale": MessageLookupByLibrary.simpleMessage("ページ倍率"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "インターフェース全体の表示倍率を調整（60% - 120%）",
+    ),
+    "darkIcon": MessageLookupByLibrary.simpleMessage("ダークアイコン"),
+    "darkIconDesc": MessageLookupByLibrary.simpleMessage("アプリアイコンをダーク系に切り替え"),
+    "highRefreshRate": MessageLookupByLibrary.simpleMessage("高リフレッシュレート"),
+    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(
+      "最高リフレッシュレートを有効化",
+    ),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("フェイルオーバー統計"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
+      "パッシブ障害検知とフェイルオーバーの統計",
+    ),
+    "managedVersion": MessageLookupByLibrary.simpleMessage("バージョン情報"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,
-    "syncFromUpstream": MessageLookupByLibrary.simpleMessage(""),
-    "managedSyncTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedUpToDate": MessageLookupByLibrary.simpleMessage(""),
+    "syncFromUpstream": MessageLookupByLibrary.simpleMessage("アップストリームから同期"),
+    "managedSyncTip": MessageLookupByLibrary.simpleMessage(
+      "アップストリームから最新のスクリプトをダウンロードし、すべての統合サブスクリプションを再生成しますか？",
+    ),
+    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(
+      "内蔵のスクリプトに戻し、すべての統合サブスクリプションを再生成しますか？",
+    ),
+    "managedUpToDate": MessageLookupByLibrary.simpleMessage("最新バージョンです"),
 
     "about": MessageLookupByLibrary.simpleMessage("アプリについて"),
     "accessControl": MessageLookupByLibrary.simpleMessage("アクセス制御"),

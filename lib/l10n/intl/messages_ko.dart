@@ -192,21 +192,29 @@ class MessageLookup extends MessageLookupByLibrary {
   static String _goboxManagedSynced(version) => "업스트림 $version";
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "pageScale": MessageLookupByLibrary.simpleMessage(""),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(""),
-    "darkIcon": MessageLookupByLibrary.simpleMessage(""),
-    "darkIconDesc": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRate": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(""),
-    "failoverStats": MessageLookupByLibrary.simpleMessage(""),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(""),
-    "managedVersion": MessageLookupByLibrary.simpleMessage(""),
+    "pageScale": MessageLookupByLibrary.simpleMessage("페이지 배율"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "전체 인터페이스 요소 크기 조정 (60% - 120%)",
+    ),
+    "darkIcon": MessageLookupByLibrary.simpleMessage("다크 아이콘"),
+    "darkIconDesc": MessageLookupByLibrary.simpleMessage("앱 아이콘을 어두운 색계열로 전환"),
+    "highRefreshRate": MessageLookupByLibrary.simpleMessage("고주사율"),
+    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(
+      "최대 주사율 지원 활성화",
+    ),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("장애 조치 통계"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("장애 감지 및 페일오버 기록"),
+    "managedVersion": MessageLookupByLibrary.simpleMessage("버전 정보"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,
-    "syncFromUpstream": MessageLookupByLibrary.simpleMessage(""),
-    "managedSyncTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedUpToDate": MessageLookupByLibrary.simpleMessage(""),
+    "syncFromUpstream": MessageLookupByLibrary.simpleMessage("업스트림에서 동기화"),
+    "managedSyncTip": MessageLookupByLibrary.simpleMessage(
+      "업스트림에서 최신 스크립트를 내려받고 모든 병합 구독을 다시 생성할까요?",
+    ),
+    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(
+      "내장 스크립트로 복원하고 모든 병합 구독을 다시 생성할까요?",
+    ),
+    "managedUpToDate": MessageLookupByLibrary.simpleMessage("이미 최신 버전입니다"),
 
     "about": MessageLookupByLibrary.simpleMessage("정보"),
     "accessControl": MessageLookupByLibrary.simpleMessage("액세스 제어"),

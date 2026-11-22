@@ -206,21 +206,39 @@ class MessageLookup extends MessageLookupByLibrary {
   static String _goboxManagedSynced(version) => "Из источника $version";
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "pageScale": MessageLookupByLibrary.simpleMessage(""),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(""),
-    "darkIcon": MessageLookupByLibrary.simpleMessage(""),
-    "darkIconDesc": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRate": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(""),
-    "failoverStats": MessageLookupByLibrary.simpleMessage(""),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(""),
-    "managedVersion": MessageLookupByLibrary.simpleMessage(""),
+    "pageScale": MessageLookupByLibrary.simpleMessage("Масштаб страницы"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "Масштабирование всех элементов интерфейса (60% - 120%)",
+    ),
+    "darkIcon": MessageLookupByLibrary.simpleMessage("Тёмная иконка"),
+    "darkIconDesc": MessageLookupByLibrary.simpleMessage(
+      "Вручную переключить на тёмную иконку приложения",
+    ),
+    "highRefreshRate": MessageLookupByLibrary.simpleMessage(
+      "Высокая частота обновления",
+    ),
+    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(
+      "Максимальная частота обновления экрана",
+    ),
+    "failoverStats": MessageLookupByLibrary.simpleMessage(
+      "Статистика переключений",
+    ),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
+      "Отслеживание автоматических переключений узлов",
+    ),
+    "managedVersion": MessageLookupByLibrary.simpleMessage("Версия"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,
-    "syncFromUpstream": MessageLookupByLibrary.simpleMessage(""),
-    "managedSyncTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedUpToDate": MessageLookupByLibrary.simpleMessage(""),
+    "syncFromUpstream": MessageLookupByLibrary.simpleMessage(
+      "Синхронизировать с источником",
+    ),
+    "managedSyncTip": MessageLookupByLibrary.simpleMessage(
+      "Загрузить последнюю версию скрипта и пересоздать все объединённые подписки?",
+    ),
+    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(
+      "Вернуть встроенный скрипт и пересоздать все объединённые подписки?",
+    ),
+    "managedUpToDate": MessageLookupByLibrary.simpleMessage("Уже последняя версия"),
 
     "about": MessageLookupByLibrary.simpleMessage("О программе"),
     "accessControl": MessageLookupByLibrary.simpleMessage(

@@ -199,21 +199,35 @@ class MessageLookup extends MessageLookupByLibrary {
   static String _goboxManagedSynced(version) => "بالادستی $version";
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "pageScale": MessageLookupByLibrary.simpleMessage(""),
-    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(""),
-    "darkIcon": MessageLookupByLibrary.simpleMessage(""),
-    "darkIconDesc": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRate": MessageLookupByLibrary.simpleMessage(""),
-    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(""),
-    "failoverStats": MessageLookupByLibrary.simpleMessage(""),
-    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(""),
-    "managedVersion": MessageLookupByLibrary.simpleMessage(""),
+    "pageScale": MessageLookupByLibrary.simpleMessage("مقیاس صفحه"),
+    "pageScaleDesc": MessageLookupByLibrary.simpleMessage(
+      "تغییر مقیاس کلی عناصر رابط کاربری (60% - 120%)",
+    ),
+    "darkIcon": MessageLookupByLibrary.simpleMessage("آیکون تاریک"),
+    "darkIconDesc": MessageLookupByLibrary.simpleMessage(
+      "تغییر آیکون برنامه به تم تاریک",
+    ),
+    "highRefreshRate": MessageLookupByLibrary.simpleMessage("نرخ نوسازی بالا"),
+    "highRefreshRateDesc": MessageLookupByLibrary.simpleMessage(
+      "فعالسازی حداکثر نرخ نوسازی",
+    ),
+    "failoverStats": MessageLookupByLibrary.simpleMessage("آمار تغییر مسیر"),
+    "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
+      "پیگیری تغییر مسیر خودکار سرورها",
+    ),
+    "managedVersion": MessageLookupByLibrary.simpleMessage("اطلاعات نسخه"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,
-    "syncFromUpstream": MessageLookupByLibrary.simpleMessage(""),
-    "managedSyncTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(""),
-    "managedUpToDate": MessageLookupByLibrary.simpleMessage(""),
+    "syncFromUpstream": MessageLookupByLibrary.simpleMessage("همگام‌سازی از بالادست"),
+    "managedSyncTip": MessageLookupByLibrary.simpleMessage(
+      "آخرین اسکریپت از بالادست دانلود و همه اشتراک‌های ادغام‌شده دوباره ساخته شوند؟",
+    ),
+    "managedRestoreTip": MessageLookupByLibrary.simpleMessage(
+      "اسکریپت داخلی بازگردانی و همه اشتراک‌های ادغام‌شده دوباره ساخته شوند؟",
+    ),
+    "managedUpToDate": MessageLookupByLibrary.simpleMessage(
+      "در حال حاضر به‌روز است",
+    ),
 
     "about": MessageLookupByLibrary.simpleMessage("درباره"),
     "accessControl": MessageLookupByLibrary.simpleMessage("کنترل دسترسی"),

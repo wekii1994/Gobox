@@ -5135,6 +5135,21 @@ class AppLocalizations {
     );
   }
 
+  /// `Dark Icon`
+  String get darkIcon {
+    return Intl.message('Dark Icon', name: 'darkIcon', desc: '', args: []);
+  }
+
+  /// `Manually switch dark app icon`
+  String get darkIconDesc {
+    return Intl.message(
+      'Manually switch dark app icon',
+      name: 'darkIconDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Font Fix`
   String get harmonyFont {
     return Intl.message('Font Fix', name: 'harmonyFont', desc: '', args: []);
