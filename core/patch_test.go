@@ -373,40 +373,6 @@ func TestApplyPatchDnsFallbackFilter(t *testing.T) {
 	}
 }
 
-func TestApplyPatchDnsIPv6(t *testing.T) {
-	for _, item := range []struct {
-		general string
-		want    bool
-	}{
-		{`{"ipv6": false}`, false},
-		{`{"ipv6": true}`, true},
-	} {
-		rawCfg := parsePatchProfile(t, "dns: {enable: true, ipv6: true, nameserver: ['10.0.0.1']}\n")
-		params := patchParams(t, `{}`)
-		params.General = json.RawMessage(item.general)
-		if _, err := applyPatch(rawCfg, params); err != nil {
-			t.Fatal(err)
-		}
-		if rawCfg.DNS.IPv6 != item.want {
-			t.Errorf("general %s: dns.ipv6 = %t, want %t", item.general, rawCfg.DNS.IPv6, item.want)
-		}
-	}
-}
-
-func TestApplyPatchDnsFallbackFilter(t *testing.T) {
-	rawCfg := parsePatchProfile(t, "dns: {enable: true, nameserver: ['10.0.0.1'], fallback: ['1.1.1.1'], fallback-filter: {geoip: true, ipcidr: ['240.0.0.0/4'], domain: ['+.google.com'], geosite: ['gfw']}}\n")
-	if _, err := applyPatch(rawCfg, patchParams(t, `{}`)); err != nil {
-		t.Fatal(err)
-	}
-	filter := rawCfg.DNS.FallbackFilter
-	if len(filter.Domain) != 0 || len(filter.GeoSite) != 0 {
-		t.Errorf("fallback-filter domain = %v, geosite = %v, want empty", filter.Domain, filter.GeoSite)
-	}
-	if !filter.GeoIP || len(filter.IPCIDR) != 1 {
-		t.Errorf("fallback-filter geoip = %t, ipcidr = %v, want kept", filter.GeoIP, filter.IPCIDR)
-	}
-}
-
 func TestApplyPatchBettboxRuleSets(t *testing.T) {
 	rawCfg := parsePatchProfile(t, "dns: {enable: false}\nrule-providers:\n  cn: {type: http, behavior: domain, format: mrs, url: 'https://example.com/cn.mrs'}\n  private_bettbox: {type: http, behavior: domain, format: mrs, url: 'https://example.com/private.mrs'}\nrules:\n  - RULE-SET,cn,DIRECT\n  - MATCH,DIRECT\n")
 	dns, _ := json.Marshal(map[string]any{
