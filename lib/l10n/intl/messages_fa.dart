@@ -2421,6 +2421,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("آدرس تست"),
     "testing": MessageLookupByLibrary.simpleMessage("در حال بررسی"),
+    "zoom": MessageLookupByLibrary.simpleMessage("بزرگنمایی"),
     "textScale": MessageLookupByLibrary.simpleMessage("مقیاس متن"),
     "theme": MessageLookupByLibrary.simpleMessage("پوسته"),
     "themeColor": MessageLookupByLibrary.simpleMessage("رنگ پوسته"),

@@ -1999,6 +1999,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("TCPの同時並列接続を許可"),
     "testUrl": MessageLookupByLibrary.simpleMessage("テストURL"),
     "testing": MessageLookupByLibrary.simpleMessage("検出中"),
+    "zoom": MessageLookupByLibrary.simpleMessage("ズーム"),
     "textScale": MessageLookupByLibrary.simpleMessage("テキスト倍率"),
     "theme": MessageLookupByLibrary.simpleMessage("テーマ"),
     "themeColor": MessageLookupByLibrary.simpleMessage("テーマカラー"),

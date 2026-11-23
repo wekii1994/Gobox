@@ -1988,6 +1988,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("테스트 URL"),
     "testing": MessageLookupByLibrary.simpleMessage("검사 중"),
+    "zoom": MessageLookupByLibrary.simpleMessage("확대/축소"),
     "textScale": MessageLookupByLibrary.simpleMessage("텍스트 배율"),
     "theme": MessageLookupByLibrary.simpleMessage("테마"),
     "themeColor": MessageLookupByLibrary.simpleMessage("테마 색상"),

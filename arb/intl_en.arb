@@ -612,6 +612,7 @@
   "clearData": "Clear Data",
   "clearDataTipTitle": "Dangerous Operation",
   "clearDataTipDesc": "This operation will reset the application. Please make backups. Are you sure you want to continue?",
+  "zoom": "Zoom",
   "textScale": "Text Scaling",
   "trayIconInvert": "Invert Tray Icon",
   "trayIconInvertDesc": "Invert the current tray icon color",

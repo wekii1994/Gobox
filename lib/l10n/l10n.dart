@@ -5090,6 +5090,11 @@ class AppLocalizations {
     );
   }
 
+  /// `Zoom`
+  String get zoom {
+    return Intl.message('Zoom', name: 'zoom', desc: '', args: []);
+  }
+
   /// `Text Scaling`
   String get textScale {
     return Intl.message('Text Scaling', name: 'textScale', desc: '', args: []);

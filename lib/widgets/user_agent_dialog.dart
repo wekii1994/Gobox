@@ -57,6 +57,7 @@ class _UserAgentDialog extends ConsumerWidget {
     );
     final profiles = ref.watch(profilesProvider);
     final history = {
+      ?current,
       ?globalUa,
       for (final profile in profiles) ?profile.userAgent,
     };

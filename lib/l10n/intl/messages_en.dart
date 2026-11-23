@@ -2386,6 +2386,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "testUrl": MessageLookupByLibrary.simpleMessage("Test URL"),
     "testing": MessageLookupByLibrary.simpleMessage("Testing"),
+    "zoom": MessageLookupByLibrary.simpleMessage("Zoom"),
     "textScale": MessageLookupByLibrary.simpleMessage("Text Scaling"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Theme Color"),

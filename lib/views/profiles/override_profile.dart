@@ -905,7 +905,7 @@ class _AddRuleDialogState extends State<AddRuleDialog>
     final metadata = widget.metadata;
     _ruleAction = switch (metadata) {
       null when system.isAndroid => RuleAction.PROCESS_NAME,
-      Metadata(host: '') => RuleAction.IP_CIDR,
+      Metadata(host: final h) when h.trim().isEmpty => RuleAction.IP_CIDR,
       _ => RuleAction.DOMAIN_SUFFIX,
     };
     _applySeed();
@@ -981,38 +981,42 @@ class _AddRuleDialogState extends State<AddRuleDialog>
   String _seedOf(RuleAction action) {
     final metadata = widget.metadata;
     if (metadata == null) return '';
-    String cidr(String ip) =>
-        ip.isEmpty ? '' : '$ip/${ip.contains(':') ? 128 : 32}';
+    String cidr(String ip) {
+      final trimmed = ip.trim();
+      return trimmed.isEmpty
+          ? ''
+          : '$trimmed/${trimmed.contains(':') ? 128 : 32}';
+    }
     return switch (action) {
       RuleAction.DOMAIN ||
       RuleAction.DOMAIN_SUFFIX ||
       RuleAction.DOMAIN_KEYWORD ||
       RuleAction.DOMAIN_WILDCARD ||
-      RuleAction.DOMAIN_REGEX => metadata.host,
+      RuleAction.DOMAIN_REGEX => metadata.host.trim(),
       RuleAction.IP_CIDR ||
       RuleAction.IP_SUFFIX => cidr(metadata.destinationIP),
       RuleAction.SRC_IP_CIDR ||
       RuleAction.SRC_IP_SUFFIX => cidr(metadata.sourceIP),
-      RuleAction.IP_ASN => metadata.destinationIPASN.split(' ').first,
-      RuleAction.SRC_IP_ASN => metadata.sourceIPASN.split(' ').first,
+      RuleAction.IP_ASN => metadata.destinationIPASN.trim().split(' ').first,
+      RuleAction.SRC_IP_ASN => metadata.sourceIPASN.trim().split(' ').first,
       RuleAction.GEOIP =>
         metadata.destinationGeoIP.firstOrNull?.toUpperCase() ?? '',
       RuleAction.SRC_GEOIP =>
         metadata.sourceGeoIP.firstOrNull?.toUpperCase() ?? '',
       RuleAction.PROCESS_NAME ||
       RuleAction.PROCESS_NAME_WILDCARD ||
-      RuleAction.PROCESS_NAME_REGEX => metadata.process,
+      RuleAction.PROCESS_NAME_REGEX => metadata.process.trim(),
       RuleAction.PROCESS_PATH ||
       RuleAction.PROCESS_PATH_WILDCARD ||
-      RuleAction.PROCESS_PATH_REGEX => metadata.processPath,
+      RuleAction.PROCESS_PATH_REGEX => metadata.processPath.trim(),
       RuleAction.UID => metadata.uid == 0 ? '' : '${metadata.uid}',
-      RuleAction.DST_PORT => metadata.destinationPort,
-      RuleAction.SRC_PORT => metadata.sourcePort,
-      RuleAction.NETWORK => metadata.network,
-      RuleAction.IN_PORT => metadata.inboundPort,
-      RuleAction.IN_TYPE => metadata.type,
-      RuleAction.IN_NAME => metadata.inboundName,
-      RuleAction.IN_USER => metadata.inboundUser,
+      RuleAction.DST_PORT => metadata.destinationPort.trim(),
+      RuleAction.SRC_PORT => metadata.sourcePort.trim(),
+      RuleAction.NETWORK => metadata.network.trim(),
+      RuleAction.IN_PORT => metadata.inboundPort.trim(),
+      RuleAction.IN_TYPE => metadata.type.trim(),
+      RuleAction.IN_NAME => metadata.inboundName.trim(),
+      RuleAction.IN_USER => metadata.inboundUser.trim(),
       _ => '',
     };
   }

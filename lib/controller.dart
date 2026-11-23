@@ -2765,6 +2765,8 @@ class AppController {
     setupClashConfigDebounce();
     if (!managed) {
       globalState.showNotifier(appLocalizations.nonManagedRuleTip);
+    } else {
+      globalState.showNotifier(appLocalizations.success);
     }
   }
 

@@ -343,7 +343,13 @@ class EditProfileViewState extends State<EditProfileView> {
   Future<void> _pickUserAgent() async {
     final result = await pickUserAgent(current: userAgent);
     if (result == null) return;
-    userAgent = result.value;
+    setState(() {
+      userAgent = result.value;
+    });
+    final displayUa = (userAgent?.trim().isNotEmpty == true)
+        ? userAgent!
+        : appLocalizations.defaultText;
+    globalState.showNotifier('${appLocalizations.useCustomUa}: $displayUa');
   }
 
   List<PopupMenuItemData> get _menuItems {
@@ -355,14 +361,28 @@ class EditProfileViewState extends State<EditProfileView> {
               ? Icons.check_circle_rounded
               : Icons.circle_outlined,
           label: appLocalizations.skipCertVerify,
-          onPressed: () => skipCertVerify = !skipCertVerify,
+          onPressed: () {
+            setState(() {
+              skipCertVerify = !skipCertVerify;
+            });
+            globalState.showNotifier(
+              '${appLocalizations.skipCertVerify}: ${skipCertVerify ? appLocalizations.enabled : appLocalizations.disabled}',
+            );
+          },
         ),
         PopupMenuItemData(
           icon: directUpdate
               ? Icons.check_circle_rounded
               : Icons.circle_outlined,
           label: appLocalizations.directUpdate,
-          onPressed: () => directUpdate = !directUpdate,
+          onPressed: () {
+            setState(() {
+              directUpdate = !directUpdate;
+            });
+            globalState.showNotifier(
+              '${appLocalizations.directUpdate}: ${directUpdate ? appLocalizations.enabled : appLocalizations.disabled}',
+            );
+          },
         ),
       ],
       PopupMenuItemData(
@@ -421,6 +441,46 @@ class EditProfileViewState extends State<EditProfileView> {
             },
           ),
         ),
+        if (skipCertVerify ||
+            directUpdate ||
+            (userAgent?.trim().isNotEmpty == true))
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (skipCertVerify)
+                  CommonChip(
+                    avatar: const AppIcon(Icons.lock_open, size: 16),
+                    label: appLocalizations.skipCertVerify,
+                    onPressed: () {
+                      setState(() => skipCertVerify = false);
+                      globalState.showNotifier(
+                        '${appLocalizations.skipCertVerify}: ${appLocalizations.disabled}',
+                      );
+                    },
+                  ),
+                if (directUpdate)
+                  CommonChip(
+                    avatar: const AppIcon(Icons.sync_alt, size: 16),
+                    label: appLocalizations.directUpdate,
+                    onPressed: () {
+                      setState(() => directUpdate = false);
+                      globalState.showNotifier(
+                        '${appLocalizations.directUpdate}: ${appLocalizations.disabled}',
+                      );
+                    },
+                  ),
+                if (userAgent?.trim().isNotEmpty == true)
+                  CommonChip(
+                    avatar: const AppIcon(Icons.computer_outlined, size: 16),
+                    label: 'UA: $userAgent',
+                    onPressed: _pickUserAgent,
+                  ),
+              ],
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextFormField(
