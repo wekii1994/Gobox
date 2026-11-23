@@ -56,9 +56,7 @@ class _ClashContainerState extends ConsumerState<ClashManager>
         unawaited(
           globalState.appController
               .handleChangeProfile(hardRestart: fullRestart)
-              .catchError((Object error, StackTrace stackTrace) {
-                commonPrint.error('Profile change failed: $error');
-              }),
+              .catchError((Object _) {}),
         );
       }
     });

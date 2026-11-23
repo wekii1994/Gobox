@@ -19,6 +19,7 @@ import com.wekii.gobox.extensions.getIpv6RouteAddress
 import com.wekii.gobox.extensions.toCIDR
 import com.wekii.gobox.models.AccessControlMode
 import com.wekii.gobox.models.VpnOptions
+import com.wekii.gobox.plugins.ServicePlugin
 import com.wekii.gobox.plugins.VpnPlugin
 import com.wekii.gobox.R
 import kotlinx.coroutines.CoroutineScope
@@ -143,7 +144,7 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
         }
 
         val fd = runCatching { establish()?.detachFd() }.getOrElse { e ->
-            Log.e(TAG, "Establish VPN exception: ${e.message}")
+            ServicePlugin.appWarn(TAG, "Establish VPN failed: ${e.message}")
             null
         }
         if (fd != null && fd > 0) {
@@ -228,6 +229,7 @@ class GoboxVpnService : VpnService(), BaseServiceInterface {
     }
 
     override fun onRevoke() {
+        ServicePlugin.appWarn(TAG, "VPN revoked by system")
         runCatching {
             VpnPlugin.handleStop()
             getSystemService(android.app.NotificationManager::class.java)

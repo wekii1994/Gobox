@@ -120,7 +120,7 @@ class ClashCore {
       await versionFile.writeAsString(version, flush: true);
     } catch (e) {
       if (!exists) rethrow;
-      commonPrint.warn('Failed to refresh $bundleMRSFileName: $e');
+      commonPrint.warn('Refresh $bundleMRSFileName failed: $e');
     } finally {
       if (await tempFile.exists()) {
         try {
@@ -273,14 +273,16 @@ class ClashCore {
     required String url,
     required String output,
     required Map<String, String> headers,
-    String? proxy,
+    required bool direct,
+    required bool skipCertVerify,
   }) async {
     final res = await clashInterface.downloadProfile(
       json.encode({
         'url': url,
         'output': output,
         'headers': headers,
-        'proxy': ?proxy,
+        'direct': direct,
+        'skip-cert-verify': skipCertVerify,
       }),
     );
     if (res.isError) {
@@ -336,7 +338,7 @@ class ClashCore {
             .toList();
       });
     } catch (e) {
-      commonPrint.warn('Failed to parse connections: $e');
+      commonPrint.warn('Parse connections failed: $e');
       return [];
     }
   }
@@ -416,7 +418,7 @@ class ClashCore {
         return externalProviders;
       });
     } catch (e) {
-      commonPrint.warn('Failed to parse external providers: $e');
+      commonPrint.warn('Parse providers failed: $e');
       return [];
     }
   }
@@ -435,7 +437,7 @@ class ClashCore {
         json.decode(externalProvidersRawString) as Map<String, Object?>,
       );
     } catch (e) {
-      commonPrint.warn('Failed to parse external provider: $e');
+      commonPrint.warn('Parse provider failed: $e');
       return null;
     }
   }
@@ -478,7 +480,7 @@ class ClashCore {
     try {
       return Delay.fromJson(json.decode(data) as Map<String, Object?>);
     } catch (e) {
-      commonPrint.warn('Failed to parse delay: $e');
+      commonPrint.warn('Parse delay failed: $e');
       rethrow;
     }
   }
@@ -548,7 +550,7 @@ class ClashCore {
         json.decode(trafficString) as Map<String, dynamic>,
       );
     } catch (e) {
-      commonPrint.warn('Failed to parse traffic: $e');
+      commonPrint.warn('Parse traffic failed: $e');
       return Traffic();
     }
   }
@@ -571,7 +573,7 @@ class ClashCore {
           total: Traffic.fromMap(decoded['total'] as Map<String, dynamic>),
         );
       } catch (e) {
-        commonPrint.warn('Failed to parse traffic snapshot: $e');
+        commonPrint.warn('Parse traffic snapshot failed: $e');
       }
     }
     return (now: Traffic(), total: Traffic());
@@ -947,7 +949,7 @@ class ClashCore {
         return logsRaw.map((e) => Log.core(e as Map<String, Object?>)).toList();
       });
     } catch (e) {
-      commonPrint.warn('Failed to parse logs: $e');
+      commonPrint.warn('Parse logs failed: $e');
       return [];
     }
   }
@@ -969,7 +971,7 @@ class ClashCore {
             .toList();
       });
     } catch (e) {
-      commonPrint.warn('Failed to parse requests: $e');
+      commonPrint.warn('Parse requests failed: $e');
       return [];
     }
   }
