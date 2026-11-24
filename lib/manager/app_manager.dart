@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:gobox/clash/core.dart';
@@ -55,7 +56,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       });
     });
     ref.listenManual(checkIpProvider, (prev, next) {
-      if (next.b && (prev?.a != next.a)) {
+      if (!next.b) return;
+      if (prev?.b == false) {
+        detectionState.startCheck(immediate: true, force: true);
+      } else if (prev?.a != next.a) {
         detectionState.startCheck();
       }
     });
@@ -80,6 +84,22 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       if (!next.hasAddedOrChanged(prev)) return;
       globalState.appController.autoBackupDebounce();
     });
+    ref.listenManual(
+      nodesProvider,
+      (_, _) => globalState.appController.autoBackupDebounce(),
+    );
+    ref.listenManual(
+      nodesProvider.select((state) => jsonEncode(state.regionNodeNames)),
+      (_, _) => globalState.appController.generateAllBundles(),
+    );
+    ref.listenManual(
+      scriptStateProvider,
+      (_, _) => globalState.appController.autoBackupDebounce(),
+    );
+    ref.listenManual(
+      managedSettingProvider,
+      (_, _) => globalState.appController.autoBackupDebounce(),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateDashboardRefreshState();
       detectionState.tryStartCheck();
@@ -205,7 +225,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
           await globalState.appController.updateGroups();
         }
       } catch (e) {
-        commonPrint.debug('foreground core refresh skipped: $e');
+        commonPrint.debug('Foreground refresh skipped: $e');
       }
 
       detectionState.checkOnForegroundResume();

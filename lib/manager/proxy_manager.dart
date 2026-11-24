@@ -4,6 +4,7 @@ import 'package:gobox/common/proxy.dart';
 import 'package:gobox/models/models.dart';
 import 'package:gobox/providers/state.dart';
 
+import 'package:gobox/common/print.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,7 +23,17 @@ class _ProxyManagerState extends ConsumerState<ProxyManager> {
     final systemProxy = proxyState.systemProxy;
     final port = proxyState.port;
     if (isStart && systemProxy) {
-      unawaited(proxy?.startProxy(port, proxyState.bypassDomain));
+      unawaited(
+        proxy?.startProxy(port, proxyState.bypassDomain).then(
+          (ok) {
+            if (ok == false) {
+              commonPrint.warn('Set system proxy failed', module: 'System');
+            }
+          },
+          onError: (Object e) =>
+              commonPrint.warn('Set system proxy failed: $e', module: 'System'),
+        ),
+      );
     } else {
       unawaited(proxy?.stopProxy());
     }

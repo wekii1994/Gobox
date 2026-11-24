@@ -15,6 +15,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.wekii.gobox.GlobalState
 import com.wekii.gobox.R
 import com.wekii.gobox.models.VpnOptions
+import com.wekii.gobox.plugins.ServicePlugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -149,5 +150,6 @@ fun Service.startForeground(notification: Notification, useSpecialType: Boolean 
     if (fallbackResult.isSuccess) return true
 
     android.util.Log.e("BaseServiceInterface", "startForeground fallback failed: ${fallbackResult.exceptionOrNull()?.message}")
+    ServicePlugin.appError("BaseServiceInterface", "Start foreground failed: ${fallbackResult.exceptionOrNull()?.message}")
     return false
 }

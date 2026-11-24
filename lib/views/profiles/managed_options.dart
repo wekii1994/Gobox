@@ -29,11 +29,6 @@ String _targetLabel(String target) =>
 String _searchKey(String value) =>
     value.toLowerCase().replaceAll(_searchKeyPattern, '');
 
-final _sensitiveTagPattern = RegExp(
-  r'porn|hentai|xvideos|xnxx|missav|javdb|jable|mindgeek|onlyfans|category-adult|category-gambling|casino|betting',
-  caseSensitive: false,
-);
-
 String _iconName(String icon) {
   final name = icon.substring(icon.lastIndexOf('/') + 1);
   return name.endsWith('.svg') ? name.substring(0, name.length - 4) : name;
@@ -215,15 +210,20 @@ class _SearchField extends StatelessWidget {
     final onSubmitted = this.onSubmitted;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: TextField(
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-        textInputAction: onSubmitted == null
-            ? TextInputAction.search
-            : TextInputAction.done,
-        decoration: InputDecoration(
-          hintText: hintText,
-          prefixIcon: const AppIcon(Icons.search),
+      child: TvTextField(
+        builder: (tv) => TextField(
+          focusNode: tv.focusNode,
+          readOnly: tv.readOnly,
+          showCursor: tv.showCursor,
+          onChanged: onChanged,
+          onSubmitted: onSubmitted,
+          textInputAction: onSubmitted == null
+              ? TextInputAction.search
+              : TextInputAction.done,
+          decoration: InputDecoration(
+            hintText: hintText,
+            prefixIcon: const AppIcon(Icons.search),
+          ),
         ),
       ),
     );
@@ -318,7 +318,11 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
           if (!policyGroupOptions.contains(key)) key,
       ];
       _options = options;
-      _icons = icons;
+      _icons = {
+        for (final MapEntry(:key, :value) in managedRateGroupIcons.entries)
+          key: ?routeIconUrl(value),
+        ...icons,
+      };
       _regions = managedRegions(
         data.catalog.catalog,
         _enabledRegions,
@@ -337,6 +341,8 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
     });
   }
 
+  List<String> get _rateGroups => managedRateGroups(_options);
+
   List<String> _arrange(List<String> saved) => orderManagedGroups(
     presets: [
       for (final name in _presets)
@@ -344,7 +350,7 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
     ],
     customs: [for (final route in _routes) route.name],
     saved: saved,
-    regions: _regions,
+    regions: [..._regions, ..._rateGroups],
   );
 
   void _change(VoidCallback callback) {
@@ -481,6 +487,7 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
             _options['禁用内核QUIC流量'] ??= _options['屏蔽内核QUIC流量']!;
             _options.remove('屏蔽内核QUIC流量');
           }
+          _order = _arrange(_order);
           _persist();
         });
       },
@@ -585,6 +592,19 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
             : catalog.iconUrlOf(route),
       ),
       title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: route == null || route.sets.isEmpty
+          ? null
+          : Text(
+              [
+                for (final key in route.sets)
+                  catalog.sets[key]?.label ??
+                      CustomRuleSet.parse(key)?.name ??
+                      key.split(':').last,
+              ].join('、'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.bodySmall?.toLight,
+            ),
       trailing: _sorting
           ? ReorderableDragStartListener(
               index: index,
@@ -626,11 +646,12 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
       );
     }
     final routes = {for (final route in _routes) route.name: route};
+    final hidden = {..._regions, ..._rateGroups};
     final items = _sorting
         ? _order
         : [
             for (final name in _order)
-              if (!_regions.contains(name)) name,
+              if (!hidden.contains(name)) name,
           ];
     final regions = catalog.catalog.regions;
     return ReorderableListView.builder(
@@ -809,49 +830,61 @@ class _CustomRegionDialogState extends State<_CustomRegionDialog> {
         child: Wrap(
           runSpacing: 16,
           children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: appLocalizations.regionName,
+            TvTextField(
+              builder: (tv) => TextFormField(
+                focusNode: tv.focusNode,
+                readOnly: tv.readOnly,
+                showCursor: tv.showCursor,
+                controller: _nameController,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: appLocalizations.regionName,
+                ),
+                validator: (value) {
+                  final trimmed = value?.trim() ?? '';
+                  if (trimmed.isEmpty) {
+                    return appLocalizations.emptyTip(
+                      appLocalizations.regionName,
+                    );
+                  }
+                  if (trimmed.contains(',') || trimmed.contains('\n')) {
+                    return appLocalizations.routeNameInvalid;
+                  }
+                  if (widget.region?.name != trimmed &&
+                      widget.existingNames.contains(trimmed)) {
+                    return appLocalizations.existsTip(
+                      appLocalizations.regionName,
+                    );
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                final trimmed = value?.trim() ?? '';
-                if (trimmed.isEmpty) {
-                  return appLocalizations.emptyTip(appLocalizations.regionName);
-                }
-                if (trimmed.contains(',') || trimmed.contains('\n')) {
-                  return appLocalizations.routeNameInvalid;
-                }
-                if (widget.region?.name != trimmed &&
-                    widget.existingNames.contains(trimmed)) {
-                  return appLocalizations.existsTip(
-                    appLocalizations.regionName,
-                  );
-                }
-                return null;
-              },
             ),
-            TextFormField(
-              controller: _regexController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: appLocalizations.regionRegex,
+            TvTextField(
+              builder: (tv) => TextFormField(
+                focusNode: tv.focusNode,
+                readOnly: tv.readOnly,
+                showCursor: tv.showCursor,
+                controller: _regexController,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: appLocalizations.regionRegex,
+                ),
+                validator: (value) {
+                  final trimmed = value?.trim() ?? '';
+                  if (trimmed.isEmpty) {
+                    return appLocalizations.emptyTip(
+                      appLocalizations.regionRegex,
+                    );
+                  }
+                  try {
+                    RegExp(trimmed);
+                  } catch (_) {
+                    return appLocalizations.regexInvalid;
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                final trimmed = value?.trim() ?? '';
-                if (trimmed.isEmpty) {
-                  return appLocalizations.emptyTip(
-                    appLocalizations.regionRegex,
-                  );
-                }
-                try {
-                  RegExp(trimmed);
-                } catch (_) {
-                  return appLocalizations.regexInvalid;
-                }
-                return null;
-              },
             ),
           ],
         ),
@@ -1145,7 +1178,18 @@ class _RouteSheetState extends State<_RouteSheet> {
     ],
   );
 
-  List<RouteService> get _services => _serviceIndex.search(_query);
+  List<RouteService> get _services {
+    final searched = _serviceIndex.search(_query);
+    if (_query.trim().isNotEmpty) return searched;
+    return [
+      for (final service in searched)
+        if (_routeOf.containsKey(service.name) ||
+            _added.contains(service) ||
+            (!sensitiveRoutePattern.hasMatch(service.name) &&
+                !service.sets.any(sensitiveRoutePattern.hasMatch)))
+          service,
+    ];
+  }
 
   bool _available(RouteService service) =>
       !widget.reserved.contains(service.name);
@@ -1641,13 +1685,18 @@ class _RouteSheetState extends State<_RouteSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                controller: _nameController,
-                textInputAction: TextInputAction.done,
-                onChanged: (_) => _change(() => _error = null),
-                decoration: InputDecoration(
-                  labelText: appLocalizations.name,
-                  errorText: _error,
+              TvTextField(
+                builder: (tv) => TextField(
+                  focusNode: tv.focusNode,
+                  readOnly: tv.readOnly,
+                  showCursor: tv.showCursor,
+                  controller: _nameController,
+                  textInputAction: TextInputAction.done,
+                  onChanged: (_) => _change(() => _error = null),
+                  decoration: InputDecoration(
+                    labelText: appLocalizations.name,
+                    errorText: _error,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1806,18 +1855,23 @@ class _MrsUrlDialogState extends State<_MrsUrlDialog> with IdleAutofocusMixin {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            controller: _controller,
+          TvTextField(
             focusNode: autofocusNode,
-            keyboardType: TextInputType.url,
-            textInputAction: TextInputAction.done,
-            onChanged: (_) => setState(() => _error = null),
-            onSubmitted: (_) => _handleSubmit(),
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              labelText: appLocalizations.url,
-              errorText: _error,
-              errorMaxLines: 2,
+            builder: (tv) => TextField(
+              focusNode: tv.focusNode,
+              readOnly: tv.readOnly,
+              showCursor: tv.showCursor,
+              controller: _controller,
+              keyboardType: TextInputType.url,
+              textInputAction: TextInputAction.done,
+              onChanged: (_) => setState(() => _error = null),
+              onSubmitted: (_) => _handleSubmit(),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: appLocalizations.url,
+                errorText: _error,
+                errorMaxLines: 2,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -1894,7 +1948,7 @@ class _RuleSetPickerSheetState extends State<_RuleSetPickerSheet> {
         ? [
             for (final set in searched)
               if (_selected.contains(set.key) ||
-                  !_sensitiveTagPattern.hasMatch(set.tag))
+                  !sensitiveRoutePattern.hasMatch(set.tag))
                 set,
           ]
         : searched;

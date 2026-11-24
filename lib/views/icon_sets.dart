@@ -301,13 +301,22 @@ class _IconPickerBodyState extends ConsumerState<IconPickerBody> {
     if (query.isNotEmpty) return _rank(icons, [query]);
     final suggested = [
       for (final token in widget.suggest.split('|'))
-        if (iconSearchKey(token) case final key when key.length > 1) key,
+        if (iconSearchKey(iconFileStem(token)) case final key
+            when key.length > 1)
+          key,
     ];
-    if (suggested.isEmpty) return icons;
-    final matched = _rank(icons, suggested);
-    if (matched.isEmpty) return icons;
+    final matched = suggested.isEmpty
+        ? const <IconSetIcon>[]
+        : _rank(icons, suggested);
     final first = matched.toSet();
-    return [...matched, ...icons.where((icon) => !first.contains(icon))];
+    return [
+      ...matched,
+      for (final icon in icons)
+        if (!first.contains(icon) &&
+            (icon.url == widget.selected ||
+                !sensitiveRoutePattern.hasMatch(iconFileStem(icon.name))))
+          icon,
+    ];
   }
 
   List<IconSetIcon> _rank(List<IconSetIcon> icons, List<String> queries) {
@@ -451,12 +460,17 @@ class _IconPickerBodyState extends ConsumerState<IconPickerBody> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-          child: TextField(
-            textInputAction: TextInputAction.search,
-            onChanged: (value) => setState(() => _query = value.trim()),
-            decoration: InputDecoration(
-              hintText: appLocalizations.searchIcons,
-              prefixIcon: const AppIcon(Icons.search),
+          child: TvTextField(
+            builder: (tv) => TextField(
+              focusNode: tv.focusNode,
+              readOnly: tv.readOnly,
+              showCursor: tv.showCursor,
+              textInputAction: TextInputAction.search,
+              onChanged: (value) => setState(() => _query = value.trim()),
+              decoration: InputDecoration(
+                hintText: appLocalizations.searchIcons,
+                prefixIcon: const AppIcon(Icons.search),
+              ),
             ),
           ),
         ),
