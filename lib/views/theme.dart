@@ -241,7 +241,7 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
               child: Text(
                 isDynamic
                     ? appLocalizations.dynamicColor
-                    : Intl.message('Scheme'),
+                    : Intl.message('${schemeVariant.name}Scheme'),
               ),
             ),
             if (!isEquals)

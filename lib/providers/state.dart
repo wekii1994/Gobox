@@ -1101,7 +1101,7 @@ needSetup(Ref ref) {
       ? ref.watch(
           managedSettingProvider.select(
             (state) =>
-                ':::::',
+                '${ManagedScript.version(state)}:${state.options}:${state.routes}:${state.order}:${state.regions}:${state.customRegions}',
           ),
         )
       : script == null

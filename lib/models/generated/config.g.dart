@@ -621,6 +621,8 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
   textScale: json['textScale'] == null
       ? const TextScale()
       : TextScale.fromJson(json['textScale'] as Map<String, dynamic>),
+  pageScale: (json['pageScale'] as num?)?.toDouble() ?? defaultPageScale,
+  useDarkIcon: json['useDarkIcon'] as bool? ?? false,
   useHarmonyFont: json['useHarmonyFont'] as bool? ?? false,
   usePhosphorIcons: json['usePhosphorIcons'] as bool? ?? true,
   invertTrayIcon: json['invertTrayIcon'] as bool? ?? false,
@@ -633,6 +635,8 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
       'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
       'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant]!,
       'textScale': instance.textScale,
+      'pageScale': instance.pageScale,
+      'useDarkIcon': instance.useDarkIcon,
       'useHarmonyFont': instance.useHarmonyFont,
       'usePhosphorIcons': instance.usePhosphorIcons,
       'invertTrayIcon': instance.invertTrayIcon,

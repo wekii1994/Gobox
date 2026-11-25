@@ -312,7 +312,7 @@ Future<void> _service(List<String> flags) async {
             await vpn?.updateNotificationNode(profileName);
 
             if (globalState.config.vpnProps.networkSpeedNotification) {
-              await vpn?.updateNotificationSpeed(profileName, '↑0B/s ↓0B/s');
+              await vpn?.updateNotificationSpeed(profileName, Traffic().toString());
             }
 
             unawaited(clashLibHandler.startListener());

@@ -602,11 +602,7 @@ data object VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         GlobalState.currentProfileName = nodeName
         if (GlobalState.isSpeedNotificationEnabled) {
             val speedInfo = Core.trafficJson()?.let(::trafficSpeedInfo)
-            if (speedInfo != null) {
-                updateNotificationSpeed(nodeName, speedInfo)
-            } else {
-                updateNotificationTitle(nodeName)
-            }
+            updateNotificationSpeed(nodeName, speedInfo ?: "0.00B↑ 0.00B↓")
             ensureSpeedTicker()
         } else {
             updateNotificationTitle(nodeName)

@@ -49,5 +49,12 @@ void main() {
         legacyPrimaryColors,
       );
     });
+
+    test('ThemeProps 页面缩放 pageScale 序列化与恢复保留用户配置', () {
+      final restored = _restore(
+        const ThemeProps(pageScale: 0.85),
+      );
+      expect(restored.themeProps.pageScale, 0.85);
+    });
   });
 }
