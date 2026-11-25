@@ -619,7 +619,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "directModeNoProxy": MessageLookupByLibrary.simpleMessage(
       "직접 연결 모드, 프록시 없음",
     ),
-    "directUpdate": MessageLookupByLibrary.simpleMessage("직접 연결로 업데이트"),
     "disableQuic": MessageLookupByLibrary.simpleMessage("QUIC 비활성화"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
       "특정 네트워크 문제를 완화하기 위해 QUIC 비활성화",
@@ -834,7 +833,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("이동"),
     "goDownload": MessageLookupByLibrary.simpleMessage("다운로드 이동"),
     "groupOrderTip": MessageLookupByLibrary.simpleMessage(
-      "드래그하여 표시 순서 변경 (사용자 지정 분기 우선 매칭)",
+      "드래그하여 그룹 순서를 변경하세요. 확인 후 저장하면 적용됩니다",
     ),
     "harmonyFont": MessageLookupByLibrary.simpleMessage("글꼴 복구"),
     "harmonyFontDesc": MessageLookupByLibrary.simpleMessage(
@@ -1108,6 +1107,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "keepDockIcon": MessageLookupByLibrary.simpleMessage("Dock에 고정"),
     "keepDockIconDesc": MessageLookupByLibrary.simpleMessage("Dock에 앱 아이콘 유지"),
     "key": MessageLookupByLibrary.simpleMessage("키"),
+    "lanFirewallTip": MessageLookupByLibrary.simpleMessage(
+      "시스템 방화벽에서 허용하기 전에는 LAN 기기가 Gobox 코어에 연결할 수 없습니다. 로컬 서브넷 기기만 허용하는 방화벽 규칙을 추가할까요? 관리자 승인이 필요합니다.",
+    ),
     "lanSharing": MessageLookupByLibrary.simpleMessage("LAN 공유"),
     "landingNode": MessageLookupByLibrary.simpleMessage("랜딩 노드"),
     "landingNodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1128,6 +1130,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "local": MessageLookupByLibrary.simpleMessage("로컬"),
     "localBackupDesc": MessageLookupByLibrary.simpleMessage("로컬 파일로 데이터 백업"),
     "localFile": MessageLookupByLibrary.simpleMessage("로컬 파일"),
+    "localNetworkPermissionTip": MessageLookupByLibrary.simpleMessage(
+      "LAN 허용에는 \'로컬 네트워크\' 권한이 필요합니다. 시스템 설정에서 Gobox에 허용해 주세요.",
+    ),
     "localPing": MessageLookupByLibrary.simpleMessage("로컬 Ping"),
     "localPingAverage": MessageLookupByLibrary.simpleMessage("평균 지연"),
     "localPingBytes": m35,
@@ -1447,7 +1452,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeTestFailed": MessageLookupByLibrary.simpleMessage("사용 불가"),
     "nodesSort": MessageLookupByLibrary.simpleMessage("노드 정렬"),
     "nonManagedRuleTip": MessageLookupByLibrary.simpleMessage(
-      "관리 모드가 아니므로 현재 프로필에만 적용됩니다",
+      "규칙이 추가되었습니다 (현재 프로필에만 적용)",
     ),
     "none": MessageLookupByLibrary.simpleMessage("없음"),
     "notRecommended": MessageLookupByLibrary.simpleMessage("권장하지 않음"),
@@ -1772,7 +1777,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleProviders": MessageLookupByLibrary.simpleMessage("규칙 프로바이더"),
     "ruleProvidersCount": MessageLookupByLibrary.simpleMessage("규칙 세트"),
     "ruleSets": MessageLookupByLibrary.simpleMessage("규칙 세트"),
-    "ruleSort": MessageLookupByLibrary.simpleMessage("규칙 순서"),
+    "ruleSort": MessageLookupByLibrary.simpleMessage("그룹 순서"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("규칙 목적지"),
     "ruleTypeDesc": m69,
     "ruleTypeName": m70,

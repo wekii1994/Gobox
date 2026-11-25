@@ -557,7 +557,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "directModeNoProxy": MessageLookupByLibrary.simpleMessage("直连模式，暂无代理"),
-    "directUpdate": MessageLookupByLibrary.simpleMessage("通过直连更新"),
     "disableQuic": MessageLookupByLibrary.simpleMessage("禁用QUIC"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
       "禁用 QUIC 以缓解特定网络问题",
@@ -751,7 +750,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "global": MessageLookupByLibrary.simpleMessage("全局"),
     "go": MessageLookupByLibrary.simpleMessage("前往"),
     "goDownload": MessageLookupByLibrary.simpleMessage("前往下载"),
-    "groupOrderTip": MessageLookupByLibrary.simpleMessage("拖动调整显示顺序，自定义分流优先匹配"),
+    "groupOrderTip": MessageLookupByLibrary.simpleMessage("拖动调整分组顺序，确认并保存后生效"),
     "harmonyFont": MessageLookupByLibrary.simpleMessage("字体修复"),
     "harmonyFontDesc": MessageLookupByLibrary.simpleMessage("使用内置字体解决显示异常问题"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),
@@ -988,6 +987,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "keepDockIcon": MessageLookupByLibrary.simpleMessage("常驻DOCK"),
     "keepDockIconDesc": MessageLookupByLibrary.simpleMessage("在 Dock 栏保留应用图标"),
     "key": MessageLookupByLibrary.simpleMessage("键"),
+    "lanFirewallTip": MessageLookupByLibrary.simpleMessage(
+      "系统防火墙放行后，局域网设备才能连接 Gobox 内核。是否添加仅允许本地子网设备访问的防火墙规则？需要管理员授权。",
+    ),
     "lanSharing": MessageLookupByLibrary.simpleMessage("局域网共享"),
     "landingNode": MessageLookupByLibrary.simpleMessage("落地节点"),
     "landingNodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1006,6 +1008,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "local": MessageLookupByLibrary.simpleMessage("本地"),
     "localBackupDesc": MessageLookupByLibrary.simpleMessage("备份数据到本地"),
     "localFile": MessageLookupByLibrary.simpleMessage("本地文件"),
+    "localNetworkPermissionTip": MessageLookupByLibrary.simpleMessage(
+      "局域网代理需要「本地网络」权限，请在系统设置中为 Gobox 开启。",
+    ),
     "localPing": MessageLookupByLibrary.simpleMessage("本地 Ping"),
     "localPingAverage": MessageLookupByLibrary.simpleMessage("平均延迟"),
     "localPingBytes": m35,
@@ -1294,9 +1299,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeShareUri": MessageLookupByLibrary.simpleMessage("节点分享(URI)"),
     "nodeTestFailed": MessageLookupByLibrary.simpleMessage("不可用"),
     "nodesSort": MessageLookupByLibrary.simpleMessage("节点排序"),
-    "nonManagedRuleTip": MessageLookupByLibrary.simpleMessage(
-      "非托管模式下，仅针对当前配置生效",
-    ),
+    "nonManagedRuleTip": MessageLookupByLibrary.simpleMessage("规则已添加，仅当前配置生效"),
     "none": MessageLookupByLibrary.simpleMessage("无"),
     "notRecommended": MessageLookupByLibrary.simpleMessage("不推荐"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage("当前代理组无法选中"),
@@ -1588,7 +1591,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleProviders": MessageLookupByLibrary.simpleMessage("规则提供者"),
     "ruleProvidersCount": MessageLookupByLibrary.simpleMessage("规则集"),
     "ruleSets": MessageLookupByLibrary.simpleMessage("规则集"),
-    "ruleSort": MessageLookupByLibrary.simpleMessage("规则排序"),
+    "ruleSort": MessageLookupByLibrary.simpleMessage("分组排序"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("规则目标"),
     "ruleTypeDesc": m69,
     "ruleTypeName": m70,

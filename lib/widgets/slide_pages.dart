@@ -1,4 +1,5 @@
-﻿import 'package:gobox/providers/providers.dart';
+import 'package:gobox/common/context.dart';
+import 'package:gobox/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -53,7 +54,7 @@ class _SlidePagesState extends ConsumerState<SlidePages> {
     if (widget.animate &&
         ref.read(isMobileViewProvider) &&
         ref.read(appSettingProvider).enableNavBarHapticFeedback &&
-        !MediaQuery.reduceMotionOf(context)) {
+        !context.reduceMotion) {
       _controller.animateToPage(
         index,
         duration: kTabScrollDuration,

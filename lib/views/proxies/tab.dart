@@ -6,6 +6,7 @@ import 'package:gobox/models/config.dart';
 import 'package:gobox/providers/providers.dart';
 import 'package:gobox/state.dart';
 import 'package:gobox/widgets/widgets.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';

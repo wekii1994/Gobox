@@ -279,10 +279,10 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
     final data = await globalState.appController.safeRun(
       silence: false,
       () async {
-        final script = await ManagedScript.script(
-          props.copyWith(routes: const [], order: const []),
-        );
-        final catalog = await ManagedScript.catalog();
+        final (catalog, script) = await (
+          ManagedScript.catalog(),
+          ManagedScript.optionsScript(props),
+        ).wait;
         final options = await JavaScriptRuntimeManager.extractScriptOptions(
           script,
         );
@@ -321,6 +321,7 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
       _icons = {
         for (final MapEntry(:key, :value) in managedRateGroupIcons.entries)
           key: ?routeIconUrl(value),
+        managedOtherRegionGroup: ?routeIconUrl(managedOtherRegionIcon),
         ...icons,
       };
       _regions = managedRegions(
@@ -351,6 +352,7 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
     customs: [for (final route in _routes) route.name],
     saved: saved,
     regions: [..._regions, ..._rateGroups],
+    tail: const [managedOtherRegionGroup],
   );
 
   void _change(VoidCallback callback) {
@@ -595,12 +597,12 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
       subtitle: route == null || route.sets.isEmpty
           ? null
           : Text(
-              [
+              {
                 for (final key in route.sets)
                   catalog.sets[key]?.label ??
                       CustomRuleSet.parse(key)?.name ??
                       key.split(':').last,
-              ].join('、'),
+              }.join('、'),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textTheme.bodySmall?.toLight,
@@ -646,7 +648,7 @@ class _ManagedOptionsSheetState extends ConsumerState<ManagedOptionsSheet> {
       );
     }
     final routes = {for (final route in _routes) route.name: route};
-    final hidden = {..._regions, ..._rateGroups};
+    final hidden = {..._regions, ..._rateGroups, managedOtherRegionGroup};
     final items = _sorting
         ? _order
         : [

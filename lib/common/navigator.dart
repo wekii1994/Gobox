@@ -1,8 +1,8 @@
-﻿import 'package:gobox/enum/enum.dart';
+import 'package:gobox/common/context.dart';
+import 'package:gobox/common/frame_probe.dart';
+import 'package:gobox/enum/enum.dart';
 import 'package:gobox/models/app.dart';
 import 'package:gobox/state.dart';
-
-import 'frame_probe.dart';
 
 import 'dart:async';
 import 'dart:ui' show FlutterView;
@@ -44,7 +44,7 @@ class BaseNavigator {
         ),
       );
     }
-    final reduceMotion = MediaQuery.maybeReduceMotionOf(context) ?? false;
+    final reduceMotion = context.reduceMotion;
     final keyboardVisible = (View.maybeOf(context)?.viewInsets.bottom ?? 0) > 0;
     await _dismissKeyboard(context);
     if (keyboardVisible) await WidgetsBinding.instance.endOfFrame;

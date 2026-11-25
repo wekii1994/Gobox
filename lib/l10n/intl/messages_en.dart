@@ -739,9 +739,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "directModeNoProxy": MessageLookupByLibrary.simpleMessage(
       "Direct mode, no proxies",
     ),
-    "directUpdate": MessageLookupByLibrary.simpleMessage(
-      "Update via direct connection",
-    ),
     "disableQuic": MessageLookupByLibrary.simpleMessage("Disable QUIC"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
       "Disable QUIC to mitigate specific network issues",
@@ -992,7 +989,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("Go"),
     "goDownload": MessageLookupByLibrary.simpleMessage("Download Now"),
     "groupOrderTip": MessageLookupByLibrary.simpleMessage(
-      "Drag to reorder display; custom routes match first",
+      "Drag to reorder groups; takes effect after you confirm and save",
     ),
     "harmonyFont": MessageLookupByLibrary.simpleMessage("Font Fix"),
     "harmonyFontDesc": MessageLookupByLibrary.simpleMessage(
@@ -1318,6 +1315,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Keep the app icon in the Dock",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Key"),
+    "lanFirewallTip": MessageLookupByLibrary.simpleMessage(
+      "LAN devices can\'t reach the Gobox core until the system firewall allows it. Add a firewall rule that only allows devices on the local subnet? Administrator approval is required.",
+    ),
     "lanSharing": MessageLookupByLibrary.simpleMessage("LAN Sharing"),
     "landingNode": MessageLookupByLibrary.simpleMessage("Landing node"),
     "landingNodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1340,6 +1340,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Backup data locally",
     ),
     "localFile": MessageLookupByLibrary.simpleMessage("Local File"),
+    "localNetworkPermissionTip": MessageLookupByLibrary.simpleMessage(
+      "LAN proxy requires the Local network permission. Allow it for Gobox in system settings.",
+    ),
     "localPing": MessageLookupByLibrary.simpleMessage("Local Ping"),
     "localPingAverage": MessageLookupByLibrary.simpleMessage("Average"),
     "localPingBytes": m35,
@@ -1717,7 +1720,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeTestFailed": MessageLookupByLibrary.simpleMessage("Unreachable"),
     "nodesSort": MessageLookupByLibrary.simpleMessage("Node Sorting"),
     "nonManagedRuleTip": MessageLookupByLibrary.simpleMessage(
-      "Not in managed mode, so this rule only applies to the current profile",
+      "Rule added to the current profile only",
     ),
     "none": MessageLookupByLibrary.simpleMessage("None"),
     "notRecommended": MessageLookupByLibrary.simpleMessage("Not Recommended"),
@@ -2130,7 +2133,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Rule Providers",
     ),
     "ruleSets": MessageLookupByLibrary.simpleMessage("Rule sets"),
-    "ruleSort": MessageLookupByLibrary.simpleMessage("Rule Order"),
+    "ruleSort": MessageLookupByLibrary.simpleMessage("Group Order"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Rule Target"),
     "ruleTypeDesc": m69,
     "ruleTypeName": m70,

@@ -765,9 +765,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "directModeNoProxy": MessageLookupByLibrary.simpleMessage(
       "Режим прямого подключения, прокси нет",
     ),
-    "directUpdate": MessageLookupByLibrary.simpleMessage(
-      "Обновлять через прямое подключение",
-    ),
     "disableQuic": MessageLookupByLibrary.simpleMessage("Отключить QUIC"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
       "Отключить QUIC для смягчения сетевых проблем",
@@ -1026,7 +1023,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("Перейти"),
     "goDownload": MessageLookupByLibrary.simpleMessage("Перейти к загрузке"),
     "groupOrderTip": MessageLookupByLibrary.simpleMessage(
-      "Перетащите для порядка отображения; пользовательские маршруты в приоритете",
+      "Перетащите, чтобы изменить порядок групп; изменения вступят в силу после подтверждения и сохранения",
     ),
     "harmonyFont": MessageLookupByLibrary.simpleMessage("Исправление шрифта"),
     "harmonyFontDesc": MessageLookupByLibrary.simpleMessage(
@@ -1378,6 +1375,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сохранять иконку приложения в Dock",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Ключ"),
+    "lanFirewallTip": MessageLookupByLibrary.simpleMessage(
+      "Устройства в локальной сети не смогут подключиться к ядру Gobox, пока это не разрешит брандмауэр. Добавить правило, разрешающее доступ только устройствам локальной подсети? Потребуются права администратора.",
+    ),
     "lanSharing": MessageLookupByLibrary.simpleMessage("Общий доступ в LAN"),
     "landingNode": MessageLookupByLibrary.simpleMessage("Выходной узел"),
     "landingNodeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1404,6 +1404,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Резервное копирование данных в файл",
     ),
     "localFile": MessageLookupByLibrary.simpleMessage("Локальный файл"),
+    "localNetworkPermissionTip": MessageLookupByLibrary.simpleMessage(
+      "Для доступа из LAN нужно разрешение «Локальная сеть». Включите его для Gobox в настройках системы.",
+    ),
     "localPing": MessageLookupByLibrary.simpleMessage("Локальный Ping"),
     "localPingAverage": MessageLookupByLibrary.simpleMessage("Средняя"),
     "localPingBytes": m35,
@@ -1799,7 +1802,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeTestFailed": MessageLookupByLibrary.simpleMessage("Недоступен"),
     "nodesSort": MessageLookupByLibrary.simpleMessage("Сортировка узлов"),
     "nonManagedRuleTip": MessageLookupByLibrary.simpleMessage(
-      "Профиль не в управляемом режиме, правило действует только для текущего профиля",
+      "Правило добавлено только в текущий профиль",
     ),
     "none": MessageLookupByLibrary.simpleMessage("Нет"),
     "notRecommended": MessageLookupByLibrary.simpleMessage("Не рекомендуется"),
@@ -2226,7 +2229,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleProviders": MessageLookupByLibrary.simpleMessage("Провайдеры правил"),
     "ruleProvidersCount": MessageLookupByLibrary.simpleMessage("Наборы правил"),
     "ruleSets": MessageLookupByLibrary.simpleMessage("Наборы правил"),
-    "ruleSort": MessageLookupByLibrary.simpleMessage("Порядок правил"),
+    "ruleSort": MessageLookupByLibrary.simpleMessage("Порядок групп"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Цель правила"),
     "ruleTypeDesc": m69,
     "ruleTypeName": m70,

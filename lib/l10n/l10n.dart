@@ -5889,16 +5889,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Update via direct connection`
-  String get directUpdate {
-    return Intl.message(
-      'Update via direct connection',
-      name: 'directUpdate',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Use specified UA`
   String get useCustomUa {
     return Intl.message(
@@ -10690,10 +10680,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Drag to reorder display; custom routes match first`
+  /// `Drag to reorder groups; takes effect after you confirm and save`
   String get groupOrderTip {
     return Intl.message(
-      'Drag to reorder display; custom routes match first',
+      'Drag to reorder groups; takes effect after you confirm and save',
       name: 'groupOrderTip',
       desc: '',
       args: [],
@@ -10755,9 +10745,9 @@ class AppLocalizations {
     );
   }
 
-  /// `Rule Order`
+  /// `Group Order`
   String get ruleSort {
-    return Intl.message('Rule Order', name: 'ruleSort', desc: '', args: []);
+    return Intl.message('Group Order', name: 'ruleSort', desc: '', args: []);
   }
 
   /// `{count} rules, included in the {group} group`
@@ -11531,10 +11521,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Not in managed mode, so this rule only applies to the current profile`
+  /// `Rule added to the current profile only`
   String get nonManagedRuleTip {
     return Intl.message(
-      'Not in managed mode, so this rule only applies to the current profile',
+      'Rule added to the current profile only',
       name: 'nonManagedRuleTip',
       desc: '',
       args: [],
@@ -11551,6 +11541,26 @@ class AppLocalizations {
     return Intl.message(
       'When on, the rule applies to all managed profiles. When off, or in non-managed mode, it only applies to the current profile',
       name: 'applyToAllManagedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `LAN devices can't reach the Gobox core until the system firewall allows it. Add a firewall rule that only allows devices on the local subnet? Administrator approval is required.`
+  String get lanFirewallTip {
+    return Intl.message(
+      'LAN devices can\'t reach the Gobox core until the system firewall allows it. Add a firewall rule that only allows devices on the local subnet? Administrator approval is required.',
+      name: 'lanFirewallTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `LAN proxy requires the Local network permission. Allow it for Gobox in system settings.`
+  String get localNetworkPermissionTip {
+    return Intl.message(
+      'LAN proxy requires the Local network permission. Allow it for Gobox in system settings.',
+      name: 'localNetworkPermissionTip',
       desc: '',
       args: [],
     );

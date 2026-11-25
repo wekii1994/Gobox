@@ -59,12 +59,10 @@ class EditProfileViewState extends State<EditProfileView> {
   late bool autoUpdate;
   late bool managed = widget.profile.managed;
   late bool skipCertVerify = widget.profile.skipCertVerify;
-  late bool directUpdate = widget.profile.directUpdate;
   late String? userAgent = widget.profile.userAgent;
   late TextEditingController ageSecretKeyController;
   FocusNode? urlFocusNode;
   bool _obscureAgeSecretKey = true;
-  String? rawText;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final fileInfoNotifier = ValueNotifier<FileInfo?>(null);
   Uint8List? fileData;
@@ -119,7 +117,6 @@ class EditProfileViewState extends State<EditProfileView> {
       autoUpdate: autoUpdate,
       managed: managed,
       skipCertVerify: skipCertVerify,
-      directUpdate: directUpdate,
       userAgent: userAgent,
       autoUpdateDuration: Duration(
         minutes: int.parse(autoUpdateDurationController.text),
@@ -241,25 +238,32 @@ class EditProfileViewState extends State<EditProfileView> {
   }
 
   Future<void> _editProfileFile() async {
-    if (rawText == null) {
+    final currentBytes = fileData;
+    final String? memoryContent;
+    final String? diskPath;
+    if (currentBytes != null) {
+      final decoded = await globalState.appController.safeRun(
+        () => utf8.decode(currentBytes),
+      );
+      if (decoded == null) return;
+      memoryContent = decoded;
+      diskPath = null;
+    } else {
       final profilePath = await appPath.getProfilePath(widget.profile.id);
-      final file = File(profilePath);
-      if (await file.exists()) {
-        rawText = await file.readAsString();
-      }
+      if (!await File(profilePath).exists()) return;
+      memoryContent = null;
+      diskPath = profilePath;
     }
     if (!mounted) return;
     final title = widget.profile.label ?? widget.profile.id;
     final editorPage = EditorPage(
       title: title,
-      content: rawText!,
+      content: memoryContent ?? '',
+      contentPath: diskPath,
       onSave: (context, _, content) {
         _handleSaveEdit(context, content);
       },
       onPop: (context, _, content) async {
-        if (content == rawText) {
-          return true;
-        }
         final res = await globalState.showMessage(
           title: title,
           message: TextSpan(text: appLocalizations.hasCacheChange),
@@ -276,7 +280,6 @@ class EditProfileViewState extends State<EditProfileView> {
     if (data == null) {
       return;
     }
-    rawText = data;
     fileData = Uint8List.fromList(utf8.encode(data));
     if (!mounted) return;
     fileInfoNotifier.value = fileInfoNotifier.value?.copyWith(
@@ -349,7 +352,7 @@ class EditProfileViewState extends State<EditProfileView> {
   List<PopupMenuItemData> get _menuItems {
     final isUrl = widget.isNew || profile.type == ProfileType.url;
     return [
-      if (isUrl) ...[
+      if (isUrl)
         PopupMenuItemData(
           icon: skipCertVerify
               ? Icons.check_circle_rounded
@@ -357,14 +360,6 @@ class EditProfileViewState extends State<EditProfileView> {
           label: appLocalizations.skipCertVerify,
           onPressed: () => skipCertVerify = !skipCertVerify,
         ),
-        PopupMenuItemData(
-          icon: directUpdate
-              ? Icons.check_circle_rounded
-              : Icons.circle_outlined,
-          label: appLocalizations.directUpdate,
-          onPressed: () => directUpdate = !directUpdate,
-        ),
-      ],
       PopupMenuItemData(
         icon: Icons.security,
         label: appLocalizations.ageKeyGenerateTitle,

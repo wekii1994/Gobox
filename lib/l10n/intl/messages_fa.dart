@@ -736,9 +736,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "directModeNoProxy": MessageLookupByLibrary.simpleMessage(
       "حالت مستقیم، پروکسی وجود ندارد",
     ),
-    "directUpdate": MessageLookupByLibrary.simpleMessage(
-      "به‌روزرسانی با اتصال مستقیم",
-    ),
     "disableQuic": MessageLookupByLibrary.simpleMessage("غیرفعال‌سازی QUIC"),
     "disableQuicDesc": MessageLookupByLibrary.simpleMessage(
       "غیرفعال‌سازی QUIC برای کاهش مشکلات شبکه",
@@ -991,7 +988,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("رفتن"),
     "goDownload": MessageLookupByLibrary.simpleMessage("رفتن به دانلود"),
     "groupOrderTip": MessageLookupByLibrary.simpleMessage(
-      "برای تغییر ترتیب نمایش بکشید؛ مسیرهای سفارشی اولویت دارند",
+      "برای تغییر ترتیب گروه‌ها بکشید؛ پس از تأیید و ذخیره اعمال می‌شود",
     ),
     "harmonyFont": MessageLookupByLibrary.simpleMessage("ترمیم فونت"),
     "harmonyFontDesc": MessageLookupByLibrary.simpleMessage(
@@ -1325,6 +1322,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "نمایش آیکون برنامه در Dock",
     ),
     "key": MessageLookupByLibrary.simpleMessage("کلید"),
+    "lanFirewallTip": MessageLookupByLibrary.simpleMessage(
+      "تا زمانی که دیوارهٔ آتش سیستم اجازه ندهد، دستگاه‌های شبکهٔ محلی نمی‌توانند به هستهٔ Gobox وصل شوند. قانونی اضافه شود که فقط به دستگاه‌های زیرشبکهٔ محلی اجازه دهد؟ تأیید مدیر لازم است.",
+    ),
     "lanSharing": MessageLookupByLibrary.simpleMessage(
       "اشتراک‌گذاری در شبکه محلی",
     ),
@@ -1349,6 +1349,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "پشتیبان‌گیری داده‌ها در فایل محلی",
     ),
     "localFile": MessageLookupByLibrary.simpleMessage("فایل محلی"),
+    "localNetworkPermissionTip": MessageLookupByLibrary.simpleMessage(
+      "دسترسی شبکهٔ محلی به مجوز «شبکهٔ محلی» نیاز دارد. آن را در تنظیمات سیستم برای Gobox فعال کنید.",
+    ),
     "localPing": MessageLookupByLibrary.simpleMessage("Ping محلی"),
     "localPingAverage": MessageLookupByLibrary.simpleMessage("میانگین"),
     "localPingBytes": m35,
@@ -1738,7 +1741,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeTestFailed": MessageLookupByLibrary.simpleMessage("در دسترس نیست"),
     "nodesSort": MessageLookupByLibrary.simpleMessage("مرتب‌سازی گره‌ها"),
     "nonManagedRuleTip": MessageLookupByLibrary.simpleMessage(
-      "در حالت غیرمدیریت‌شده، این قانون فقط روی پروفایل فعلی اعمال می‌شود",
+      "قانون فقط به پروفایل فعلی افزوده شد",
     ),
     "none": MessageLookupByLibrary.simpleMessage("هیچکدام"),
     "notRecommended": MessageLookupByLibrary.simpleMessage("توصیه نمی‌شود"),
@@ -2171,7 +2174,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ruleProvidersCount": MessageLookupByLibrary.simpleMessage("مجموعه قوانین"),
     "ruleSets": MessageLookupByLibrary.simpleMessage("مجموعه‌های قوانین"),
-    "ruleSort": MessageLookupByLibrary.simpleMessage("ترتیب قوانین"),
+    "ruleSort": MessageLookupByLibrary.simpleMessage("ترتیب گروه‌ها"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("مقصد قانون"),
     "ruleTypeDesc": m69,
     "ruleTypeName": m70,

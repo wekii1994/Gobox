@@ -21,7 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' hide windows;
 import 'package:restart_app/restart_app.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:tray_manager/tray_manager.dart';
@@ -37,6 +37,12 @@ import 'common/profile_recovery.dart';
 import 'models/models.dart';
 import 'views/profiles/override_profile.dart';
 import 'views/proxies/common.dart' show cancelDelayTests, delayTest;
+
+class _RecoveryApplyException implements Exception {
+  const _RecoveryApplyException(this.error);
+
+  final Object error;
+}
 
 class AppController {
   int? lastProfileModified;
@@ -2699,6 +2705,33 @@ class AppController {
     }
   }
 
+  void updateAllowLan(bool value) {
+    _ref
+        .read(patchClashConfigProvider.notifier)
+        .updateState((state) => state.copyWith(allowLan: value));
+    if (value) unawaited(_ensureLanAccess());
+  }
+
+  Future<void> _ensureLanAccess() async {
+    if (system.isAndroid) {
+      if (await app.requestLocalNetworkPermission()) return;
+      final confirmed = await globalState.showMessage(
+        message: TextSpan(text: appLocalizations.localNetworkPermissionTip),
+        confirmText: appLocalizations.openSettings,
+      );
+      if (confirmed == true) await app.openAppSettings();
+      return;
+    }
+    final helperWindows = windows;
+    if (helperWindows == null || !helperWindows.usesHelper) return;
+    if (await helperWindows.hasCoreFirewallRule()) return;
+    final confirmed = await globalState.showMessage(
+      message: TextSpan(text: appLocalizations.lanFirewallTip),
+      confirmText: appLocalizations.add,
+    );
+    if (confirmed == true) helperWindows.addCoreFirewallRule();
+  }
+
   void updateSystemProxy() {
     _ref
         .read(networkSettingProvider.notifier)
@@ -3232,6 +3265,12 @@ class AppController {
           userInput = true;
         }
       }
+    } on _RecoveryApplyException catch (e) {
+      commonPrint.error(
+        'Apply after restore failed: ${e.error}',
+        module: 'Backup',
+      );
+      throw e.error;
     } catch (e) {
       commonPrint.error('Restore failed: $e', module: 'Backup');
       throw 'Backup file is corrupted or invalid: $e';
@@ -3412,8 +3451,15 @@ class AppController {
       _ref.read(managedSettingProvider.notifier).value = managedProps;
     }
     await savePreferences();
-    if (globalState.isStart) {
+    await _applyRecoveredProfile();
+  }
+
+  Future<void> _applyRecoveredProfile() async {
+    if (!globalState.isStart) return;
+    try {
       await applyProfile(silence: true);
+    } catch (e) {
+      throw _RecoveryApplyException(e);
     }
   }
 
@@ -3590,9 +3636,7 @@ class AppController {
 
     _recoveryLimited(limitedConfig, recoveryOption);
     await savePreferences();
-    if (globalState.isStart) {
-      await applyProfile(silence: true);
-    }
+    await _applyRecoveredProfile();
 
     _showRecoveryResultMessage(profiles);
   }
