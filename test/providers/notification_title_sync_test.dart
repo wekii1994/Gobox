@@ -165,6 +165,45 @@ void main() {
       );
       expect(title, 'MyCustomFallback');
     });
+
+    test('showHiddenItems 控制是否选用隐藏主策略组', () {
+      final groups = [
+        Group(
+          type: GroupType.Selector,
+          name: 'HiddenGroup',
+          hidden: true,
+          now: 'Hidden-Node',
+          all: [_proxy('Hidden-Node')],
+        ),
+        Group(
+          type: GroupType.Selector,
+          name: 'PROXY',
+          now: 'Visible-Node',
+          all: [_proxy('Visible-Node')],
+        ),
+      ];
+
+      expect(
+        resolvePhysicalOutboundTitle(
+          mode: Mode.rule,
+          groups: groups,
+          selectedMap: const {},
+          showHiddenItems: false,
+          fallbackLabel: fallback,
+        ),
+        'Visible-Node',
+      );
+      expect(
+        resolvePhysicalOutboundTitle(
+          mode: Mode.rule,
+          groups: groups,
+          selectedMap: const {},
+          showHiddenItems: true,
+          fallbackLabel: fallback,
+        ),
+        'Hidden-Node',
+      );
+    });
   });
 
   group('Service notificationTitle 同步状态检查', () {

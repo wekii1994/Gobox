@@ -230,6 +230,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
       "Tracks automatic failovers from passive failure detection",
     ),
+    "failoverStatsRefresh": MessageLookupByLibrary.simpleMessage("Refresh"),
+    "failoverStatsClear": MessageLookupByLibrary.simpleMessage(
+      "Clear Statistics",
+    ),
+    "failoverStatsClearTitle": MessageLookupByLibrary.simpleMessage(
+      "Clear Failover Statistics",
+    ),
+    "failoverStatsClearConfirm": MessageLookupByLibrary.simpleMessage(
+      "Are you sure you want to clear all failover counts and history records? This action cannot be undone.",
+    ),
+    "failoverStatsNote": MessageLookupByLibrary.simpleMessage(
+      "Tracks actual failover triggers from Passive Failure Detection & Fast Failover.",
+    ),
+    "failoverStatsLoadError": MessageLookupByLibrary.simpleMessage(
+      "Failed to load failover statistics. Tap refresh to retry.",
+    ),
+    "failoverStatsToday": MessageLookupByLibrary.simpleMessage("Today"),
+    "failoverStatsTotal": MessageLookupByLibrary.simpleMessage("Total"),
+    "failoverStatsHistory": MessageLookupByLibrary.simpleMessage(
+      "Recent Failovers",
+    ),
+    "failoverStatsEmpty": MessageLookupByLibrary.simpleMessage(
+      "No failover records yet",
+    ),
+    "failoverStatsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "When a node encounters a hard failure or timeout, it will auto-switch and appear here",
+    ),
     "managedVersion": MessageLookupByLibrary.simpleMessage("Version"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,

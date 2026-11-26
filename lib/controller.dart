@@ -513,7 +513,7 @@ class AppController {
   }
 
   Future<void> syncNotificationTitleNow({bool force = false}) async {
-    if (!system.isAndroid) return;
+    if (!system.isAndroid || globalState.startTime == null) return;
     final service = vpn_service.service;
     if (service == null) return;
     final title = getPhysicalOutboundTitle();

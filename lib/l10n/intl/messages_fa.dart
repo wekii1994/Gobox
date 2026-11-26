@@ -223,6 +223,29 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
       "پیگیری تغییر مسیر خودکار سرورها",
     ),
+    "failoverStatsRefresh": MessageLookupByLibrary.simpleMessage("بازخوانی"),
+    "failoverStatsClear": MessageLookupByLibrary.simpleMessage("پاک کردن آمار"),
+    "failoverStatsClearTitle": MessageLookupByLibrary.simpleMessage(
+      "پاک کردن آمار تغییر مسیر",
+    ),
+    "failoverStatsClearConfirm": MessageLookupByLibrary.simpleMessage(
+      "آیا از پاک کردن همه شمارنده‌ها و سابقه تغییر مسیر اطمینان دارید؟ این کار قابل بازگشت نیست.",
+    ),
+    "failoverStatsNote": MessageLookupByLibrary.simpleMessage(
+      "ثبت رخدادهای واقعی تشخیص خطای غیرفعال و تغییر مسیر سریع در گروه‌های پراکسی.",
+    ),
+    "failoverStatsLoadError": MessageLookupByLibrary.simpleMessage(
+      "بارگذاری آمار ناموفق بود. برای تلاش مجدد بازخوانی را بزنید.",
+    ),
+    "failoverStatsToday": MessageLookupByLibrary.simpleMessage("امروز"),
+    "failoverStatsTotal": MessageLookupByLibrary.simpleMessage("کل"),
+    "failoverStatsHistory": MessageLookupByLibrary.simpleMessage("سابقه تغییر مسیر"),
+    "failoverStatsEmpty": MessageLookupByLibrary.simpleMessage(
+      "هنوز هیچ سابقه تغییر مسیری ثبت نشده است",
+    ),
+    "failoverStatsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "هنگام بروز خطای سخت یا وقفه اتصال پیاپی، گره به‌طور خودکار تغییر کرده و اینجا ثبت می‌شود",
+    ),
     "managedVersion": MessageLookupByLibrary.simpleMessage("اطلاعات نسخه"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,

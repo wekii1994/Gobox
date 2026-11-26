@@ -754,44 +754,80 @@ class Utils {
     final clean1 = version1.startsWith('v') ? version1.substring(1) : version1;
     final clean2 = version2.startsWith('v') ? version2.substring(1) : version2;
 
-    final noBuild1 = clean1.split('+')[0];
-    final noBuild2 = clean2.split('+')[0];
+    final buildIdx1 = clean1.indexOf('+');
+    final buildIdx2 = clean2.indexOf('+');
+    final noBuild1 = buildIdx1 >= 0 ? clean1.substring(0, buildIdx1) : clean1;
+    final noBuild2 = buildIdx2 >= 0 ? clean2.substring(0, buildIdx2) : clean2;
 
-    final v1 = noBuild1.split('.');
-    final v2 = noBuild2.split('.');
+    final dashIdx1 = noBuild1.indexOf('-');
+    final dashIdx2 = noBuild2.indexOf('-');
+    final core1 = dashIdx1 >= 0 ? noBuild1.substring(0, dashIdx1) : noBuild1;
+    final core2 = dashIdx2 >= 0 ? noBuild2.substring(0, dashIdx2) : noBuild2;
+    final suffix1 = dashIdx1 >= 0 ? noBuild1.substring(dashIdx1 + 1) : '';
+    final suffix2 = dashIdx2 >= 0 ? noBuild2.substring(dashIdx2 + 1) : '';
 
-    final major1 = v1.isNotEmpty ? (int.tryParse(v1[0]) ?? 0) : 0;
-    final major2 = v2.isNotEmpty ? (int.tryParse(v2[0]) ?? 0) : 0;
-    if (major1 != major2) {
-      return major1.compareTo(major2);
+    final parts1 = core1.split('.');
+    final parts2 = core2.split('.');
+    final coreLen = parts1.length > parts2.length ? parts1.length : parts2.length;
+    for (var i = 0; i < coreLen; i++) {
+      final n1 = i < parts1.length ? (int.tryParse(parts1[i]) ?? 0) : 0;
+      final n2 = i < parts2.length ? (int.tryParse(parts2[i]) ?? 0) : 0;
+      if (n1 != n2) return n1.compareTo(n2);
     }
 
-    final minor1 = v1.length > 1 ? (int.tryParse(v1[1]) ?? 0) : 0;
-    final minor2 = v2.length > 1 ? (int.tryParse(v2[1]) ?? 0) : 0;
-    if (minor1 != minor2) {
-      return minor1.compareTo(minor2);
-    }
+    final suffixCmp = _compareVersionSuffix(suffix1, suffix2);
+    if (suffixCmp != 0) return suffixCmp;
 
-    final p1 = v1.length > 2 ? v1[2].split('-') : const <String>[];
-    final p2 = v2.length > 2 ? v2[2].split('-') : const <String>[];
-
-    final patch1 = p1.isNotEmpty ? (int.tryParse(p1[0]) ?? 0) : 0;
-    final patch2 = p2.isNotEmpty ? (int.tryParse(p2[0]) ?? 0) : 0;
-    if (patch1 != patch2) {
-      return patch1.compareTo(patch2);
-    }
-
-    final rev1 = p1.length > 1 ? (int.tryParse(p1[1]) ?? 0) : 0;
-    final rev2 = p2.length > 1 ? (int.tryParse(p2[1]) ?? 0) : 0;
-    if (rev1 != rev2) {
-      return rev1.compareTo(rev2);
-    }
-
-    final build1 =
-        clean1.contains('+') ? (int.tryParse(clean1.split('+')[1]) ?? 0) : 0;
-    final build2 =
-        clean2.contains('+') ? (int.tryParse(clean2.split('+')[1]) ?? 0) : 0;
+    final build1 = buildIdx1 >= 0
+        ? (int.tryParse(clean1.substring(buildIdx1 + 1)) ?? 0)
+        : 0;
+    final build2 = buildIdx2 >= 0
+        ? (int.tryParse(clean2.substring(buildIdx2 + 1)) ?? 0)
+        : 0;
     return build1.compareTo(build2);
+  }
+
+  static final RegExp _versionTokenRegExp = RegExp(r'\d+|[a-zA-Z]+');
+  static final RegExp _digitsOnlyRegExp = RegExp(r'^\d+$');
+
+  static int _versionSuffixRank(String suffix) {
+    if (suffix.isEmpty) return 1;
+    // Pure positive integer suffix represents post-upstream revision (e.g. 1.20.1-1 > 1.20.1).
+    if (_digitsOnlyRegExp.hasMatch(suffix) && int.tryParse(suffix) != null) {
+      return 2;
+    }
+    // Alphanumeric suffix represents pre-release (e.g. 1.20.1-pre1 < 1.20.1).
+    return 0;
+  }
+
+  static int _compareVersionSuffix(String suffix1, String suffix2) {
+    if (suffix1 == suffix2) return 0;
+    final rank1 = _versionSuffixRank(suffix1);
+    final rank2 = _versionSuffixRank(suffix2);
+    if (rank1 != rank2) return rank1.compareTo(rank2);
+    if (rank1 == 2) {
+      return int.parse(suffix1).compareTo(int.parse(suffix2));
+    }
+    final tokens1 =
+        _versionTokenRegExp.allMatches(suffix1).map((m) => m.group(0)!).toList();
+    final tokens2 =
+        _versionTokenRegExp.allMatches(suffix2).map((m) => m.group(0)!).toList();
+    final minLen = tokens1.length < tokens2.length ? tokens1.length : tokens2.length;
+    for (var i = 0; i < minLen; i++) {
+      final a = tokens1[i];
+      final b = tokens2[i];
+      final numA = int.tryParse(a);
+      final numB = int.tryParse(b);
+      if (numA != null && numB != null) {
+        if (numA != numB) return numA.compareTo(numB);
+      } else if (numA != null || numB != null) {
+        return numA != null ? -1 : 1;
+      } else {
+        final cmp = a.toLowerCase().compareTo(b.toLowerCase());
+        if (cmp != 0) return cmp;
+      }
+    }
+    return tokens1.length.compareTo(tokens2.length);
   }
 
   final Map<String, String> _pinyinCache = {};

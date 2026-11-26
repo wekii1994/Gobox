@@ -1188,6 +1188,7 @@ String resolvePhysicalOutboundTitle({
   required List<Group> groups,
   required SelectedMap selectedMap,
   String? mainGroupName,
+  bool showHiddenItems = false,
   String fallbackLabel = AppIdentity.displayName,
 }) {
   if (mode == Mode.direct) {
@@ -1205,7 +1206,7 @@ String resolvePhysicalOutboundTitle({
         final visibleGroups = getVisibleGroups(
           mode: mode,
           groups: groups,
-          showHiddenItems: false,
+          showHiddenItems: showHiddenItems,
         );
         return (visibleGroups.getGroup(GroupName.GLOBAL.name) ??
                 visibleGroups.firstOrNull)

@@ -16,13 +16,11 @@ String _formatDateTime(DateTime dt) =>
 class FailoverStatsPage extends ConsumerWidget {
   const FailoverStatsPage({super.key});
 
-  Future<void> _clear(BuildContext context, WidgetRef ref, bool isZh) async {
+  Future<void> _clear(WidgetRef ref) async {
     final confirmed = await globalState.showMessage(
-      title: isZh ? '清空故障转移统计' : 'Clear Failover Statistics',
+      title: appLocalizations.failoverStatsClearTitle,
       message: TextSpan(
-        text: isZh
-            ? '确定要清空今日与累计转移计数及所有历史记录吗？此操作无法撤销。'
-            : 'Are you sure you want to clear all failover counts and history records? This action cannot be undone.',
+        text: appLocalizations.failoverStatsClearConfirm,
       ),
     );
     if (confirmed == true) {
@@ -32,7 +30,6 @@ class FailoverStatsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isZh = Localizations.localeOf(context).languageCode == 'zh';
     final colorScheme = context.colorScheme;
     final statsAsync = ref.watch(failoverStatsProvider);
     final stats = statsAsync.value ?? const FailoverStats();
@@ -41,35 +38,31 @@ class FailoverStatsPage extends ConsumerWidget {
     final records = stats.records;
 
     return CommonScaffold(
-      title: isZh ? '故障转移统计' : 'Failover Statistics',
+      title: appLocalizations.failoverStats,
       actions: [
         IconButton(
-          tooltip: isZh ? '刷新' : 'Refresh',
+          tooltip: appLocalizations.failoverStatsRefresh,
           icon: const Icon(Icons.refresh_rounded),
           onPressed: () => ref.read(failoverStatsProvider.notifier).refresh(),
         ),
         IconButton(
-          tooltip: isZh ? '清空统计' : 'Clear Statistics',
+          tooltip: appLocalizations.failoverStatsClear,
           icon: const Icon(Icons.delete_sweep_rounded),
-          onPressed: () => _clear(context, ref, isZh),
+          onPressed: () => _clear(ref),
         ),
       ],
       body: ToolPageBody(
         children: [
           ToolNote(
             icon: Icons.shield_outlined,
-            text: isZh
-                ? '记录策略组被动故障感知（Passive Failure Detection）与秒级无感故障转移（Fast Failover）的实际触发数据。'
-                : 'Tracks actual failover triggers from Passive Failure Detection & Fast Failover.',
+            text: appLocalizations.failoverStatsNote,
             color: colorScheme.primary,
           ),
           if (hasError) ...[
             const SizedBox(height: 12),
             ToolNote(
               icon: Icons.error_outline_rounded,
-              text: isZh
-                  ? '加载统计数据失败，请点击右上角刷新重试。'
-                  : 'Failed to load failover statistics. Tap refresh to retry.',
+              text: appLocalizations.failoverStatsLoadError,
               color: colorScheme.error,
             ),
           ],
@@ -78,13 +71,13 @@ class FailoverStatsPage extends ConsumerWidget {
             children: [
               ToolInfoTile(
                 icon: Icons.today_rounded,
-                label: isZh ? '今日触发' : 'Today',
+                label: appLocalizations.failoverStatsToday,
                 value: '${stats.today}',
                 color: const Color(0xFF2F80ED),
               ),
               ToolInfoTile(
                 icon: Icons.history_rounded,
-                label: isZh ? '历史累计' : 'Total',
+                label: appLocalizations.failoverStatsTotal,
                 value: '${stats.total}',
                 color: const Color(0xFF7B61FF),
               ),
@@ -92,7 +85,7 @@ class FailoverStatsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           ToolSectionHeader(
-            isZh ? '转移历史' : 'Recent Failovers',
+            appLocalizations.failoverStatsHistory,
             trailing: records.isNotEmpty
                 ? Text(
                     '${records.length}',
@@ -121,16 +114,14 @@ class FailoverStatsPage extends ConsumerWidget {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            isZh ? '暂无故障转移记录' : 'No failover records yet',
+                            appLocalizations.failoverStatsEmpty,
                             style: context.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            isZh
-                                ? '当节点发生硬故障或连续拨号超时，系统将秒级自动切换并记录于此'
-                                : 'When a node encounters a hard failure or timeout, it will auto-switch and appear here',
+                            appLocalizations.failoverStatsEmptyDesc,
                             style: context.textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant
                                   .withValues(alpha: 0.7),
@@ -145,7 +136,7 @@ class FailoverStatsPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       for (final record in records) ...[
-                        _FailoverRecordCard(record: record, isZh: isZh),
+                        _FailoverRecordCard(record: record),
                         const SizedBox(height: 8),
                       ],
                     ],
@@ -159,11 +150,9 @@ class FailoverStatsPage extends ConsumerWidget {
 
 class _FailoverRecordCard extends StatelessWidget {
   final FailoverRecord record;
-  final bool isZh;
 
   const _FailoverRecordCard({
     required this.record,
-    required this.isZh,
   });
 
   @override

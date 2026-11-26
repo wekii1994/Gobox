@@ -148,8 +148,23 @@ Future<void> showContextMenu(
   Widget? header,
   double maxWidth = 300,
 }) {
-  final rect = anchor ?? (position ?? Offset.zero) & Size.zero;
-  return Navigator.of(context, rootNavigator: true).push(
+  final navigator = Navigator.of(context, rootNavigator: true);
+  final navigatorBox = navigator.context.findRenderObject();
+  final hasNavBox = navigatorBox is RenderBox && navigatorBox.hasSize;
+  final Rect rect;
+  if (anchor != null) {
+    final topLeft = hasNavBox
+        ? navigatorBox.globalToLocal(anchor.topLeft)
+        : anchor.topLeft;
+    rect = topLeft & anchor.size;
+  } else {
+    final globalPos = position ?? Offset.zero;
+    final localPos = hasNavBox
+        ? navigatorBox.globalToLocal(globalPos)
+        : globalPos;
+    rect = localPos & Size.zero;
+  }
+  return navigator.push(
     _ContextMenuRoute(
       barrierLabel: utils.id,
       anchor: rect,
@@ -569,12 +584,14 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     if (renderBox == null) {
       return;
     }
+    final navigatorBox = Navigator.maybeOf(context)?.context.findRenderObject();
     final viewPadding = MediaQuery.viewPaddingOf(context);
-    _targetOffsetValueNotifier.value = renderBox
-        .localToGlobal(
-          Offset.zero.translate(viewPadding.right, viewPadding.top),
-        )
-        .translate(_offset.dx, _offset.dy);
+    final viewOffset = Offset(viewPadding.right, viewPadding.top);
+    _targetOffsetValueNotifier.value =
+        (navigatorBox is RenderBox && navigatorBox.hasSize
+                ? renderBox.localToGlobal(viewOffset, ancestor: navigatorBox)
+                : renderBox.localToGlobal(viewOffset))
+            .translate(_offset.dx, _offset.dy);
   }
 
   @override

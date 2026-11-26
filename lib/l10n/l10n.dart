@@ -190,6 +190,116 @@ class AppLocalizations {
     );
   }
 
+  /// `Refresh`
+  String get failoverStatsRefresh {
+    return Intl.message(
+      'Refresh',
+      name: 'failoverStatsRefresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear Statistics`
+  String get failoverStatsClear {
+    return Intl.message(
+      'Clear Statistics',
+      name: 'failoverStatsClear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear Failover Statistics`
+  String get failoverStatsClearTitle {
+    return Intl.message(
+      'Clear Failover Statistics',
+      name: 'failoverStatsClearTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to clear all failover counts and history records? This action cannot be undone.`
+  String get failoverStatsClearConfirm {
+    return Intl.message(
+      'Are you sure you want to clear all failover counts and history records? This action cannot be undone.',
+      name: 'failoverStatsClearConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tracks actual failover triggers from Passive Failure Detection & Fast Failover.`
+  String get failoverStatsNote {
+    return Intl.message(
+      'Tracks actual failover triggers from Passive Failure Detection & Fast Failover.',
+      name: 'failoverStatsNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to load failover statistics. Tap refresh to retry.`
+  String get failoverStatsLoadError {
+    return Intl.message(
+      'Failed to load failover statistics. Tap refresh to retry.',
+      name: 'failoverStatsLoadError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Today`
+  String get failoverStatsToday {
+    return Intl.message(
+      'Today',
+      name: 'failoverStatsToday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total`
+  String get failoverStatsTotal {
+    return Intl.message(
+      'Total',
+      name: 'failoverStatsTotal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recent Failovers`
+  String get failoverStatsHistory {
+    return Intl.message(
+      'Recent Failovers',
+      name: 'failoverStatsHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No failover records yet`
+  String get failoverStatsEmpty {
+    return Intl.message(
+      'No failover records yet',
+      name: 'failoverStatsEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When a node encounters a hard failure or timeout, it will auto-switch and appear here`
+  String get failoverStatsEmptyDesc {
+    return Intl.message(
+      'When a node encounters a hard failure or timeout, it will auto-switch and appear here',
+      name: 'failoverStatsEmptyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Traffic Usage`
   String get trafficUsage {
     return Intl.message(

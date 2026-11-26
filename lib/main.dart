@@ -29,6 +29,28 @@ ReceivePort? _messageReceiverPort;
 Timer? _serviceSyncDebounceTimer;
 bool _isServiceSyncingOutbound = false;
 
+String _resolveLiveOutboundTitle({
+  required Config config,
+  required List<Group> groups,
+  required SelectedMap fallbackSelectedMap,
+  required String fallbackLabel,
+}) {
+  // Prefer the live group selection returned by the running core so stale
+  // debounced disk config never overwrites a just-switched Selector node.
+  final liveSelectedMap = <String, String>{
+    ...fallbackSelectedMap,
+    for (final group in groups)
+      if (group.realNow.isNotEmpty) group.name: group.realNow,
+  };
+  return resolvePhysicalOutboundTitle(
+    mode: config.patchClashConfig.mode,
+    groups: groups,
+    selectedMap: liveSelectedMap,
+    showHiddenItems: config.proxiesStyle.showHiddenItems,
+    fallbackLabel: fallbackLabel,
+  );
+}
+
 Future<void> _syncOutboundTitleFromService(
   ClashLibHandler clashLibHandler,
 ) async {
@@ -58,10 +80,10 @@ Future<void> _syncOutboundTitleFromService(
     final profile = config.profiles.where((e) => e.id == profileId).firstOrNull;
     final fallbackName = profile?.label ?? AppIdentity.displayName;
 
-    final title = resolvePhysicalOutboundTitle(
-      mode: config.patchClashConfig.mode,
+    final title = _resolveLiveOutboundTitle(
+      config: config,
       groups: groups,
-      selectedMap: profile?.selectedMap ?? const {},
+      fallbackSelectedMap: profile?.selectedMap ?? const {},
       fallbackLabel: fallbackName,
     );
 
@@ -91,7 +113,7 @@ void _setupServiceMessagePort(ClashLibHandler clashLibHandler) {
     if (sendPort != null) {
       _safeSend(sendPort, message);
     }
-    if (message is String && message.contains('groupsChanged')) {
+    if (message is String && message.contains('"groupsChanged"')) {
       _scheduleServiceSyncOutboundTitle(clashLibHandler);
     }
   });
@@ -298,10 +320,10 @@ Future<void> _service(List<String> flags) async {
               final groups = proxiesRaw.isNotEmpty
                   ? buildGroups(proxiesRaw)
                   : const <Group>[];
-              profileName = resolvePhysicalOutboundTitle(
-                mode: globalState.config.patchClashConfig.mode,
+              profileName = _resolveLiveOutboundTitle(
+                config: globalState.config,
                 groups: groups,
-                selectedMap: profile?.selectedMap ?? const {},
+                fallbackSelectedMap: profile?.selectedMap ?? const {},
                 fallbackLabel: fallbackName,
               );
             } catch (e) {

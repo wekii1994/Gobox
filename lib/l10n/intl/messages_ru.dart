@@ -234,6 +234,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
       "Отслеживание автоматических переключений узлов",
     ),
+    "failoverStatsRefresh": MessageLookupByLibrary.simpleMessage("Обновить"),
+    "failoverStatsClear": MessageLookupByLibrary.simpleMessage(
+      "Очистить статистику",
+    ),
+    "failoverStatsClearTitle": MessageLookupByLibrary.simpleMessage(
+      "Очистить статистику переключений",
+    ),
+    "failoverStatsClearConfirm": MessageLookupByLibrary.simpleMessage(
+      "Вы уверены, что хотите очистить все счётчики и историю переключений? Это действие нельзя отменить.",
+    ),
+    "failoverStatsNote": MessageLookupByLibrary.simpleMessage(
+      "Фиксирует реальные срабатывания пассивного обнаружения сбоев и быстрого переключения.",
+    ),
+    "failoverStatsLoadError": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить статистику переключений. Нажмите обновить для повтора.",
+    ),
+    "failoverStatsToday": MessageLookupByLibrary.simpleMessage("Сегодня"),
+    "failoverStatsTotal": MessageLookupByLibrary.simpleMessage("Всего"),
+    "failoverStatsHistory": MessageLookupByLibrary.simpleMessage(
+      "История переключений",
+    ),
+    "failoverStatsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Записей о переключениях пока нет",
+    ),
+    "failoverStatsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "При критическом сбое или серии таймаутов узел переключится автоматически и появится здесь",
+    ),
     "managedVersion": MessageLookupByLibrary.simpleMessage("Версия"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,

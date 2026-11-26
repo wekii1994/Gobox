@@ -212,6 +212,27 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "failoverStats": MessageLookupByLibrary.simpleMessage("장애 조치 통계"),
     "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage("장애 감지 및 페일오버 기록"),
+    "failoverStatsRefresh": MessageLookupByLibrary.simpleMessage("새로고침"),
+    "failoverStatsClear": MessageLookupByLibrary.simpleMessage("통계 지우기"),
+    "failoverStatsClearTitle": MessageLookupByLibrary.simpleMessage(
+      "장애 조치 통계 지우기",
+    ),
+    "failoverStatsClearConfirm": MessageLookupByLibrary.simpleMessage(
+      "오늘 및 누적 장애 조치 횟수와 모든 기록을 지우시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    ),
+    "failoverStatsNote": MessageLookupByLibrary.simpleMessage(
+      "수동 장애 감지 및 빠른 페일오버의 실제 전환 데이터를 기록합니다.",
+    ),
+    "failoverStatsLoadError": MessageLookupByLibrary.simpleMessage(
+      "통계 데이터를 불러오지 못했습니다. 새로고침을 눌러 다시 시도하세요.",
+    ),
+    "failoverStatsToday": MessageLookupByLibrary.simpleMessage("오늘"),
+    "failoverStatsTotal": MessageLookupByLibrary.simpleMessage("전체"),
+    "failoverStatsHistory": MessageLookupByLibrary.simpleMessage("전환 기록"),
+    "failoverStatsEmpty": MessageLookupByLibrary.simpleMessage("장애 조치 기록이 없습니다"),
+    "failoverStatsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "노드에서 치명적 오류나 연속 연결 시간 초과가 발생하면 자동으로 전환되어 여기에 표시됩니다",
+    ),
     "managedVersion": MessageLookupByLibrary.simpleMessage("버전 정보"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,

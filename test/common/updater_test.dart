@@ -64,6 +64,13 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  different-file
 
       // Build metadata
       expect(utils.compareVersions('1.19.9-1+2026112201', '1.19.9-1+2026112101'), greaterThan(0));
+
+      // Pre-release ordering (< release, > lower pre-release)
+      expect(utils.compareVersions('1.20.1-pre1', '1.20.1'), lessThan(0));
+      expect(utils.compareVersions('1.20.1-pre2', '1.20.1-pre1'), greaterThan(0));
+      expect(utils.compareVersions('1.20.1-pre10', '1.20.1-pre2'), greaterThan(0));
+      expect(utils.compareVersions('1.20.1-pre1-6', '1.20.1-pre1-5'), greaterThan(0));
+      expect(utils.compareVersions('1.20.1-1', '1.20.1-pre1-6'), greaterThan(0));
     });
   });
 }

@@ -206,6 +206,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
       "记录策略组被动故障感知与秒级无感故障转移数据",
     ),
+    "failoverStatsRefresh": MessageLookupByLibrary.simpleMessage("刷新"),
+    "failoverStatsClear": MessageLookupByLibrary.simpleMessage("清空统计"),
+    "failoverStatsClearTitle": MessageLookupByLibrary.simpleMessage("清空故障转移统计"),
+    "failoverStatsClearConfirm": MessageLookupByLibrary.simpleMessage(
+      "确定要清空今日与累计转移计数及所有历史记录吗？此操作无法撤销。",
+    ),
+    "failoverStatsNote": MessageLookupByLibrary.simpleMessage(
+      "记录策略组被动故障感知（Passive Failure Detection）与秒级无感故障转移（Fast Failover）的实际触发数据。",
+    ),
+    "failoverStatsLoadError": MessageLookupByLibrary.simpleMessage(
+      "加载统计数据失败，请点击右上角刷新重试。",
+    ),
+    "failoverStatsToday": MessageLookupByLibrary.simpleMessage("今日触发"),
+    "failoverStatsTotal": MessageLookupByLibrary.simpleMessage("历史累计"),
+    "failoverStatsHistory": MessageLookupByLibrary.simpleMessage("转移历史"),
+    "failoverStatsEmpty": MessageLookupByLibrary.simpleMessage("暂无故障转移记录"),
+    "failoverStatsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "当节点发生硬故障或连续拨号超时，系统将秒级自动切换并记录于此",
+    ),
     "managedVersion": MessageLookupByLibrary.simpleMessage("版本信息"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,

@@ -213,6 +213,29 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolFailoverStatsDesc": MessageLookupByLibrary.simpleMessage(
       "パッシブ障害検知とフェイルオーバーの統計",
     ),
+    "failoverStatsRefresh": MessageLookupByLibrary.simpleMessage("更新"),
+    "failoverStatsClear": MessageLookupByLibrary.simpleMessage("統計を消去"),
+    "failoverStatsClearTitle": MessageLookupByLibrary.simpleMessage(
+      "フェイルオーバー統計を消去",
+    ),
+    "failoverStatsClearConfirm": MessageLookupByLibrary.simpleMessage(
+      "今日と累計のフェイルオーバー回数および履歴をすべて消去しますか？この操作は元に戻せません。",
+    ),
+    "failoverStatsNote": MessageLookupByLibrary.simpleMessage(
+      "パッシブ障害検知と高速フェイルオーバーの実際のトリガー履歴を記録します。",
+    ),
+    "failoverStatsLoadError": MessageLookupByLibrary.simpleMessage(
+      "統計データの読み込みに失敗しました。更新を押して再試行してください。",
+    ),
+    "failoverStatsToday": MessageLookupByLibrary.simpleMessage("本日"),
+    "failoverStatsTotal": MessageLookupByLibrary.simpleMessage("累計"),
+    "failoverStatsHistory": MessageLookupByLibrary.simpleMessage("切り替え履歴"),
+    "failoverStatsEmpty": MessageLookupByLibrary.simpleMessage(
+      "フェイルオーバーの記録はありません",
+    ),
+    "failoverStatsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "ノードで致命的なエラーや連続タイムアウトが発生すると、自動切り替えが行われここに記録されます",
+    ),
     "managedVersion": MessageLookupByLibrary.simpleMessage("バージョン情報"),
     "managedBundled": _goboxManagedBundled,
     "managedSynced": _goboxManagedSynced,

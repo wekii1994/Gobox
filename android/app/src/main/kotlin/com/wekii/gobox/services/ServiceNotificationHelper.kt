@@ -45,6 +45,9 @@ internal class ServiceNotificationHelper(
         cachedBuilder = null
         if (clearLastText) {
             lastNotificationText = null
+            // Discard stale pre-sleep network speed so screen wake falls back to current node title
+            // until the live speed ticker produces a fresh measurement.
+            pendingSpeedInfo = null
         }
     }
 
